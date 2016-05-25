@@ -1,0 +1,7 @@
+database:
+  driverClass: org.h2.Driver
+  user: javap
+  password:
+  url: jdbc:h2:./javap
+server:
+  rootPath: '/api/*'
