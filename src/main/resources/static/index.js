@@ -1,7 +1,9 @@
 $(function () {
     function ajax(request) {
-        var userToken = /userToken=(\w+)/.exec(document.cookie)[1];
-        if (!userToken) {
+        var userToken;
+
+        var userTokenMatch = /userToken=(\w+)/.exec(document.cookie);
+        if (!userTokenMatch) {
             var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             userToken = "";
             while (userToken.length < 64) {
@@ -10,6 +12,8 @@ $(function () {
             var expiryTime = new Date();
             expiryTime.setTime(expiryTime.getTime() + (120 * 24 * 60 * 60 * 1000)); // 4 months
             document.cookie = "userToken=" + userToken + "; expires=" + expiryTime.toUTCString();
+        } else {
+            userToken = userTokenMatch[1];
         }
 
         var oldBeforeSend = request.beforeSend;
