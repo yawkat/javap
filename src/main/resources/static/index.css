@@ -14,8 +14,7 @@
     top: 0;
     left: 0;
     width: 50%;
-    height: 70%;
-    border-bottom: 1px solid grey;
+    height: 100%;
 }
 
 #result-editor-wrapper {
@@ -27,17 +26,23 @@
     border-left: 1px solid grey;
 }
 
+#buttons-left {
+    position: absolute;
+    top: 0;
+    right: 50%;
+    z-index: 1;
+}
+
+#buttons-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+
 #result-editor, #code-editor {
     width: 100%;
     height: 100%;
-}
-
-#buttons {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 50%;
-    height: 30%;
 }
 
 #compile {
@@ -47,7 +52,7 @@
     border-radius: 2px;
     color: white;
     border: 1px solid #43a047;
-    margin: 1em;
+    margin: .2em;
     cursor: pointer;
 }
 
