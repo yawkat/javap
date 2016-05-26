@@ -74,13 +74,31 @@ $(function () {
 
         setEditorValue(codeEditor, paste.input.code);
         setEditorValue(resultEditor, paste.output.javap || "");
+        $("#compiler-names").find("option").each(function () {
+            var tgt = $(this);
+            tgt.attr("selected", tgt.val() === paste.input.compilerName);
+        });
     }
 
     ajax({
         method: "GET",
-        url: "/api/paste/" + (window.location.hash || "#default").substr(1)
-    }).then(function (data) {
-        displayPaste(data)
+        url: "/api/compiler"
+    }).then(function (compilers) {
+        var compilerNames = $("#compiler-names");
+        compilerNames.empty();
+        for (var i = 0; i < compilers.length; i++) {
+            var option = $("<option>");
+            compilerNames.append(option);
+            option.text(compilers[i].name);
+            option.val(compilers[i].name);
+        }
+
+        ajax({
+            method: "GET",
+            url: "/api/paste/" + (window.location.hash || "#default").substr(1)
+        }).then(function (data) {
+            displayPaste(data)
+        }, handleError);
     }, handleError);
 
     $("#compile").click(function () {
@@ -91,7 +109,8 @@ $(function () {
             contentType: 'application/json; charset=utf-8',
             data: JSON.stringify({
                 input: {
-                    code: codeEditor.getValue()
+                    code: codeEditor.getValue(),
+                    compilerName: $("#compiler-names").val()
                 }
             })
         }).then(function (data) {

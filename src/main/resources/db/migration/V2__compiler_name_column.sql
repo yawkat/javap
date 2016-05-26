@@ -1,0 +1,2 @@
+ALTER TABLE paste
+  ADD COLUMN inputCompilerName VARCHAR(32) NOT NULL DEFAULT 'OpenJDK 8u92'

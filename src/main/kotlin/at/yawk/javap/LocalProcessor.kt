@@ -12,6 +12,8 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.stream.Collectors
 import java.util.stream.Stream
+import javax.inject.Inject
+import javax.ws.rs.BadRequestException
 
 /**
  * @author yawkat
@@ -27,7 +29,21 @@ private inline fun <T, R> Stream<T>.use(f: (Stream<T>) -> R): R {
     }
 }
 
-class LocalProcessor : Processor {
+fun deleteRecursively(path: Path) {
+    Files.walkFileTree(path, object : SimpleFileVisitor<Path>() {
+        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+            Files.delete(file)
+            return FileVisitResult.CONTINUE
+        }
+
+        override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
+            Files.delete(dir)
+            return FileVisitResult.CONTINUE
+        }
+    })
+}
+
+class LocalProcessor @Inject constructor(val jdkProvider: JdkProvider) : Processor {
     override fun process(input: ProcessingInput): ProcessingOutput {
         val tempDirectory = Files.createTempDirectory(null)
         try {
@@ -37,15 +53,16 @@ class LocalProcessor : Processor {
             Files.createDirectories(classDir)
 
             val sourceFile = sourceDir.resolve("Main.java")
+
+            val jdk = jdkProvider.jdks.find { it.name == input.compilerName }
+                    ?: throw BadRequestException("Unknown compiler name")
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
             val javacResult = ProcessExecutor().command(
-                    "javac",
+                    jdk.javacPath,
                     "-encoding", "utf-8",
                     "-g", // debugging info
                     "-proc:none", // no annotation processing
-                    "-source", "1.8",
-                    "-target", "1.8",
                     "-d", classDir.toAbsolutePath().toString(),
                     sourceFile.fileName.toString()
             ).directory(sourceDir.toFile()).readOutput(true).destroyOnExit().execute()
@@ -55,6 +72,7 @@ class LocalProcessor : Processor {
                 if (!classFiles.isEmpty()) {
                     ProcessExecutor().command(
                             "javap", "-private", "-l", "-s", "-c", "-constants",
+                            "-XDdetails:stackMaps,localVariables",
                             *classFiles.toTypedArray()
                     ).directory(classDir.toFile()).readOutput(true).destroyOnExit().execute().outputUTF8()
                 } else NO_CLASSES_GENERATED
@@ -64,19 +82,5 @@ class LocalProcessor : Processor {
         } finally {
             deleteRecursively(tempDirectory)
         }
-    }
-
-    private fun deleteRecursively(path: Path) {
-        Files.walkFileTree(path, object : SimpleFileVisitor<Path>() {
-            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                Files.delete(file)
-                return FileVisitResult.CONTINUE
-            }
-
-            override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
-                Files.delete(dir)
-                return FileVisitResult.CONTINUE
-            }
-        })
     }
 }

@@ -17,22 +17,27 @@ interface PasteDao {
     @SqlQuery("select * from paste where id = :id")
     fun getPasteById(@Bind("id") id: String): Paste?
 
-    @SqlUpdate("insert into paste (id, ownerToken, inputCode, outputCompilerLog, outputJavap) values " +
-            "(:id, :ownerToken, :input.code, :output.compilerLog, :output.javap)")
+    @SqlUpdate("insert into paste (id, ownerToken, inputCode, inputCompilerName, outputCompilerLog, outputJavap) values " +
+            "(:id, :ownerToken, :input.code, :input.compilerName, :output.compilerLog, :output.javap)")
     fun createPaste(@Bind("ownerToken") ownerToken: String, @Bind("id") id: String,
                     @BindBean("input") input: ProcessingInput, @BindBean("output") output: ProcessingOutput)
 
-    @SqlUpdate("update paste set inputCode=:input.code, outputCompilerLog=:output.compilerLog, outputJavap=:output.javap " +
+    @SqlUpdate("update paste set inputCode=:input.code, inputCompilerName=:input.compilerName, " +
+            "outputCompilerLog=:output.compilerLog, outputJavap=:output.javap " +
             "where id=:id and ownerToken=:ownerToken")
     fun updatePaste(@Bind("ownerToken") ownerToken: String, @Bind("id") id: String,
                     @BindBean("input") input: ProcessingInput, @BindBean("output") output: ProcessingOutput)
 
     class PasteMapper : ResultSetMapper<Paste> {
         override fun map(index: Int, r: ResultSet, ctx: StatementContext) = Paste(
-                r.getString("id"),
-                r.getString("ownerToken"),
-                ProcessingInput(r.getString("inputCode")),
-                ProcessingOutput(r.getString("outputCompilerLog"), r.getString("outputJavap"))
+                id = r.getString("id"),
+                ownerToken = r.getString("ownerToken"),
+                input = ProcessingInput(
+                        code = r.getString("inputCode"),
+                        compilerName = r.getString("inputCompilerName")),
+                output = ProcessingOutput(
+                        compilerLog = r.getString("outputCompilerLog"),
+                        javap = r.getString("outputJavap"))
         )
     }
 }

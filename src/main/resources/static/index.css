@@ -45,15 +45,25 @@
     height: 100%;
 }
 
+#buttons-left > * {
+    padding: .5em;
+    margin: .2em;
+    display: block;
+    border: 1px solid;
+    border-radius: 2px;
+}
+
 #compile {
     float: right;
-    padding: .5em;
     background-color: #4caf50;
-    border-radius: 2px;
     color: white;
-    border: 1px solid #43a047;
-    margin: .2em;
     cursor: pointer;
+    border-color: #43a047;
+}
+
+#compiler-names {
+    background-color: white;
+    border-color: #d3d3d3;
 }
 
 .compiling #result-editor-wrapper {
