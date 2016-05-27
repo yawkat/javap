@@ -1,4 +1,6 @@
 $(function () {
+    // AJAX
+
     function ajax(request) {
         var userToken;
 
@@ -50,19 +52,7 @@ $(function () {
         showDialog("Error", message);
     }
 
-    var codeEditor = ace.edit("code-editor");
-    codeEditor.getSession().setMode("ace/mode/java");
-    var resultEditor = ace.edit("result-editor");
-    resultEditor.getSession().setMode("ace/mode/java");
-    resultEditor.setReadOnly(true);
-
-    function setEditorValue(editor, value) {
-        var selection = editor.selection.getRange();
-        editor.setValue(value);
-        editor.selection.setRange(selection);
-    }
-
-    var currentPaste = null;
+    // PASTE FUNCTIONS
 
     function displayPaste(paste) {
         currentPaste = paste;
@@ -86,6 +76,55 @@ $(function () {
         });
     }
 
+    function triggerCompile() {
+        $("body").addClass("compiling");
+        ajax({
+            method: currentPaste.editable ? "PUT" : "POST",
+            url: "/api/paste" + (currentPaste.editable ? "/" + currentPaste.id : ""),
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({
+                input: {
+                    code: codeEditor.getValue(),
+                    compilerName: $("#compiler-names").val()
+                }
+            })
+        }).then(function (data) {
+            displayPaste(data);
+        }, handleError).always(function () {
+            $("body").removeClass("compiling");
+        });
+    }
+
+    // MAKE STUFF INTERACTIVE
+
+    var codeEditor = ace.edit("code-editor");
+    codeEditor.getSession().setMode("ace/mode/java");
+
+    codeEditor.commands.addCommand({
+        name: "trigger compile",
+        bindKey: { win: "Ctrl-Enter", mac: "Command-Enter" },
+        exec: triggerCompile,
+        readOnly: false
+    });
+    codeEditor.commands.addCommand({
+        name: "trigger compile",
+        bindKey: { win: "Ctrl-S", mac: "Command-S" },
+        exec: triggerCompile,
+        readOnly: false
+    });
+
+    var resultEditor = ace.edit("result-editor");
+    resultEditor.getSession().setMode("ace/mode/java");
+    resultEditor.setReadOnly(true);
+
+    function setEditorValue(editor, value) {
+        var selection = editor.selection.getRange();
+        editor.setValue(value);
+        editor.selection.setRange(selection);
+    }
+
+    var currentPaste = null;
+
     ajax({
         method: "GET",
         url: "/api/compiler"
@@ -107,22 +146,5 @@ $(function () {
         }, handleError);
     }, handleError);
 
-    $("#compile").click(function () {
-        $("body").addClass("compiling");
-        ajax({
-            method: currentPaste.editable ? "PUT" : "POST",
-            url: "/api/paste" + (currentPaste.editable ? "/" + currentPaste.id : ""),
-            contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify({
-                input: {
-                    code: codeEditor.getValue(),
-                    compilerName: $("#compiler-names").val()
-                }
-            })
-        }).then(function (data) {
-            displayPaste(data);
-        }, handleError).always(function () {
-            $("body").removeClass("compiling");
-        });
-    });
+    $("#compile").click(triggerCompile);
 });
