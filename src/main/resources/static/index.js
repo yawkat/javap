@@ -101,13 +101,13 @@ $(function () {
     codeEditor.getSession().setMode("ace/mode/java");
 
     codeEditor.commands.addCommand({
-        name: "trigger compile",
+        name: "trigger compile ctrl-enter",
         bindKey: { win: "Ctrl-Enter", mac: "Command-Enter" },
         exec: triggerCompile,
         readOnly: false
     });
     codeEditor.commands.addCommand({
-        name: "trigger compile",
+        name: "trigger compile ctrl-s",
         bindKey: { win: "Ctrl-S", mac: "Command-S" },
         exec: triggerCompile,
         readOnly: false
