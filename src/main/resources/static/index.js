@@ -147,4 +147,6 @@ $(function () {
     }, handleError);
 
     $("#compile").click(triggerCompile);
+
+    $(document).tooltip();
 });
