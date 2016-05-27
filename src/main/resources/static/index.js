@@ -73,7 +73,13 @@ $(function () {
         }
 
         setEditorValue(codeEditor, paste.input.code);
-        setEditorValue(resultEditor, paste.output.javap || "");
+        var compiledSuccessfully = !!paste.output.javap;
+        $("body").toggleClass("compile-error", !compiledSuccessfully);
+        if (compiledSuccessfully) {
+            setEditorValue(resultEditor, paste.output.javap);
+        } else {
+            setEditorValue(resultEditor, paste.output.compilerLog);
+        }
         $("#compiler-names").find("option").each(function () {
             var tgt = $(this);
             tgt.attr("selected", tgt.val() === paste.input.compilerName);

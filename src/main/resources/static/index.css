@@ -69,3 +69,7 @@
 .compiling #result-editor-wrapper {
     opacity: 0.5;
 }
+
+.compile-error #result-editor-wrapper .ace_text-layer * {
+    color: red !important;
+}
