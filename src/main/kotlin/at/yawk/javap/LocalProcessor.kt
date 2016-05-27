@@ -68,19 +68,25 @@ class LocalProcessor @Inject constructor(val jdkProvider: JdkProvider) : Process
             ).directory(sourceDir.toFile()).readOutput(true).destroyOnExit().execute()
 
             val javapOutput = if (javacResult.exitValue == 0) {
-                val classFiles = Files.list(classDir).use { it.map { it.fileName.toString() }.collect(Collectors.toList<String>()) }
-                if (!classFiles.isEmpty()) {
-                    ProcessExecutor().command(
-                            "javap", "-private", "-l", "-s", "-c", "-constants",
-                            "-XDdetails:stackMaps,localVariables",
-                            *classFiles.toTypedArray()
-                    ).directory(classDir.toFile()).readOutput(true).destroyOnExit().execute().outputUTF8()
-                } else NO_CLASSES_GENERATED
+                javap(classDir)
             } else null
 
             return ProcessingOutput(javacResult.outputUTF8(), javapOutput)
         } finally {
             deleteRecursively(tempDirectory)
         }
+    }
+
+    private fun javap(classDir: Path): String {
+        val classFiles = Files.list(classDir).use { it.map { it.fileName.toString() }.collect(Collectors.toList<String>()) }
+        return if (!classFiles.isEmpty()) {
+            val javapOutput = ProcessExecutor().command(
+                    "javap", "-v", "-XDdetails:stackMaps,localVariables",
+                    *classFiles.toTypedArray()
+            ).directory(classDir.toFile()).readOutput(true).destroyOnExit().execute().outputUTF8()
+            javapOutput
+                    .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
+                    .replace("Classfile .*\n  Last modified.*\n  MD5.*\n  ".toRegex(RegexOption.MULTILINE), "")
+        } else NO_CLASSES_GENERATED
     }
 }
