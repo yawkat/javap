@@ -37,33 +37,48 @@ abc
         assertEquals(
                 localProcessor.process(ProcessingInput("class A { void a() { int i = 0; i++; } }", SystemJdkProvider.JDK)),
                 ProcessingOutput("", """Compiled from "Main.java"
-class A {
+class A
+  minor version: 0
+  major version: 52
+  flags: ACC_SUPER
+{
   A();
     descriptor: ()V
+    flags:
     Code:
-       0: aload_0
-       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
-       4: return
-    LineNumberTable:
-      line 1: 0
-    LocalVariableTable:
-      Start  Length  Slot  Name   Signature
-          0       5     0  this   LA;
+      stack=1, locals=1, args_size=1
+        start local 0 // A this
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+        end local 0 // A this
+      LineNumberTable:
+        line 1: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   LA;
 
   void a();
     descriptor: ()V
+    flags:
     Code:
-       0: iconst_0
-       1: istore_1
-       2: iinc          1, 1
-       5: return
-    LineNumberTable:
-      line 1: 0
-    LocalVariableTable:
-      Start  Length  Slot  Name   Signature
-          0       6     0  this   LA;
-          2       4     1     i   I
+      stack=1, locals=2, args_size=1
+        start local 0 // A this
+         0: iconst_0
+         1: istore_1
+        start local 1 // int i
+         2: iinc          1, 1
+         5: return
+        end local 1 // int i
+        end local 0 // A this
+      LineNumberTable:
+        line 1: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       6     0  this   LA;
+            2       4     1     i   I
 }
+SourceFile: "Main.java"
 """)
         )
     }
