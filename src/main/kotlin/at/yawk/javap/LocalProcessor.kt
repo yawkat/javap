@@ -43,7 +43,7 @@ fun deleteRecursively(path: Path) {
     })
 }
 
-class LocalProcessor @Inject constructor(val jdkProvider: JdkProvider) : Processor {
+class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Processor {
     override fun process(input: ProcessingInput): ProcessingOutput {
         val tempDirectory = Files.createTempDirectory(null)
         try {
@@ -52,18 +52,26 @@ class LocalProcessor @Inject constructor(val jdkProvider: JdkProvider) : Process
             val classDir = tempDirectory.resolve("classes")
             Files.createDirectories(classDir)
 
-            val sourceFile = sourceDir.resolve("Main.java")
-
-            val jdk = jdkProvider.jdks.find { it.name == input.compilerName }
+            val sdk = sdkProvider.sdks.find { it.name == input.compilerName }
                     ?: throw BadRequestException("Unknown compiler name")
+
+            val sourceFile = sourceDir.resolve(when (sdk.language) {
+                SdkLanguage.JAVA -> "Main.java"
+                SdkLanguage.KOTLIN -> "Main.kt"
+            })
+
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
-            val javacResult = ProcessExecutor().command(
-                    jdk.javacPath,
+            val flags = if (sdk.language == SdkLanguage.JAVA) listOf(
                     "-encoding", "utf-8",
                     "-g", // debugging info
-                    "-proc:none", // no annotation processing
-                    "-d", classDir.toAbsolutePath().toString(),
+                    "-proc:none" // no annotation processing
+            ).toTypedArray()
+            else if (sdk.language == SdkLanguage.KOTLIN) emptyArray<String>()
+            else throw UnsupportedOperationException()
+
+            val javacResult = ProcessExecutor().command(
+                    sdk.compilerPath, *flags, "-d", classDir.toAbsolutePath().toString(),
                     sourceFile.fileName.toString()
             ).directory(sourceDir.toFile()).readOutput(true).destroyOnExit().execute()
 

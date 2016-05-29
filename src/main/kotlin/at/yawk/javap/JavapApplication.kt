@@ -41,9 +41,9 @@ class JavapApplication : Application<JavapConfiguration>() {
         val injector = Guice.createInjector(Module {
             it.bind(DBI::class.java).toInstance(dbi)
             it.bind(PasteDao::class.java).toInstance(dbi.onDemand(PasteDao::class.java))
-            it.bind(JdkProvider::class.java).to(JdkProviderImpl::class.java)
+            it.bind(SdkProvider::class.java).to(SdkProviderImpl::class.java)
         })
-        injector.getInstance(JdkProviderImpl::class.java).downloadMissing()
+        injector.getInstance(SdkProviderImpl::class.java).downloadMissing()
 
         environment.jersey().register(injector.getInstance(PasteResource::class.java))
         environment.jersey().register(injector.getInstance(CompilerResource::class.java))

@@ -7,7 +7,7 @@ import javax.inject.Inject
 /**
  * @author yawkat
  */
-class DefaultPaste @Inject constructor(jdkProvider: JdkProvider, processor: Processor) {
+class DefaultPaste @Inject constructor(sdkProvider: SdkProvider, processor: Processor) {
     private val input = ProcessingInput("""import java.util.*;
 import java.lang.*;
 import java.lang.invoke.*;
@@ -20,6 +20,6 @@ public class Main {
         i++;
     }
 }""",
-            jdkProvider.defaultJdk.name)
+            sdkProvider.defaultSdk.name)
     val defaultPaste = Paste(DEFAULT_PASTE_NAME, "", input, processor.process(input))
 }

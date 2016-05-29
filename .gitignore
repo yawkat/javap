@@ -2,4 +2,4 @@ javap.mv.db
 .idea/
 *.iml
 target/
-jdk/
+sdk/

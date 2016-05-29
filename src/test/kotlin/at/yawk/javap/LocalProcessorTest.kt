@@ -10,12 +10,12 @@ import org.testng.annotations.Test
  */
 
 class LocalProcessorTest {
-    val localProcessor = LocalProcessor(SystemJdkProvider)
+    val localProcessor = LocalProcessor(SystemSdkProvider)
 
     @Test
     fun `empty file`() {
         assertEquals(
-                localProcessor.process(ProcessingInput("", SystemJdkProvider.JDK)),
+                localProcessor.process(ProcessingInput("", SystemSdkProvider.JDK)),
                 ProcessingOutput("", NO_CLASSES_GENERATED)
         )
     }
@@ -23,7 +23,7 @@ class LocalProcessorTest {
     @Test
     fun `compile error`() {
         assertEquals(
-                localProcessor.process(ProcessingInput("abc", SystemJdkProvider.JDK)),
+                localProcessor.process(ProcessingInput("abc", SystemSdkProvider.JDK)),
                 ProcessingOutput("""Main.java:1: error: reached end of file while parsing
 abc
 ^
@@ -35,7 +35,7 @@ abc
     @Test
     fun `simple program`() {
         assertEquals(
-                localProcessor.process(ProcessingInput("class A { void a() { int i = 0; i++; } }", SystemJdkProvider.JDK)),
+                localProcessor.process(ProcessingInput("class A { void a() { int i = 0; i++; } }", SystemSdkProvider.JDK)),
                 ProcessingOutput("", """Compiled from "Main.java"
 class A
   minor version: 0

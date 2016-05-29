@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType
 @Path("/compiler") // /api/compiler
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-class CompilerResource @Inject constructor(val jdkProvider: JdkProvider) {
+class CompilerResource @Inject constructor(val sdkProvider: SdkProvider) {
     @GET
-    fun listJdks() = jdkProvider.jdks.map { mapOf("name" to it.name) }
+    fun listJdks() = sdkProvider.sdks.map { mapOf("name" to it.name) }
 }

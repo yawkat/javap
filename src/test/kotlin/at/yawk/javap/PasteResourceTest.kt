@@ -29,7 +29,7 @@ class PasteResourceTest {
     val dataSource: DataSource = JdbcConnectionPool.create("jdbc:h2:mem:test", "", "")
     val dbi = DBI(dataSource)
     val pasteResource: PasteResource = PasteResource(dbi, dbi.onDemand(PasteDao::class.java), processor,
-            DefaultPaste(SystemJdkProvider, processor))
+            DefaultPaste(SystemSdkProvider, processor))
 
     @BeforeClass
     fun setupDb() {
@@ -46,8 +46,8 @@ class PasteResourceTest {
     @Test
     fun `create get update cycle`() {
         val token = "abcdef"
-        val input1 = ProcessingInput("test code 1", SystemJdkProvider.JDK)
-        val input2 = ProcessingInput("test code 2", SystemJdkProvider.JDK)
+        val input1 = ProcessingInput("test code 1", SystemSdkProvider.JDK)
+        val input2 = ProcessingInput("test code 2", SystemSdkProvider.JDK)
 
         val created = pasteResource.createPaste(token, PasteResource.Create(input1)).paste
         Assert.assertEquals(created, Paste(created.id, token, input1, processor.process(input1)))
@@ -72,44 +72,44 @@ class PasteResourceTest {
 
     @Test(expectedExceptions = arrayOf(BadRequestException::class))
     fun `paste create invalid user token`() {
-        pasteResource.createPaste("#", PasteResource.Create(ProcessingInput("abc", SystemJdkProvider.JDK)))
+        pasteResource.createPaste("#", PasteResource.Create(ProcessingInput("abc", SystemSdkProvider.JDK)))
     }
 
     @Test(expectedExceptions = arrayOf(BadRequestException::class))
     fun `paste create no user token`() {
-        pasteResource.createPaste(null, PasteResource.Create(ProcessingInput("abc", SystemJdkProvider.JDK)))
+        pasteResource.createPaste(null, PasteResource.Create(ProcessingInput("abc", SystemSdkProvider.JDK)))
     }
 
     @Test(expectedExceptions = arrayOf(BadRequestException::class))
     fun `paste create empty user token`() {
-        pasteResource.createPaste("", PasteResource.Create(ProcessingInput("abc", SystemJdkProvider.JDK)))
+        pasteResource.createPaste("", PasteResource.Create(ProcessingInput("abc", SystemSdkProvider.JDK)))
     }
 
     @Test(expectedExceptions = arrayOf(BadRequestException::class))
     fun `paste update invalid user token`() {
-        pasteResource.updatePaste("#", "xyz", PasteResource.Update(ProcessingInput("abc", SystemJdkProvider.JDK)))
+        pasteResource.updatePaste("#", "xyz", PasteResource.Update(ProcessingInput("abc", SystemSdkProvider.JDK)))
     }
 
     @Test(expectedExceptions = arrayOf(BadRequestException::class))
     fun `paste update no user token`() {
-        pasteResource.updatePaste(null, "xyz", PasteResource.Update(ProcessingInput("abc", SystemJdkProvider.JDK)))
+        pasteResource.updatePaste(null, "xyz", PasteResource.Update(ProcessingInput("abc", SystemSdkProvider.JDK)))
     }
 
     @Test(expectedExceptions = arrayOf(BadRequestException::class))
     fun `paste update empty user token`() {
-        pasteResource.updatePaste("", "xyz", PasteResource.Update(ProcessingInput("abc", SystemJdkProvider.JDK)))
+        pasteResource.updatePaste("", "xyz", PasteResource.Update(ProcessingInput("abc", SystemSdkProvider.JDK)))
     }
 
     @Test(expectedExceptions = arrayOf(NotAuthorizedException::class))
     fun `deny paste update for other user`() {
-        val created = pasteResource.createPaste("abc", PasteResource.Create(ProcessingInput("abc", SystemJdkProvider.JDK))).paste
-        pasteResource.updatePaste("def", created.id, PasteResource.Update(ProcessingInput("def", SystemJdkProvider.JDK)))
+        val created = pasteResource.createPaste("abc", PasteResource.Create(ProcessingInput("abc", SystemSdkProvider.JDK))).paste
+        pasteResource.updatePaste("def", created.id, PasteResource.Update(ProcessingInput("def", SystemSdkProvider.JDK)))
     }
 
     @Test
     fun `paste dto serialization`() {
         val objectMapper = ObjectMapper().findAndRegisterModules()
-        val input = ProcessingInput("in", SystemJdkProvider.JDK)
+        val input = ProcessingInput("in", SystemSdkProvider.JDK)
         Assert.assertEquals(
                 objectMapper.writeValueAsString(PasteResource.PasteDto(Paste("a", "b", input, processor.process(input)), "a")),
                 """{"id":"a","input":{"code":"in","compilerName":"SYSTEM"},"output":{"compilerLog":"compiler log in","javap":"javap in"},"editable":false}"""
