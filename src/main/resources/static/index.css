@@ -45,7 +45,7 @@
     height: 100%;
 }
 
-#buttons-left > * {
+#buttons-left > *, #buttons-right > * {
     padding: .5em;
     margin: .2em;
     display: block;
@@ -61,7 +61,7 @@
     border-color: #43a047;
 }
 
-#compiler-names {
+select {
     background-color: white;
     border-color: #d3d3d3;
 }

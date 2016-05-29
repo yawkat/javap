@@ -54,6 +54,11 @@ $(function () {
 
     // PASTE FUNCTIONS
 
+    function showCurrentPasteOutput(type) {
+        $("body").toggleClass("compile-error", type === "compilerLog");
+        setEditorValue(resultEditor, currentPaste.output[type]);
+    }
+
     function displayPaste(paste) {
         currentPaste = paste;
         if (/^default:.*$/.exec(paste.id)) {
@@ -63,17 +68,28 @@ $(function () {
         }
 
         setEditorValue(codeEditor, paste.input.code);
-        var compiledSuccessfully = !!paste.output.javap;
-        $("body").toggleClass("compile-error", !compiledSuccessfully);
-        if (compiledSuccessfully) {
-            setEditorValue(resultEditor, paste.output.javap);
-        } else {
-            setEditorValue(resultEditor, paste.output.compilerLog);
-        }
         $("#compiler-names").find("option").each(function () {
             var tgt = $(this);
             tgt.attr("selected", tgt.val() === paste.input.compilerName);
         });
+
+        var outputType = $("#output-type");
+        outputType.find("option").each(function () {
+            var option = $(this);
+            var enabled = option.val() in paste.output;
+            if (enabled) {
+                var value = paste.output[option.val()];
+                enabled &= !!value && value.trim() !== "";
+            }
+            option.attr("disabled", !enabled);
+        });
+        var selected = outputType.find(":selected");
+        if (selected.attr("disabled")) {
+            selected.attr("selected", false);
+            selected = outputType.find(":enabled").first();
+            selected.attr("selected", true);
+        }
+        showCurrentPasteOutput(selected.val());
     }
 
     function loadPaste(name, forceCompiler) {
@@ -162,6 +178,10 @@ $(function () {
         if (newSdk.language !== selectedLanguage) {
             loadPaste("default:" + newSdk.language, newSdk.name);
         }
+    });
+
+    $("#output-type").change(function () {
+        showCurrentPasteOutput($(this).val());
     });
 
     $(document).tooltip();
