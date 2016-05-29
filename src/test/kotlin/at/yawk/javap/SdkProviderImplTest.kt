@@ -14,7 +14,7 @@ class SdkProviderImplTest {
         val provider = SdkProviderImpl()
         provider.downloadMissing()
         val version = ProcessExecutor()
-                .command(provider.defaultSdk.compilerPath, "-version")
+                .command(provider.defaultSdkByLanguage[SdkLanguage.JAVA]!!.compilerPath, "-version")
                 .readOutput(true)
                 .exitValueNormal()
                 .execute()

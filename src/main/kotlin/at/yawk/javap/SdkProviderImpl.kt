@@ -49,7 +49,10 @@ class SdkProviderImpl : SdkProvider {
 
     private val kotlinSdks = listOf(kotlin102)
 
-    override val defaultSdk = openjdk8u92.sdk
+    override val defaultSdkByLanguage = mapOf(
+            SdkLanguage.JAVA to openjdk8u92.sdk,
+            SdkLanguage.KOTLIN to kotlin102.sdk
+    )
     override val sdks = kotlinSdks.map { it.sdk } + zuluJdks.map { it.sdk }
 
     fun downloadMissing() {

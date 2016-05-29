@@ -10,10 +10,10 @@ import javax.ws.rs.core.MediaType
 /**
  * @author yawkat
  */
-@Path("/compiler") // /api/compiler
+@Path("/sdk") // /api/sdk
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-class CompilerResource @Inject constructor(val sdkProvider: SdkProvider) {
+class SdkResource @Inject constructor(val sdkProvider: SdkProvider) {
     @GET
-    fun listJdks() = sdkProvider.sdks.map { mapOf("name" to it.name) }
+    fun listSdks() = sdkProvider.sdks.map { mapOf("name" to it.name, "language" to it.language.name) }
 }

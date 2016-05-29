@@ -13,8 +13,6 @@ import javax.ws.rs.core.MediaType
 /**
  * @author yawkat
  */
-internal const val DEFAULT_PASTE_NAME = "default"
-
 fun generateId(length: Int): String {
     val possibilities = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     return String(CharArray(length) { possibilities[ThreadLocalRandom.current().nextInt(possibilities.length)] })
@@ -37,9 +35,8 @@ class PasteResource @Inject constructor(
     @GET
     @Path("/{id}")
     fun getPaste(@HeaderParam("X-User-Token") userToken: String?, @PathParam("id") id: String): PasteDto {
-        val paste =
-                if (id == DEFAULT_PASTE_NAME) defaultPaste.defaultPaste
-                else pasteDao.getPasteById(id) ?: throw NotFoundException()
+        val paste = defaultPaste.defaultPastes.find { it.id == id }
+                ?: pasteDao.getPasteById(id) ?: throw NotFoundException()
         return PasteDto(paste, userToken)
     }
 
@@ -54,7 +51,7 @@ class PasteResource @Inject constructor(
 
         while (true) {
             val id = generateId(6)
-            if (id == DEFAULT_PASTE_NAME) continue
+            if (defaultPaste.defaultPastes.any { it.id == id }) continue
             // todo: handle PK violation and retry with different ID
             pasteDao.createPaste(userToken, id, input, output)
             return PasteDto(Paste(id, userToken, input, output), userToken)

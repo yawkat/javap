@@ -46,6 +46,6 @@ class JavapApplication : Application<JavapConfiguration>() {
         injector.getInstance(SdkProviderImpl::class.java).downloadMissing()
 
         environment.jersey().register(injector.getInstance(PasteResource::class.java))
-        environment.jersey().register(injector.getInstance(CompilerResource::class.java))
+        environment.jersey().register(injector.getInstance(SdkResource::class.java))
     }
 }

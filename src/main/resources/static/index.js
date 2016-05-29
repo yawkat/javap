@@ -56,7 +56,7 @@ $(function () {
 
     function displayPaste(paste) {
         currentPaste = paste;
-        if (paste.id == "default") {
+        if (/^default:.*$/.exec(paste.id)) {
             delete window.location.hash;
         } else {
             window.location.hash = paste.id;
@@ -74,6 +74,18 @@ $(function () {
             var tgt = $(this);
             tgt.attr("selected", tgt.val() === paste.input.compilerName);
         });
+    }
+
+    function loadPaste(name, forceCompiler) {
+        ajax({
+            method: "GET",
+            url: "/api/paste/" + name
+        }).then(function (data) {
+            if (forceCompiler) {
+                data.input.compilerName = forceCompiler;
+            }
+            displayPaste(data)
+        }, handleError);
     }
 
     function triggerCompile() {
@@ -127,26 +139,30 @@ $(function () {
 
     ajax({
         method: "GET",
-        url: "/api/compiler"
-    }).then(function (compilers) {
+        url: "/api/sdk"
+    }).then(function (sdks) {
         var compilerNames = $("#compiler-names");
         compilerNames.empty();
-        for (var i = 0; i < compilers.length; i++) {
+        for (var i = 0; i < sdks.length; i++) {
             var option = $("<option>");
+            option.data("sdk", sdks[i]);
             compilerNames.append(option);
-            option.text(compilers[i].name);
-            option.val(compilers[i].name);
+            option.text(sdks[i].name);
+            option.val(sdks[i].name);
         }
 
-        ajax({
-            method: "GET",
-            url: "/api/paste/" + (window.location.hash || "#default").substr(1)
-        }).then(function (data) {
-            displayPaste(data)
-        }, handleError);
+        loadPaste((window.location.hash || "#default:JAVA").substr(1));
     }, handleError);
 
     $("#compile").click(triggerCompile);
+
+    var selectedLanguage = "JAVA";
+    $("#compiler-names").change(function () {
+        var newSdk = $(this).find(":selected").data("sdk");
+        if (newSdk.language !== selectedLanguage) {
+            loadPaste("default:" + newSdk.language, newSdk.name);
+        }
+    });
 
     $(document).tooltip();
 });

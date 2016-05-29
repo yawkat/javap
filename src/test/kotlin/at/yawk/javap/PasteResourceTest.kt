@@ -119,8 +119,8 @@ class PasteResourceTest {
     @Test
     fun `get default paste`() {
         Assert.assertEquals(
-                pasteResource.getPaste(null, DEFAULT_PASTE_NAME).paste,
-                pasteResource.defaultPaste.defaultPaste
+                pasteResource.getPaste(null, "default:JAVA").paste,
+                pasteResource.defaultPaste.defaultPastes[0]
         )
     }
 }

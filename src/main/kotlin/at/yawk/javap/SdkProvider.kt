@@ -4,6 +4,6 @@ package at.yawk.javap
  * @author yawkat
  */
 interface SdkProvider {
-    val defaultSdk: Sdk
+    val defaultSdkByLanguage: Map<SdkLanguage, Sdk>
     val sdks: List<Sdk>
 }
