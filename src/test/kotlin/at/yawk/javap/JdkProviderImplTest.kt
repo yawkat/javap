@@ -3,7 +3,6 @@ package at.yawk.javap
 import org.testng.Assert
 import org.testng.annotations.Test
 import org.zeroturnaround.exec.ProcessExecutor
-import java.nio.file.Paths
 
 /**
  * @author yawkat
@@ -20,6 +19,5 @@ class JdkProviderImplTest {
                 .execute()
                 .outputUTF8()
         Assert.assertTrue(version.trim().matches("javac 1\\..*".toRegex()))
-        deleteRecursively(Paths.get("jdk"))
     }
 }

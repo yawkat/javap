@@ -8,7 +8,9 @@ import javax.inject.Inject
  * @author yawkat
  */
 class DefaultPaste @Inject constructor(sdkProvider: SdkProvider, processor: Processor) {
-    private val javaInput = ProcessingInput("""import java.util.*;
+    val defaultPastes = sdkProvider.defaultSdkByLanguage.map {
+        val code = when(it.key) {
+            SdkLanguage.JAVA -> """import java.util.*;
 import java.lang.*;
 import java.lang.invoke.*;
 import java.lang.reflect.*;
@@ -19,17 +21,17 @@ public class Main {
         int i = 0;
         i++;
     }
-}""", sdkProvider.defaultSdkByLanguage[SdkLanguage.JAVA]!!.name)
-    private val kotlinInput = ProcessingInput("""import java.util.*
+}"""
+                    SdkLanguage.KOTLIN -> """import java.util.*
 
 class Main() {
     init {
         var i = 0
         i++
     }
-}""", sdkProvider.defaultSdkByLanguage[SdkLanguage.KOTLIN]!!.name)
-    val defaultPastes = listOf(
-            Paste("default:JAVA", "", javaInput, processor.process(javaInput)),
-            Paste("default:KOTLIN", "", kotlinInput, processor.process(kotlinInput))
-    )
+}"""
+        }
+        val input = ProcessingInput(code, it.value.name)
+        Paste("default:${it.key}", "", input, processor.process(input))
+    }
 }
