@@ -17,13 +17,13 @@ interface PasteDao {
     @SqlQuery("select * from paste where id = :id")
     fun getPasteById(@Bind("id") id: String): Paste?
 
-    @SqlUpdate("insert into paste (id, ownerToken, inputCode, inputCompilerName, outputCompilerLog, outputJavap) values " +
-            "(:id, :ownerToken, :input.code, :input.compilerName, :output.compilerLog, :output.javap)")
+    @SqlUpdate("insert into paste (id, ownerToken, inputCode, inputCompilerName, outputCompilerLog, outputJavap, outputProcyon) values " +
+            "(:id, :ownerToken, :input.code, :input.compilerName, :output.compilerLog, :output.javap, :output.procyon)")
     fun createPaste(@Bind("ownerToken") ownerToken: String, @Bind("id") id: String,
                     @BindBean("input") input: ProcessingInput, @BindBean("output") output: ProcessingOutput)
 
     @SqlUpdate("update paste set inputCode=:input.code, inputCompilerName=:input.compilerName, " +
-            "outputCompilerLog=:output.compilerLog, outputJavap=:output.javap " +
+            "outputCompilerLog=:output.compilerLog, outputJavap=:output.javap, outputProcyon=:output.procyon " +
             "where id=:id and ownerToken=:ownerToken")
     fun updatePaste(@Bind("ownerToken") ownerToken: String, @Bind("id") id: String,
                     @BindBean("input") input: ProcessingInput, @BindBean("output") output: ProcessingOutput)
@@ -37,7 +37,8 @@ interface PasteDao {
                         compilerName = r.getString("inputCompilerName")),
                 output = ProcessingOutput(
                         compilerLog = r.getString("outputCompilerLog"),
-                        javap = r.getString("outputJavap"))
+                        javap = r.getString("outputJavap"),
+                        procyon = r.getString("outputProcyon"))
         )
     }
 }

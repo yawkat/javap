@@ -23,7 +23,7 @@ import javax.ws.rs.NotFoundException
 class PasteResourceTest {
     val processor = object : Processor {
         override fun process(input: ProcessingInput): ProcessingOutput {
-            return ProcessingOutput("compiler log " + input.code, "javap " + input.code)
+            return ProcessingOutput("compiler log " + input.code, "javap " + input.code, "procyon " + input.code)
         }
     }
     val dataSource: DataSource = JdbcConnectionPool.create("jdbc:h2:mem:test", "", "")

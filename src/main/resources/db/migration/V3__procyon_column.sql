@@ -1,0 +1,2 @@
+ALTER TABLE paste
+  ADD COLUMN outputProcyon TEXT DEFAULT NULL

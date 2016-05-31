@@ -16,7 +16,7 @@ class LocalProcessorTest {
     fun `empty file`() {
         assertEquals(
                 localProcessor.process(ProcessingInput("", SystemSdkProvider.JDK)),
-                ProcessingOutput("", NO_CLASSES_GENERATED)
+                ProcessingOutput("", NO_CLASSES_GENERATED, "")
         )
     }
 
@@ -28,7 +28,7 @@ class LocalProcessorTest {
 abc
 ^
 1 error
-""", null)
+""", null, null)
         )
     }
 
@@ -79,6 +79,13 @@ class A
             2       4     1     i   I
 }
 SourceFile: "Main.java"
+""", """class A
+{
+    void a() {
+        int i = 0;
+        ++i;
+    }
+}
 """)
         )
     }

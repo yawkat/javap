@@ -75,11 +75,17 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Process
                     sourceFile.fileName.toString()
             ).directory(sourceDir.toFile()).readOutput(true).destroyOnExit().execute()
 
-            val javapOutput = if (javacResult.exitValue == 0) {
-                javap(classDir)
-            } else null
+            val javapOutput: String?
+            val procyonOutput: String?
+            if (javacResult.exitValue == 0) {
+                javapOutput = javap(classDir)
+                procyonOutput = decompile(classDir, Decompiler.PROCYON)
+            } else {
+                javapOutput = null
+                procyonOutput = null
+            }
 
-            return ProcessingOutput(javacResult.outputUTF8(), javapOutput)
+            return ProcessingOutput(javacResult.outputUTF8(), javapOutput, procyonOutput)
         } finally {
             deleteRecursively(tempDirectory)
         }
@@ -96,5 +102,14 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Process
                     .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
                     .replace("Classfile .*\n  Last modified.*\n  MD5.*\n  ".toRegex(RegexOption.MULTILINE), "")
         } else NO_CLASSES_GENERATED
+    }
+
+    private fun decompile(classDir: Path, decompiler: Decompiler): String {
+        try {
+            return decompiler.decompile(classDir)
+        } catch(e: Throwable) {
+            e.printStackTrace()
+            return e.toString()
+        }
     }
 }

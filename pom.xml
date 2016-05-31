@@ -17,9 +17,11 @@
         <guava.version>19.0</guava.version>
         <flyway.version>4.0.1</flyway.version>
         <h2.version>1.4.191</h2.version>
+        <procyon.version>0.5.32</procyon.version>
 
         <testng.version>6.9.10</testng.version>
         <mockito.version>2.0.2-beta</mockito.version>
+        <jimfs.version>1.1</jimfs.version>
     </properties>
 
     <dependencies>
@@ -78,6 +80,11 @@
             <artifactId>flyway-core</artifactId>
             <version>${flyway.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.bitbucket.mstrobel</groupId>
+            <artifactId>procyon-compilertools</artifactId>
+            <version>${procyon.version}</version>
+        </dependency>
 
         <!-- webjars -->
         <dependency>
@@ -107,6 +114,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.jimfs</groupId>
+            <artifactId>jimfs</artifactId>
+            <version>${jimfs.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
