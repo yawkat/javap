@@ -79,8 +79,11 @@ class A
             2       4     1     i   I
 }
 SourceFile: "Main.java"
-""", """class A
-{
+""", """class A {
+    A() {
+        super();
+    }
+
     void a() {
         int i = 0;
         ++i;

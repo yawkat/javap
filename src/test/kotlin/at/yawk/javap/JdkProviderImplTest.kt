@@ -8,7 +8,7 @@ import org.zeroturnaround.exec.ProcessExecutor
  * @author yawkat
  */
 class JdkProviderImplTest {
-    @Test
+    @Test(enabled = false)
     fun testDownload() {
         val provider = JdkProviderImpl()
         provider.downloadMissing()

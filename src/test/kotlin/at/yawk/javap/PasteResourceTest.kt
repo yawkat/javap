@@ -112,7 +112,7 @@ class PasteResourceTest {
         val input = ProcessingInput("in", SystemSdkProvider.JDK)
         Assert.assertEquals(
                 objectMapper.writeValueAsString(PasteResource.PasteDto(Paste("a", "b", input, processor.process(input)), "a")),
-                """{"id":"a","input":{"code":"in","compilerName":"SYSTEM"},"output":{"compilerLog":"compiler log in","javap":"javap in"},"editable":false}"""
+                """{"id":"a","input":{"code":"in","compilerName":"SYSTEM"},"output":{"compilerLog":"compiler log in","javap":"javap in","procyon":"procyon in"},"editable":false}"""
         )
     }
 
