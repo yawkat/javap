@@ -143,6 +143,7 @@ $(function () {
 
     var resultEditor = ace.edit("result-editor");
     resultEditor.getSession().setMode("ace/mode/java");
+    resultEditor.getSession().setUseWrapMode(true);
     resultEditor.setReadOnly(true);
 
     function setEditorValue(editor, value) {
