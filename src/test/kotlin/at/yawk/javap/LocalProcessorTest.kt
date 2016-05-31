@@ -83,7 +83,7 @@ SourceFile: "Main.java"
     A() {
         super();
     }
-
+    """ + """
     void a() {
         int i = 0;
         ++i;
