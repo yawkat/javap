@@ -131,7 +131,7 @@ class SdkProviderImpl : SdkProvider {
 
         val sdk = Sdk(
                 name,
-                compilerCommand = listOf("java", "-jar", ecjPath.toAbsolutePath().toString()),
+                compilerCommand = listOf("java", "-jar", ecjPath.toAbsolutePath().toString(), "-source", "8"),
                 language = SdkLanguage.JAVA
         )
 
