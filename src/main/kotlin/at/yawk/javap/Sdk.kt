@@ -5,6 +5,6 @@ package at.yawk.javap
  */
 data class Sdk(
         val name: String,
-        val compilerPath: String,
+        val compilerCommand: List<String>,
         val language: SdkLanguage
 )

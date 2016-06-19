@@ -42,6 +42,13 @@ class SdkProviderImpl : SdkProvider {
 
     private val zuluJdks = listOf(openjdk9pre, openjdk8u92, openjdk7u101, openjdk6u79)
 
+    private val ecj451 = Ecj(
+            "Eclipse ECJ 4.5.1",
+            URL("http://central.maven.org/maven2/org/eclipse/jdt/core/compiler/ecj/4.5.1/ecj-4.5.1.jar")
+    )
+
+    private val ecjSdks = listOf(ecj451)
+
     private val kotlin102 = StandardKotlin(
             "Kotlin 1.0.2",
             URL("https://github.com/JetBrains/kotlin/releases/download/1.0.2/kotlin-compiler-1.0.2.zip")
@@ -53,10 +60,11 @@ class SdkProviderImpl : SdkProvider {
             SdkLanguage.JAVA to openjdk8u92.sdk,
             SdkLanguage.KOTLIN to kotlin102.sdk
     )
-    override val sdks = kotlinSdks.map { it.sdk } + zuluJdks.map { it.sdk }
+    override val sdks = kotlinSdks.map { it.sdk } + zuluJdks.map { it.sdk } + ecjSdks.map { it.sdk }
 
     fun downloadMissing() {
         zuluJdks.forEach { it.downloadIfMissing() }
+        ecjSdks.forEach { it.downloadIfMissing() }
         kotlinSdks.forEach { it.downloadIfMissing() }
     }
 
@@ -69,7 +77,7 @@ class SdkProviderImpl : SdkProvider {
 
         val sdk = Sdk(
                 name,
-                compilerPath = jdkRoot.resolve("bin/javac").toAbsolutePath().toString(),
+                compilerCommand = listOf(jdkRoot.resolve("bin/javac").toAbsolutePath().toString()),
                 language = SdkLanguage.JAVA
         )
 
@@ -117,12 +125,31 @@ class SdkProviderImpl : SdkProvider {
         }
     }
 
-    private class StandardKotlin(val name: String, val url: URL) {
-        val sdkRoot = Paths.get("sdk", name)
+    private class Ecj(name: String, val url: URL) {
+        val ecjRoot = Paths.get("sdk", name)
+        val ecjPath = ecjRoot.resolve("ecj.jar")
 
         val sdk = Sdk(
                 name,
-                compilerPath = sdkRoot.resolve("bin/kotlinc").toAbsolutePath().toString(),
+                compilerCommand = listOf("java", "-jar", ecjPath.toAbsolutePath().toString()),
+                language = SdkLanguage.JAVA
+        )
+
+        fun downloadIfMissing() {
+            if (Files.exists(ecjRoot)) return
+
+            Files.createDirectory(ecjRoot)
+            url.openStream().use { Files.copy(it, ecjPath) }
+        }
+    }
+
+    private class StandardKotlin(val name: String, val url: URL) {
+        val sdkRoot = Paths.get("sdk", name)
+        val compilerPath = sdkRoot.resolve("bin/kotlinc").toAbsolutePath().toString()
+
+        val sdk = Sdk(
+                name,
+                compilerCommand = listOf(compilerPath),
                 language = SdkLanguage.KOTLIN
         )
 
@@ -146,7 +173,7 @@ class SdkProviderImpl : SdkProvider {
                     }
                 }
 
-                val attributeView = Files.getFileAttributeView(Paths.get(sdk.compilerPath), PosixFileAttributeView::class.java)
+                val attributeView = Files.getFileAttributeView(Paths.get(compilerPath), PosixFileAttributeView::class.java)
                 attributeView.setPermissions(attributeView.readAttributes().permissions() + PosixFilePermission.OWNER_EXECUTE)
             } finally {
                 if (Files.exists(tmp)) {

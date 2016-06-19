@@ -62,16 +62,16 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Process
 
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
-            val flags = if (sdk.language == SdkLanguage.JAVA) listOf(
+            val flags = if (sdk.language == SdkLanguage.JAVA) arrayOf(
                     "-encoding", "utf-8",
                     "-g", // debugging info
                     "-proc:none" // no annotation processing
-            ).toTypedArray()
+            )
             else if (sdk.language == SdkLanguage.KOTLIN) emptyArray<String>()
             else throw UnsupportedOperationException()
 
             val javacResult = ProcessExecutor().command(
-                    sdk.compilerPath, *flags, "-d", classDir.toAbsolutePath().toString(),
+                    *sdk.compilerCommand.toTypedArray(), *flags, "-d", classDir.toAbsolutePath().toString(),
                     sourceFile.fileName.toString()
             ).directory(sourceDir.toFile()).readOutput(true).destroyOnExit().execute()
 
