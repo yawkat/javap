@@ -95,7 +95,7 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Process
         val classFiles = Files.list(classDir).use { it.map { it.fileName.toString() }.collect(Collectors.toList<String>()) }
         return if (!classFiles.isEmpty()) {
             val javapOutput = ProcessExecutor().command(
-                    "javap", "-v", "-XDdetails:stackMaps,localVariables",
+                    "javap", "-v", "-private", "-constants", "-XDdetails:stackMaps,localVariables",
                     *classFiles.toTypedArray()
             ).directory(classDir.toFile()).readOutput(true).destroyOnExit().execute().outputUTF8()
             javapOutput
