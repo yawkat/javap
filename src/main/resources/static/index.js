@@ -57,15 +57,19 @@ $(function () {
     function showCurrentPasteOutput(type) {
         $("body").toggleClass("compile-error", type === "compilerLog");
         setEditorValue(resultEditor, currentPaste.output[type]);
-    }
-
-    function displayPaste(paste) {
-        currentPaste = paste;
-        if (/^default:.*$/.exec(paste.id)) {
+        if (/^default:.*$/.exec(currentPaste.id)) {
             delete window.location.hash;
         } else {
-            window.location.hash = paste.id;
+            var path = currentPaste.id;
+            if (type !== "javap" && (type !== "compilerLog" || currentPaste.output["javap"])) {
+                path += "/" + type;
+            }
+            window.location.hash = path;
         }
+    }
+
+    function displayPaste(paste, requestedOutputType) {
+        currentPaste = paste;
 
         setEditorValue(codeEditor, paste.input.code);
         $("#compiler-names").find("option").each(function () {
@@ -83,6 +87,10 @@ $(function () {
             }
             option.attr("disabled", !enabled);
         });
+        if (requestedOutputType) {
+            outputType.find(":selected").attr("selected", false);
+            outputType.find("[value=" + requestedOutputType + "]").attr("selected", true);
+        }
         var selected = outputType.find(":selected");
         if (selected.attr("disabled")) {
             selected.attr("selected", false);
@@ -92,7 +100,7 @@ $(function () {
         showCurrentPasteOutput(selected.val());
     }
 
-    function loadPaste(name, forceCompiler) {
+    function loadPaste(name, outputType, forceCompiler) {
         ajax({
             method: "GET",
             url: "/api/paste/" + name
@@ -100,7 +108,7 @@ $(function () {
             if (forceCompiler) {
                 data.input.compilerName = forceCompiler;
             }
-            displayPaste(data)
+            displayPaste(data, outputType);
         }, handleError);
     }
 
@@ -117,7 +125,7 @@ $(function () {
                 }
             })
         }).then(function (data) {
-            displayPaste(data);
+            displayPaste(data, null);
         }, handleError).always(function () {
             $("body").removeClass("compiling");
         });
@@ -168,7 +176,7 @@ $(function () {
             option.val(sdks[i].name);
         }
 
-        loadPaste((window.location.hash || "#default:JAVA").substr(1));
+        loadPaste((window.location.hash || "#default:JAVA").substr(1), null);
     }, handleError);
 
     $("#compile").click(triggerCompile);
@@ -177,7 +185,7 @@ $(function () {
     $("#compiler-names").change(function () {
         var newSdk = $(this).find(":selected").data("sdk");
         if (newSdk.language !== selectedLanguage) {
-            loadPaste("default:" + newSdk.language, newSdk.name);
+            loadPaste("default:" + newSdk.language, null, newSdk.name);
         }
     });
 
