@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>javap pastebin</title>
 
     <script src="/webjars/jquery/2.2.4/jquery.min.js"></script>
@@ -19,14 +20,15 @@
     <div id="code-editor-wrapper">
         <div id="code-editor"></div>
     </div>
-    <div id="result-editor-wrapper">
-        <div id="result-editor"></div>
-    </div>
-
     <div id="buttons-left">
         <button class="ui-widget" id="compile" title="Ctrl-Enter to compile">Compile</button>
         <select id="compiler-names" title="Compiler"></select>
     </div>
+
+    <div id="result-editor-wrapper">
+        <div id="result-editor"></div>
+    </div>
+
     <div id="buttons-right">
         <select id="output-type" title="Output Type">
             <option value="compilerLog">Compiler Log</option>

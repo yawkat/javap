@@ -61,6 +61,33 @@
     border-color: #43a047;
 }
 
+@media (max-width: 1000px) {
+    #main-pane {
+        width: 100%;
+        height: auto;
+        overflow: hidden;
+    }
+
+    #code-editor-wrapper, #result-editor-wrapper {
+        height: 75vh;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    #buttons-left, #buttons-right {
+        min-height: 2em;
+    }
+
+    #code-editor-wrapper, #result-editor-wrapper, #buttons-left, #buttons-right {
+        position: relative;
+        float: none;
+        left: auto;
+        bottom: auto;
+        right: auto;
+        top: auto;
+    }
+}
+
 select {
     background-color: white;
     border-color: #d3d3d3;
