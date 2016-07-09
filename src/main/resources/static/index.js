@@ -301,9 +301,10 @@ $(function () {
 
         var paste = (window.location.hash || "#default:JAVA").substr(1);
         var outputType = null;
-        if (paste.contains("/")) {
-            outputType = paste.substr(paste.indexOf("/") + 1);
-            paste = paste.substr(0, paste.indexOf("/"));
+        var slashIndex = paste.indexOf("/");
+        if (slashIndex !== -1) {
+            outputType = paste.substr(slashIndex + 1);
+            paste = paste.substr(0, slashIndex);
         }
         loadPaste(paste, outputType);
     }, handleError);
