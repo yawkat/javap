@@ -73,3 +73,35 @@ select {
 .compile-error #result-editor-wrapper .ace_text-layer * {
     color: red !important;
 }
+
+.line-color-0 {
+    background-color: #ef9a9a;
+}
+
+.line-color-1 {
+    background-color: #90caf9;
+}
+
+.line-color-2 {
+    background-color: #a5d6a7;
+}
+
+.line-color-3 {
+    background-color: #ffcc80;
+}
+
+.line-color-4 {
+    background-color: #ce93d8;
+}
+
+.line-color-5 {
+    background-color: #80deea;
+}
+
+.line-color-6 {
+    background-color: #e6ee9c;
+}
+
+.line-color-7 {
+    background-color: #bcaaa4;
+}

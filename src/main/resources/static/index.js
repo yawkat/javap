@@ -57,6 +57,10 @@ $(function () {
     function showCurrentPasteOutput(type) {
         $("body").toggleClass("compile-error", type === "compilerLog");
         setEditorValue(resultEditor, currentPaste.output[type]);
+        clearGutterDecorations();
+        if (type === "javap") {
+            colorizeJavap();
+        }
         if (/^default:.*$/.exec(currentPaste.id)) {
             delete window.location.hash;
         } else {
@@ -129,6 +133,125 @@ $(function () {
         }, handleError).always(function () {
             $("body").removeClass("compiling");
         });
+    }
+
+    // JAVAP LINE COLORING
+
+    // returns a dict `source line -> javap line array`
+    function buildJavapLineMappings() {
+        var javapLines = currentPaste.output.javap.split("\n");
+
+        var OUTER = 0;
+        var METHOD_BYTECODE = 1;
+        var METHOD_BEFORE_LNT = 2;
+        var METHOD_LNT = 3;
+
+        var mode = OUTER;
+
+        var currentMethodLabels;
+        var currentMethodBytecodeStart;
+        var currentMethodBytecodeEnd;
+        var currentMethodLNT;
+
+        var mapping = {};
+
+        for (var i = 0; i < javapLines.length; i++) {
+            var line = javapLines[i];
+            switch (mode) {
+                case OUTER:
+                    if (line === "    Code:") {
+                        mode = METHOD_BYTECODE;
+
+                        currentMethodLabels = {};
+                        currentMethodLNT = {};
+                        currentMethodBytecodeStart = i + 1;
+                    }
+                    break;
+                case METHOD_BYTECODE:
+                    if (line !== "      LineNumberTable:" && line !== "      LocalVariableTable:") {
+                        var labelPattern = /^\s*(\d+): .*$/;
+                        var match = labelPattern.exec(line);
+                        if (match) {
+                            var label = parseInt(match[1]);
+                            currentMethodLabels[i] = label;
+                        }
+                    } else {
+                        currentMethodBytecodeEnd = i;
+
+                        mode = METHOD_BEFORE_LNT;
+                        i--;
+                    }
+                    break;
+                case METHOD_BEFORE_LNT:
+                    if (line === "      LineNumberTable:") {
+                        mode = METHOD_LNT;
+                    }
+                    break;
+                case METHOD_LNT:
+                    var entryPattern = /^        line (\d+): (\d+)$/;
+                    var match = entryPattern.exec(line);
+                    if (match) {
+                        var sourceLine = parseInt(match[1]) - 1; // 1-indexed by javac
+                        var label = parseInt(match[2]);
+                        currentMethodLNT[label] = sourceLine;
+                    } else {
+                        var currentLine = null;
+                        for (var j = currentMethodBytecodeStart; j < currentMethodBytecodeEnd; j++) {
+                            var label = currentMethodLabels[j];
+                            var sourceLine = currentMethodLNT[label];
+                            if (sourceLine || sourceLine === 0) {
+                                currentLine = [];
+                                mapping[sourceLine] = currentLine;
+                            }
+                            if (currentLine !== null) {
+                                currentLine.push(j);
+                            }
+                        }
+
+                        mode = OUTER;
+                    }
+                    break;
+            }
+        }
+        return mapping;
+    }
+
+    var gutterDecorationsLeft = {};
+    var gutterDecorationsRight = {};
+
+    function clearGutterDecorations() {
+        for (var i = 0; i < Object.keys(gutterDecorationsLeft).length; i++) {
+            var line = Object.keys(gutterDecorationsLeft)[i];
+            codeEditor.session.removeGutterDecoration(line, gutterDecorationsLeft[line]);
+        }
+        for (var i = 0; i < Object.keys(gutterDecorationsRight).length; i++) {
+            var line = Object.keys(gutterDecorationsRight)[i];
+            resultEditor.session.removeGutterDecoration(line, gutterDecorationsRight[line]);
+        }
+        gutterDecorationsLeft = {};
+        gutterDecorationsRight = {};
+    }
+
+    function colorizeJavap() {
+        var lineMappings = buildJavapLineMappings();
+        var colorIndex = 0;
+        var lineCount = currentPaste.input.code.split("\n").length;
+        for (var i = 0; i < Object.keys(lineMappings).length; i++) {
+            var sourceLine = Object.keys(lineMappings)[i];
+            if (sourceLine >= lineCount) {
+                continue;
+            }
+            var outputLines = lineMappings[sourceLine];
+            var cl = "line-color-" + colorIndex;
+            codeEditor.session.addGutterDecoration(sourceLine, cl);
+            gutterDecorationsLeft[sourceLine] = cl;
+            for (var j = 0; j < outputLines.length; j++) {
+                var outputLine = outputLines[j];
+                resultEditor.session.addGutterDecoration(outputLine, cl);
+                gutterDecorationsRight[outputLine] = cl;
+            }
+            colorIndex = (colorIndex + 1) % 8;
+        }
     }
 
     // MAKE STUFF INTERACTIVE
