@@ -32,18 +32,31 @@
     border-left: 1px solid grey;
 }
 
-#buttons-left {
+#buttons-code-editor {
     position: absolute;
     bottom: 0;
     right: 50%;
     z-index: 1;
 }
 
-#buttons-right {
+#buttons-output {
     position: absolute;
     bottom: 0;
     right: 0;
     z-index: 1;
+}
+
+#buttons-social {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+
+#github {
+    background: white;
+    text-decoration: none;
+    color: #333;
 }
 
 #result-editor, #code-editor {
@@ -51,7 +64,7 @@
     height: 100%;
 }
 
-#buttons-left > *, #buttons-right > * {
+#buttons-code-editor > *, #buttons-output > *, #buttons-social > * {
     padding: .5em;
     margin: .2em;
     display: block;
@@ -80,11 +93,11 @@
         overflow: hidden;
     }
 
-    #buttons-left, #buttons-right {
+    #buttons-code-editor, #buttons-output, #buttons-social {
         min-height: 2em;
     }
 
-    #code-editor-wrapper, #result-editor-wrapper, #buttons-left, #buttons-right {
+    #code-editor-wrapper, #result-editor-wrapper, #buttons-code-editor, #buttons-output, #buttons-social {
         position: relative;
         float: none;
         left: auto;
