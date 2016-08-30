@@ -8,7 +8,7 @@ import org.zeroturnaround.exec.ProcessExecutor
  * @author yawkat
  */
 class SdkProviderImplTest {
-    @Test
+    @Test(enabled = false)
     fun testDownload() {
         val provider = SdkProviderImpl()
         provider.downloadMissing()
@@ -21,7 +21,7 @@ class SdkProviderImplTest {
         Assert.assertTrue(version.trim().matches("javac 1\\..*".toRegex()))
     }
 
-    @Test
+    @Test(enabled = false)
     fun `ecj`() {
         val provider = SdkProviderImpl()
         provider.downloadMissing()

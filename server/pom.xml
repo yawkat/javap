@@ -13,6 +13,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>at.yawk.javap</groupId>
+            <artifactId>javap-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
@@ -73,23 +79,6 @@
             <version>${procyon.version}</version>
         </dependency>
 
-        <!-- webjars -->
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery-ui</artifactId>
-            <version>1.11.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>ace</artifactId>
-            <version>01.08.2014</version>
-        </dependency>
-
         <!-- test -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -135,33 +124,6 @@
                         <goals>
                             <goal>test-compile</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.2</version>
-
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>shaded</shadedClassifierName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>at.yawk.javap.JavapApplicationKt</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

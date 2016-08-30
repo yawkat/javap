@@ -7,10 +7,13 @@ import com.google.inject.Module
 import io.dropwizard.Application
 import io.dropwizard.assets.AssetsBundle
 import io.dropwizard.jdbi.DBIFactory
+import io.dropwizard.servlets.assets.AssetServlet
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import org.flywaydb.core.Flyway
 import org.skife.jdbi.v2.DBI
+import java.net.URL
+import java.nio.charset.StandardCharsets
 
 /**
  * @author yawkat
@@ -28,7 +31,19 @@ class JavapApplication : Application<JavapConfiguration>() {
         bootstrap.objectMapper.registerModule(KotlinModule())
         bootstrap.addBundle(AssetsBundle("/META-INF/resources/webjars", "/webjars", "", "webjars"))
         bootstrap.addBundle(AssetsBundle("/static", "/", "index.html", "index"))
-        bootstrap.addBundle(AssetsBundle("/static"))
+        bootstrap.addBundle(object : AssetsBundle("/static", "/static", "", "js") {
+            override fun createServlet(): AssetServlet {
+                return object : AssetServlet(resourcePath, uriPath, indexFile, StandardCharsets.UTF_8) {
+                    override fun getResourceUrl(absoluteRequestedResourcePath: String): URL {
+                        println(absoluteRequestedResourcePath)
+                        if (absoluteRequestedResourcePath == "static/kotlin.js") {
+                            return super.getResourceUrl("kotlin.js")
+                        }
+                        return super.getResourceUrl(absoluteRequestedResourcePath)
+                    }
+                }
+            }
+        })
     }
 
     override fun run(configuration: JavapConfiguration, environment: Environment) {
