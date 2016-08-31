@@ -10,6 +10,7 @@ import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
 import com.google.common.annotations.VisibleForTesting
 import org.zeroturnaround.exec.ProcessExecutor
+import org.zeroturnaround.exec.ProcessResult
 import java.io.IOException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
@@ -49,7 +50,7 @@ fun deleteRecursively(path: Path) {
     })
 }
 
-class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Processor {
+class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firejail: Firejail) : Processor {
     override fun process(input: ProcessingInput): ProcessingOutput {
         val tempDirectory = Files.createTempDirectory(null)
         try {
@@ -68,18 +69,24 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Process
 
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
-            val flags = if (sdk.language == SdkLanguage.JAVA) arrayOf(
+            val flags = if (sdk.language == SdkLanguage.JAVA) listOf(
                     "-encoding", "utf-8",
                     "-g", // debugging info
                     "-proc:none" // no annotation processing
             )
-            else if (sdk.language == SdkLanguage.KOTLIN) emptyArray<String>()
+            else if (sdk.language == SdkLanguage.KOTLIN) emptyList<String>()
             else throw UnsupportedOperationException()
 
-            val javacResult = ProcessExecutor().command(
-                    *sdk.compilerCommand.toTypedArray(), *flags, "-d", classDir.toAbsolutePath().toString(),
-                    sourceFile.fileName.toString()
-            ).directory(sourceDir.toFile()).readOutput(true).destroyOnExit().execute()
+            val command =
+                    sdk.compilerCommand +
+                            flags +
+                            listOf("-d", classDir.toAbsolutePath().toString(), sourceFile.fileName.toString())
+            val javacResult = firejail.executeCommand(
+                    command,
+                    workingDir = sourceDir,
+                    whitelist = listOf(tempDirectory),
+                    readOnlyWhitelist = if(sdk.baseDir == null) emptyList() else listOf(sdk.baseDir)
+            )
 
             val javapOutput: String?
             val procyonOutput: String?
@@ -100,10 +107,10 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider) : Process
     private fun javap(classDir: Path): String {
         val classFiles = Files.list(classDir).use { it.map { it.fileName.toString() }.collect(Collectors.toList<String>()) }
         return if (!classFiles.isEmpty()) {
-            val javapOutput = ProcessExecutor().command(
-                    "javap", "-v", "-private", "-constants", "-XDdetails:stackMaps,localVariables",
-                    *classFiles.toTypedArray()
-            ).directory(classDir.toFile()).readOutput(true).destroyOnExit().execute().outputUTF8()
+            val javapOutput = firejail.executeCommand(
+                    listOf("javap", "-v", "-private", "-constants", "-XDdetails:stackMaps,localVariables") + classFiles,
+                    classDir
+            ).outputUTF8()
             javapOutput
                     .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
                     .replace("Classfile .*\n  Last modified.*\n  MD5.*\n  ".toRegex(RegexOption.MULTILINE), "")

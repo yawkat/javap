@@ -6,11 +6,14 @@
 
 package at.yawk.javap
 
+import java.nio.file.Path
+
 /**
  * @author yawkat
  */
 data class Sdk(
         val name: String,
+        val baseDir: Path?,
         val compilerCommand: List<String>,
         val language: SdkLanguage
 )

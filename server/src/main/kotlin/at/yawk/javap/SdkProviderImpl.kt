@@ -83,6 +83,7 @@ class SdkProviderImpl : SdkProvider {
 
         val sdk = Sdk(
                 name,
+                baseDir = jdkRoot,
                 compilerCommand = listOf(jdkRoot.resolve("bin/javac").toAbsolutePath().toString()),
                 language = SdkLanguage.JAVA
         )
@@ -137,6 +138,7 @@ class SdkProviderImpl : SdkProvider {
 
         val sdk = Sdk(
                 name,
+                baseDir = ecjRoot,
                 compilerCommand = listOf("java", "-jar", ecjPath.toAbsolutePath().toString(), "-source", "8"),
                 language = SdkLanguage.JAVA
         )
@@ -155,6 +157,7 @@ class SdkProviderImpl : SdkProvider {
 
         val sdk = Sdk(
                 name,
+                baseDir = sdkRoot,
                 compilerCommand = listOf(compilerPath),
                 language = SdkLanguage.KOTLIN
         )
