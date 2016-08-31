@@ -1,4 +1,4 @@
-javap
+javap [![Build Status](https://ci.yawk.at/job/javap/badge/icon)](https://ci.yawk.at/job/javap)
 =====
 
 javap pastebin for viewing the bytecode of small pieces of code.
