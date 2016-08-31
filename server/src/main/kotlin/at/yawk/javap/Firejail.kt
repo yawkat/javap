@@ -35,6 +35,7 @@ class Firejail {
         if (enableJail) {
             val firejailCommand = listOf(
                     "firejail",
+                    "--force",
                     "--noprofile",
                     "--quiet",
                     "--caps",
