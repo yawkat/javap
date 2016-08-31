@@ -50,6 +50,10 @@ private class Parser(val lines: List<String>) {
             if (lntStartFound || line == "      LocalVariableTable:") {
                 break
             }
+            if (line == "") {
+                // no lnt nor lvt
+                return
+            }
 
             val match = line.match("""^\s*(\d+): .*$""") ?: null
             if (match != null && match.size > 0) {
