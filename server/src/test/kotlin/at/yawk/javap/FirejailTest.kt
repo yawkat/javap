@@ -7,7 +7,9 @@
 package at.yawk.javap
 
 import org.testng.Assert
-import org.testng.Assert.*
+import org.testng.Assert.assertEquals
+import org.testng.SkipException
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.nio.file.Files
 
@@ -16,6 +18,11 @@ import java.nio.file.Files
  */
 class FirejailTest {
     val firejail = Firejail()
+
+    @BeforeClass
+    fun checkSkip() {
+        if (!firejail.enableJail) throw SkipException("Firejail support disabled")
+    }
 
     @Test
     fun `whitelist reading`() {
