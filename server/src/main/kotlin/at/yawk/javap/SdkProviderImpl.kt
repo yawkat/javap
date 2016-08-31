@@ -12,12 +12,14 @@ import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream
 import java.io.ByteArrayInputStream
 import java.net.URL
-import java.nio.file.*
+import java.nio.file.DirectoryNotEmptyException
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.attribute.PosixFileAttributeView
-import java.nio.file.attribute.PosixFilePermission
-import java.util.*
-import java.util.zip.ZipInputStream
+import java.util.Arrays
 import javax.inject.Singleton
 import javax.xml.bind.DatatypeConverter
 
@@ -55,16 +57,21 @@ class SdkProviderImpl : SdkProvider {
 
     private val ecjSdks = listOf(ecj451)
 
-    private val kotlin102 = StandardKotlin(
+    private val kotlin102 = MavenKotlin(
             "Kotlin 1.0.2",
-            URL("https://github.com/JetBrains/kotlin/releases/download/1.0.2/kotlin-compiler-1.0.2.zip")
+            URL("http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.2/kotlin-compiler-1.0.2.jar")
     )
 
-    private val kotlinSdks = listOf(kotlin102)
+    private val kotlin103 = MavenKotlin(
+            "Kotlin 1.0.3",
+            URL("http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.3/kotlin-compiler-1.0.3.jar")
+    )
+
+    private val kotlinSdks = listOf(kotlin103, kotlin102)
 
     override val defaultSdkByLanguage = mapOf(
             SdkLanguage.JAVA to openjdk8u92.sdk,
-            SdkLanguage.KOTLIN to kotlin102.sdk
+            SdkLanguage.KOTLIN to kotlin103.sdk
     )
     override val sdks = kotlinSdks.map { it.sdk } + zuluJdks.map { it.sdk } + ecjSdks.map { it.sdk }
 
@@ -79,7 +86,7 @@ class SdkProviderImpl : SdkProvider {
             val md5: String,
             val url: URL
     ) {
-        val jdkRoot = Paths.get("sdk", name)
+        val jdkRoot = Paths.get("sdk", name)!!
 
         val sdk = Sdk(
                 name,
@@ -133,13 +140,13 @@ class SdkProviderImpl : SdkProvider {
     }
 
     private class Ecj(name: String, val url: URL) {
-        val ecjRoot = Paths.get("sdk", name)
-        val ecjPath = ecjRoot.resolve("ecj.jar")
+        val ecjRoot = Paths.get("sdk", name)!!
+        val ecjPath = ecjRoot.resolve("ecj.jar").toAbsolutePath()!!
 
         val sdk = Sdk(
                 name,
                 baseDir = ecjRoot,
-                compilerCommand = listOf("java", "-jar", ecjPath.toAbsolutePath().toString(), "-source", "8"),
+                compilerCommand = listOf("java", "-jar", ecjPath.toString(), "-source", "8"),
                 language = SdkLanguage.JAVA
         )
 
@@ -151,44 +158,26 @@ class SdkProviderImpl : SdkProvider {
         }
     }
 
-    private class StandardKotlin(val name: String, val url: URL) {
-        val sdkRoot = Paths.get("sdk", name)
-        val compilerPath = sdkRoot.resolve("bin/kotlinc").toAbsolutePath().toString()
+    private class MavenKotlin(val name: String, val url: URL) {
+        val sdkRoot = Paths.get("sdk", name)!!
+        val compilerPath = sdkRoot.resolve("kotlin-compiler.jar").toAbsolutePath()!!
 
         val sdk = Sdk(
                 name,
                 baseDir = sdkRoot,
-                compilerCommand = listOf(compilerPath),
+                compilerCommand = listOf("java", "-jar", compilerPath.toString()),
                 language = SdkLanguage.KOTLIN
         )
 
         fun downloadIfMissing() {
-            if (Files.exists(sdkRoot)) return
-
-            log.info("Downloading kotlin sdk '$name'")
-
-            val tmp = Files.createTempDirectory(null)
-            try {
-                log.info("Extracting kotlin sdk '$name'")
-
-                ZipInputStream(url.openStream()).use { input ->
-                    while (true) {
-                        val entry = input.nextEntry ?: break
-                        if (entry.isDirectory) continue
-                        if (!entry.name.startsWith("kotlinc/")) continue
-                        val output = sdkRoot.resolve(entry.name.substring("kotlinc/".length))
-                        if (!Files.exists(output.parent)) Files.createDirectories(output.parent)
-                        Files.copy(input, output)
-                    }
-                }
-
-                val attributeView = Files.getFileAttributeView(Paths.get(compilerPath), PosixFileAttributeView::class.java)
-                attributeView.setPermissions(attributeView.readAttributes().permissions() + PosixFilePermission.OWNER_EXECUTE)
-            } finally {
-                if (Files.exists(tmp)) {
-                    deleteRecursively(tmp)
-                }
+            if (Files.exists(sdkRoot)) {
+                if (Files.exists(compilerPath)) return
+                // old sdk (extracted from the zip), migrate
+                deleteRecursively(sdkRoot)
             }
+
+            Files.createDirectory(sdkRoot)
+            url.openStream().use { Files.copy(it, compilerPath) }
         }
     }
 }
