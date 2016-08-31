@@ -53,12 +53,6 @@
     z-index: 1;
 }
 
-#github {
-    background: white;
-    text-decoration: none;
-    color: #333;
-}
-
 #result-editor, #code-editor {
     width: 100%;
     height: 100%;
@@ -72,12 +66,23 @@
     border-radius: 2px;
 }
 
+#github, #fork {
+    text-decoration: none;
+    float: right;
+    color: #ddd;
+    border-color: #000;
+    cursor: pointer;
+    background: #333;
+    margin-bottom: 0;
+}
+
 #compile {
     float: right;
     background-color: #4caf50;
     color: white;
     cursor: pointer;
     border-color: #43a047;
+    clear: both;
 }
 
 @media (max-width: 1000px) {

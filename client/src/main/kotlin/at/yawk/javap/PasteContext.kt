@@ -17,6 +17,10 @@ import kotlin.browser.window
 var context: PasteContext? = null
 
 class PasteContext(var currentPaste: Paste) {
+    fun fork() {
+        currentPaste = currentPaste.copy(editable = false)
+    }
+
     fun showCurrentPasteOutput(type: OutputType) {
         jq("body").toggleClass("compile-error", type == OutputType.compilerLog)
         val text = type.getter(currentPaste.output)!!

@@ -47,6 +47,7 @@ fun start() {
     }, handleError)
 
     jq("#compile").click { context?.triggerCompile() }
+    jq("#fork").click { context?.fork() }
 
     val selectedLanguage = SdkLanguage.JAVA
     jq("#compiler-names").change {
