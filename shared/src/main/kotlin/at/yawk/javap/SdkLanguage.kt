@@ -12,4 +12,5 @@ package at.yawk.javap
 enum class SdkLanguage {
     JAVA,
     KOTLIN,
+    SCALA,
 }

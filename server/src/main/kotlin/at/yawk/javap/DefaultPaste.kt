@@ -28,13 +28,16 @@ public class Main {
         i++;
     }
 }"""
-                    SdkLanguage.KOTLIN -> """import java.util.*
+            SdkLanguage.KOTLIN -> """import java.util.*
 
 class Main() {
     init {
         var i = 0
         i++
     }
+}"""
+            SdkLanguage.SCALA -> """object Main {
+    def test(i: Int) = i + 1
 }"""
         }
         val input = ProcessingInput(code, it.value.name)

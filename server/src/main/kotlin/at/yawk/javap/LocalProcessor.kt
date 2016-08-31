@@ -9,8 +9,6 @@ package at.yawk.javap
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
 import com.google.common.annotations.VisibleForTesting
-import org.zeroturnaround.exec.ProcessExecutor
-import org.zeroturnaround.exec.ProcessResult
 import java.io.IOException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
@@ -65,17 +63,20 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
             val sourceFile = sourceDir.resolve(when (sdk.language) {
                 SdkLanguage.JAVA -> "Main.java"
                 SdkLanguage.KOTLIN -> "Main.kt"
+                SdkLanguage.SCALA -> "Main.scala"
             })
 
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
-            val flags = if (sdk.language == SdkLanguage.JAVA) listOf(
-                    "-encoding", "utf-8",
-                    "-g", // debugging info
-                    "-proc:none" // no annotation processing
-            )
-            else if (sdk.language == SdkLanguage.KOTLIN) emptyList<String>()
-            else throw UnsupportedOperationException()
+            val flags = when (sdk.language) {
+                SdkLanguage.JAVA -> listOf(
+                        "-encoding", "utf-8",
+                        "-g", // debugging info
+                        "-proc:none" // no annotation processing
+                )
+                SdkLanguage.KOTLIN -> emptyList()
+                SdkLanguage.SCALA -> emptyList()
+            }
 
             val command =
                     sdk.compilerCommand +

@@ -19,7 +19,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 import java.util.Arrays
+import java.util.zip.ZipInputStream
 import javax.inject.Singleton
 import javax.xml.bind.DatatypeConverter
 
@@ -27,6 +29,8 @@ private val log = LoggerFactory.getLogger(SdkProviderImpl::class.java)
 
 @Singleton
 class SdkProviderImpl : SdkProvider {
+    ////// OPENJDK
+
     private val openjdk6u79 = ZuluJdk(
             "OpenJDK 6u79",
             "a54fb082c89de3909df5b69cd50a2155",
@@ -50,12 +54,16 @@ class SdkProviderImpl : SdkProvider {
 
     private val zuluJdks = listOf(openjdk9pre, openjdk8u92, openjdk7u101, openjdk6u79)
 
+    ////// ECJ
+
     private val ecj451 = Ecj(
             "Eclipse ECJ 4.5.1",
             URL("http://central.maven.org/maven2/org/eclipse/jdt/core/compiler/ecj/4.5.1/ecj-4.5.1.jar")
     )
 
     private val ecjSdks = listOf(ecj451)
+
+    ////// KOTLIN
 
     private val kotlin102 = MavenKotlin(
             "Kotlin 1.0.2",
@@ -69,16 +77,31 @@ class SdkProviderImpl : SdkProvider {
 
     private val kotlinSdks = listOf(kotlin103, kotlin102)
 
+    ////// SCALA
+
+    // before adding new SDKs, make sure features like macros are *disabled*! we don't want remote code execution!
+
+    private val scala2118 = StandardScala(
+            "Scala 2.11.8",
+            URL("http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.zip")
+    )
+
+    private val scalaSdks = listOf(scala2118)
+
+    //////
+
     override val defaultSdkByLanguage = mapOf(
             SdkLanguage.JAVA to openjdk8u92.sdk,
-            SdkLanguage.KOTLIN to kotlin103.sdk
+            SdkLanguage.KOTLIN to kotlin103.sdk,
+            SdkLanguage.SCALA to scala2118.sdk
     )
-    override val sdks = kotlinSdks.map { it.sdk } + zuluJdks.map { it.sdk } + ecjSdks.map { it.sdk }
+    override val sdks = kotlinSdks.map { it.sdk } + zuluJdks.map { it.sdk } + ecjSdks.map { it.sdk } + scalaSdks.map { it.sdk }
 
     fun downloadMissing() {
         zuluJdks.forEach { it.downloadIfMissing() }
         ecjSdks.forEach { it.downloadIfMissing() }
         kotlinSdks.forEach { it.downloadIfMissing() }
+        scalaSdks.forEach { it.downloadIfMissing() }
     }
 
     private class ZuluJdk(
@@ -178,6 +201,40 @@ class SdkProviderImpl : SdkProvider {
 
             Files.createDirectory(sdkRoot)
             url.openStream().use { Files.copy(it, compilerPath) }
+        }
+    }
+
+    private class StandardScala(val name: String, val url: URL) {
+        val sdkRoot = Paths.get("sdk", name)!!
+        val compilerPath = sdkRoot.resolve("bin/scalac").toAbsolutePath()!!
+
+        val sdk = Sdk(
+                name,
+                baseDir = sdkRoot,
+                compilerCommand = listOf(compilerPath.toString()),
+                language = SdkLanguage.SCALA
+        )
+
+        fun downloadIfMissing() {
+            if (Files.exists(sdkRoot)) return
+
+            ZipInputStream(url.openStream()).use { stream ->
+                while (true) {
+                    val entry = stream.nextEntry ?: break
+                    if (entry.isDirectory) continue
+                    var name = entry.name
+                    if (name.startsWith("/")) name = name.substring(1)
+                    // strip leading scala-a.b.c folder
+                    name = name.substring(name.indexOf('/') + 1)
+
+                    val relativePath = Paths.get(name)
+                    val target = sdkRoot.resolve(relativePath)
+                    Files.createDirectories(target.parent)
+                    Files.copy(stream, target)
+                }
+            }
+
+            Files.setPosixFilePermissions(compilerPath, Files.getPosixFilePermissions(compilerPath) + PosixFilePermission.OWNER_EXECUTE)
         }
     }
 }
