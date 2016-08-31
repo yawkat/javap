@@ -8,6 +8,7 @@ package at.yawk.javap
 
 import at.yawk.javap.model.Paste
 import jquery.jq
+import kotlin.Pair
 import kotlin.browser.document
 import kotlin.browser.window
 
@@ -47,7 +48,10 @@ fun start() {
     }, handleError)
 
     jq("#compile").click { context?.triggerCompile() }
-    jq("#fork").click { context?.fork() }
+    jq("#fork").click {
+        context?.fork()
+        context?.triggerCompile()
+    }
 
     val selectedLanguage = SdkLanguage.JAVA
     jq("#compiler-names").change {
