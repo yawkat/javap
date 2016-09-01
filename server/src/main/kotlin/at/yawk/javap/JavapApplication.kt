@@ -41,7 +41,6 @@ class JavapApplication : Application<JavapConfiguration>() {
             override fun createServlet(): AssetServlet {
                 return object : AssetServlet(resourcePath, uriPath, indexFile, StandardCharsets.UTF_8) {
                     override fun getResourceUrl(absoluteRequestedResourcePath: String): URL {
-                        println(absoluteRequestedResourcePath)
                         if (absoluteRequestedResourcePath == "static/kotlin.js") {
                             return super.getResourceUrl("kotlin.js")
                         }

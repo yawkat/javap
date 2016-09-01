@@ -188,7 +188,7 @@ class SdkProviderImpl : SdkProvider {
         val sdk = Sdk(
                 name,
                 baseDir = sdkRoot,
-                compilerCommand = listOf("java", "-jar", compilerPath.toString()),
+                compilerCommand = listOf("java", "-jar", compilerPath.toString(), "-no-stdlib", "-cp", "$compilerPath:."),
                 language = SdkLanguage.KOTLIN
         )
 
