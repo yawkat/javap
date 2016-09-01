@@ -24,15 +24,28 @@ fun start() {
     ajax(Request(
             method = "GET",
             url = "/api/sdk"
-    )).then({ sdks: dynamic ->
+    )).then({ sdks: Array<Sdk> ->
         val compilerNames = jq("#compiler-names")
         compilerNames.empty()
-        for (sdk: Sdk in sdks) {
+
+        fun categoryForSdkName(name: String) =
+                name.match("""^((?:[A-Za-z]+ )+).*$""")[1]
+
+        var category: String? = null
+        for (sdk in sdks) {
+            if (categoryForSdkName(sdk.name) != category) {
+                category = categoryForSdkName(sdk.name)
+                val option = jq("<option>")
+                option.attr("disabled", "disabled")
+                option.text("${category.trim()}:")
+                compilerNames.append(option)
+            }
+
             val option = jq("<option>")
             option.data("sdk", sdk)
-            compilerNames.append(option)
             option.text(sdk.name)
             option.`val`(sdk.name)
+            compilerNames.append(option)
         }
 
         val hash = window.location.hash

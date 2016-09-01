@@ -66,6 +66,19 @@
     border-radius: 2px;
 }
 
+#buttons-code-editor select {
+    padding: 0 .5em;
+}
+
+#buttons-code-editor select option {
+    padding: .5em 1em;
+}
+
+#buttons-code-editor select option:disabled {
+    padding: .5em;
+    background: #eee;
+}
+
 #github, #fork {
     text-decoration: none;
     float: right;
