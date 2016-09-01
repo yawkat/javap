@@ -1,0 +1,36 @@
+defaults:
+  JAVA: OpenJDK 8u92
+  KOTLIN: Kotlin 1.0.3
+  SCALA: Scala 2.11.8
+sdks:
+  OpenJDK 9.0.0.4 EA:
+    type: zulu
+    url: http://cdn.azul.com/zulu-pre/bin/zulu9.0.0.4-ea-jdk9.0.0-linux_x64.tar.gz
+    md5: e8904591fc029152a38804f3f3c02461
+  OpenJDK 8u92:
+    type: zulu
+    url: http://cdn.azul.com/zulu/bin/zulu8.15.0.1-jdk8.0.92-linux_x64.tar.gz
+    md5: 509fef886f7c6992d0f6f133c4928ec9
+  OpenJDK 7u101:
+    type: zulu
+    url: http://cdn.azul.com/zulu/bin/zulu7.14.0.5-jdk7.0.101-linux_x64.tar.gz
+    md5: 6fd6af8bc9a696116b7eeff8d28b0e98
+  OpenJDK 6u79:
+    type: zulu
+    url: http://cdn.azul.com/zulu/bin/zulu6.12.0.2-jdk6.0.79-linux_x64.tar.gz
+    md5: a54fb082c89de3909df5b69cd50a2155
+
+  Eclipse ECJ 4.5.1:
+    type: ecj
+    url: http://central.maven.org/maven2/org/eclipse/jdt/core/compiler/ecj/4.5.1/ecj-4.5.1.jar
+
+  Kotlin 1.0.3:
+    type: kotlin
+    url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.3/kotlin-compiler-1.0.3.jar
+  Kotlin 1.0.2:
+    type: kotlin
+    url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.2/kotlin-compiler-1.0.2.jar
+
+  Scala 2.11.8:
+    type: scala
+    url: http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.zip

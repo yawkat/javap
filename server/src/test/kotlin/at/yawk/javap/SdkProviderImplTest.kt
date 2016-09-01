@@ -17,7 +17,7 @@ class SdkProviderImplTest {
     @Test(enabled = false)
     fun testDownload() {
         val provider = SdkProviderImpl()
-        provider.downloadMissing()
+        provider.start()
         val version = ProcessExecutor()
                 .command(*provider.defaultSdkByLanguage[SdkLanguage.JAVA]!!.compilerCommand.toTypedArray(), "-version")
                 .readOutput(true)
@@ -30,7 +30,7 @@ class SdkProviderImplTest {
     @Test(enabled = false)
     fun `ecj`() {
         val provider = SdkProviderImpl()
-        provider.downloadMissing()
+        provider.start()
         val version = ProcessExecutor()
                 .command(*provider.sdks.find { it.name.contains("ECJ") }!!.compilerCommand.toTypedArray(), "-version")
                 .readOutput(true)

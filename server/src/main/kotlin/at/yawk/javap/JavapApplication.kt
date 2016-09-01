@@ -63,7 +63,7 @@ class JavapApplication : Application<JavapConfiguration>() {
             it.bind(PasteDao::class.java).toInstance(dbi.onDemand(PasteDao::class.java))
             it.bind(SdkProvider::class.java).to(SdkProviderImpl::class.java)
         })
-        injector.getInstance(SdkProviderImpl::class.java).downloadMissing()
+        injector.getInstance(SdkProviderImpl::class.java).start()
 
         environment.jersey().register(injector.getInstance(PasteResource::class.java))
         environment.jersey().register(injector.getInstance(SdkResource::class.java))
