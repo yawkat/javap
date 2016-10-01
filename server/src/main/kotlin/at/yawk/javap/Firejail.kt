@@ -45,7 +45,6 @@ class Firejail {
                     "--net=none",
                     "--nonewprivs",
                     "--seccomp",
-                    "--nosound",
                     "--name=${UUID.randomUUID()}",
                     "--shell=none",
                     "--blacklist=/var",
