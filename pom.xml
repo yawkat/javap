@@ -30,7 +30,7 @@
     </licenses>
 
     <properties>
-        <kotlin.version>1.0.3</kotlin.version>
+        <kotlin.version>1.0.4</kotlin.version>
         <dropwizard.version>0.9.2</dropwizard.version>
         <guice.version>4.0</guice.version>
         <jackson.version>2.7.3</jackson.version>
