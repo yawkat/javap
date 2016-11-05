@@ -106,7 +106,9 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
     }
 
     private fun javap(classDir: Path): String {
-        val classFiles = Files.list(classDir).use { it.map { it.fileName.toString() }.collect(Collectors.toList<String>()) }
+        val classFiles = Files.list(classDir).use { // close stream
+            it.sorted().map { it.fileName.toString() }.collect(Collectors.toList<String>())
+        }
         return if (!classFiles.isEmpty()) {
             val javapOutput = firejail.executeCommand(
                     listOf("javap", "-v", "-private", "-constants", "-XDdetails:stackMaps,localVariables") + classFiles,

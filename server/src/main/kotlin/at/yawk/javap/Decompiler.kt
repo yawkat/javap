@@ -41,7 +41,7 @@ enum class Decompiler {
         override fun decompile(classDir: Path): String {
             val astBuilder = AstBuilder(DecompilerContext(settings))
             Files.newDirectoryStream(classDir).use {
-                for (classFile in it) {
+                for (classFile in it.sorted()) {
                     if (!classFile.toString().endsWith(".class")) continue
                     astBuilder.addType(ClassFileReader.readClass(
                             ClassFileReader.OPTION_PROCESS_ANNOTATIONS or ClassFileReader.OPTION_PROCESS_CODE,
