@@ -1,7 +1,7 @@
 defaults:
   JAVA: OpenJDK 8u92
-  KOTLIN: Kotlin 1.0.3
-  SCALA: Scala 2.11.8
+  KOTLIN: Kotlin 1.0.4
+  SCALA: Scala 2.12.0
 sdks:
   OpenJDK 9.0.0.4 EA:
     type: zulu
@@ -24,6 +24,9 @@ sdks:
     type: ecj
     url: http://central.maven.org/maven2/org/eclipse/jdt/core/compiler/ecj/4.5.1/ecj-4.5.1.jar
 
+  Kotlin 1.0.4:
+    type: kotlin
+    url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.4/kotlin-compiler-1.0.4.jar
   Kotlin 1.0.3:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.3/kotlin-compiler-1.0.3.jar
@@ -31,6 +34,9 @@ sdks:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.2/kotlin-compiler-1.0.2.jar
 
+  Scala 2.12.0:
+    type: scala
+    url: http://downloads.lightbend.com/scala/2.12.0/scala-2.12.0.zip
   Scala 2.11.8:
     type: scala
     url: http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.zip
