@@ -66,11 +66,12 @@ fun start() {
         context?.triggerCompile()
     }
 
-    val selectedLanguage = SdkLanguage.JAVA
+    var selectedLanguage = SdkLanguage.JAVA
     jq("#compiler-names").change {
         val sdk: Sdk = jq(this).find(":selected").data("sdk")
         if (sdk.language != selectedLanguage) {
             loadPaste("default:${sdk.language}", outputType = null, forceCompiler = sdk.name)
+            selectedLanguage = sdk.language
         }
     }
 
