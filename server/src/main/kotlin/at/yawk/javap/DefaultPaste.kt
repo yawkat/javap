@@ -17,6 +17,7 @@ class DefaultPaste @Inject constructor(sdkProvider: SdkProvider, processor: Proc
     val defaultPastes = sdkProvider.defaultSdkByLanguage.map {
         val code = when(it.key) {
             SdkLanguage.JAVA -> """import java.util.*;
+import lombok.*;
 
 public class Main {
     public Main() {

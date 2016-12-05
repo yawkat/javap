@@ -19,15 +19,10 @@ import org.zeroturnaround.exec.stream.slf4j.Slf4jStream
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.net.URL
-import java.nio.file.DirectoryNotEmptyException
-import java.nio.file.FileVisitResult
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.SimpleFileVisitor
+import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
-import java.util.Arrays
+import java.util.*
 import java.util.zip.ZipInputStream
 import javax.inject.Singleton
 import javax.xml.bind.DatatypeConverter
@@ -66,6 +61,7 @@ private data class RemoteFile(
         val sha512: String? = null
 ) {
     fun <R> download(consumer: (InputStream) -> R): R {
+        log.info("Fetching {}", url)
         return url.openStream().use {
             var stream: InputStream = BufferedInputStream(it)
             var callbacks = emptyList<() -> Unit>()
@@ -143,7 +139,8 @@ private interface SdkConfig {
 }
 
 private class ZuluSdkConfig : SdkConfig {
-    @JsonUnwrapped lateinit var distribution: RemoteFile
+    lateinit var distribution: RemoteFile
+    var lombok: RemoteFile? = null
 
     override fun buildSdk(name: String, sdkRoot: Path): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
@@ -163,27 +160,55 @@ private class ZuluSdkConfig : SdkConfig {
             }
         }
 
+        var compilerCommand = listOf(
+                sdkRoot.resolve("bin/javac").toAbsolutePath().toString()
+        )
+
+        val lombokLocation = sdkRoot.resolve("lombok.jar")
+        if (lombok != null) {
+            if (!Files.exists(lombokLocation)) {
+                lombok!!.downloadTo(lombokLocation)
+            }
+            compilerCommand += listOf(
+                    "-cp", lombokLocation.toAbsolutePath().toString(),
+                    "-processor", "lombok.launch.AnnotationProcessorHider\$AnnotationProcessor,lombok.launch.AnnotationProcessorHider\$ClaimingProcessor"
+            )
+        }
+
         return Sdk(
                 name,
                 baseDir = sdkRoot,
-                compilerCommand = listOf(sdkRoot.resolve("bin/javac").toAbsolutePath().toString()),
+                compilerCommand = compilerCommand,
                 language = SdkLanguage.JAVA
         )
     }
 }
 
 private class EcjConfig : SdkConfig {
-    @JsonUnwrapped lateinit var compilerJar: RemoteFile
+    lateinit var compilerJar: RemoteFile
+    var lombok: RemoteFile? = null
 
     override fun buildSdk(name: String, sdkRoot: Path): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             compilerJar.downloadTo(tmp.resolve("ecj.jar"))
         }
 
+        var compilerCommand = listOf("java")
+
+        val lombokLocation = sdkRoot.resolve("lombok.jar")
+        if (lombok != null) {
+            if (!Files.exists(lombokLocation)) {
+                lombok!!.downloadTo(lombokLocation)
+            }
+            compilerCommand += listOf("-javaagent:${lombokLocation.toAbsolutePath()}=ECJ")
+        }
+
+        compilerCommand += listOf("-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(), "-source", "8")
+
         return Sdk(
                 name,
                 baseDir = sdkRoot,
-                compilerCommand = listOf("java", "-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(), "-source", "8"),
+                compilerCommand = compilerCommand,
                 language = SdkLanguage.JAVA
         )
     }

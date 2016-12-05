@@ -26,13 +26,14 @@ class Firejail {
             command: List<String>,
             workingDir: Path,
             whitelist: List<Path> = listOf(workingDir),
-            readOnlyWhitelist: List<Path> = emptyList()
+            readOnlyWhitelist: List<Path> = emptyList(),
+            runInJail: Boolean = true
     ): ProcessResult {
         if (!workingDir.startsWith("/tmp"))
             throw UnsupportedOperationException("Currently only /tmp is supported, verify security before allowing other paths")
 
         val combinedCommand: List<String>
-        if (enableJail) {
+        if (enableJail && runInJail) {
             val firejailCommand = listOf(
                     "firejail",
                     "--force",
@@ -59,7 +60,7 @@ class Firejail {
             combinedCommand = firejailCommand + "--" + command
         } else {
             combinedCommand = command
-            log.warn("Firejail is disabled. Command execution is not sandboxed!")
+            if (runInJail) log.warn("Firejail is disabled. Command execution is not sandboxed!")
         }
         return ProcessExecutor()
                 .command(combinedCommand)

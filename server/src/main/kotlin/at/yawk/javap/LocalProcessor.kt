@@ -71,8 +71,7 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
             val flags = when (sdk.language) {
                 SdkLanguage.JAVA -> listOf(
                         "-encoding", "utf-8",
-                        "-g", // debugging info
-                        "-proc:none" // no annotation processing
+                        "-g" // debugging info
                 )
                 SdkLanguage.KOTLIN -> emptyList()
                 SdkLanguage.SCALA -> emptyList()
@@ -112,7 +111,8 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
         return if (!classFiles.isEmpty()) {
             val javapOutput = firejail.executeCommand(
                     listOf("javap", "-v", "-private", "-constants", "-XDdetails:stackMaps,localVariables") + classFiles,
-                    classDir
+                    classDir,
+                    runInJail = false
             ).outputUTF8()
             javapOutput
                     .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
