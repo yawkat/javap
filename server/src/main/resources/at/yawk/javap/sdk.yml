@@ -37,6 +37,12 @@ sdks:
     lombok:
       url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar
 
+  Kotlin 1.0.6:
+    type: kotlin
+    url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.6/kotlin-compiler-1.0.6.jar
+  Kotlin 1.0.5:
+    type: kotlin
+    url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.5/kotlin-compiler-1.0.5.jar
   Kotlin 1.0.4:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.4/kotlin-compiler-1.0.4.jar
