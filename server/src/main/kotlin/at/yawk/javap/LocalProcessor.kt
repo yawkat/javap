@@ -88,14 +88,15 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
                     readOnlyWhitelist = if(sdk.baseDir == null) emptyList() else listOf(sdk.baseDir)
             )
 
-            val javapOutput: String?
+            var javapOutput: String? = javap(classDir)
             val procyonOutput: String?
-            if (javacResult.exitValue == 0) {
-                javapOutput = javap(classDir)
-                procyonOutput = decompile(classDir, Decompiler.PROCYON)
-            } else {
-                javapOutput = null
+            if (javapOutput == null) {
+                if (javacResult.exitValue == 0) {
+                    javapOutput = NO_CLASSES_GENERATED
+                }
                 procyonOutput = null
+            } else {
+                procyonOutput = decompile(classDir, Decompiler.PROCYON)
             }
 
             return ProcessingOutput(javacResult.outputUTF8(), javapOutput, procyonOutput)
@@ -104,7 +105,7 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
         }
     }
 
-    private fun javap(classDir: Path): String {
+    private fun javap(classDir: Path): String? {
         val classFiles = Files.list(classDir).use { // close stream
             it.sorted().map { it.fileName.toString() }.collect(Collectors.toList<String>())
         }
@@ -117,7 +118,7 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
             javapOutput
                     .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
                     .replace("Classfile .*\n  Last modified.*\n  MD5.*\n  ".toRegex(RegexOption.MULTILINE), "")
-        } else NO_CLASSES_GENERATED
+        } else null
     }
 
     private fun decompile(classDir: Path, decompiler: Decompiler): String {

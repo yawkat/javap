@@ -22,7 +22,7 @@ class LocalProcessorTest {
     fun `empty file`() {
         assertEquals(
                 localProcessor.process(ProcessingInput("", SystemSdkProvider.JDK)),
-                ProcessingOutput("", NO_CLASSES_GENERATED, "")
+                ProcessingOutput("", NO_CLASSES_GENERATED, null)
         )
     }
 

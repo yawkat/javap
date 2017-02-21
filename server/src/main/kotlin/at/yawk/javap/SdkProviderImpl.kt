@@ -203,7 +203,7 @@ private class EcjConfig : SdkConfig {
             compilerCommand += listOf("-javaagent:${lombokLocation.toAbsolutePath()}=ECJ")
         }
 
-        compilerCommand += listOf("-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(), "-source", "8")
+        compilerCommand += listOf("-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(), "-source", "8", "-proceedOnError")
 
         return Sdk(
                 name,
