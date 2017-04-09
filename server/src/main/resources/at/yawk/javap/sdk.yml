@@ -1,6 +1,6 @@
 defaults:
   JAVA: OpenJDK 8u92
-  KOTLIN: Kotlin 1.0.4
+  KOTLIN: Kotlin 1.1.1
   SCALA: Scala 2.12.0
 sdks:
   OpenJDK 9.0.0.4 EA:
