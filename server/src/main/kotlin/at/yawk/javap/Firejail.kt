@@ -53,9 +53,9 @@ class Firejail {
                     // make sure ~ and /tmp are blacklisted, need at least one whitelist entry for that
                     "--whitelist=/tmp/.doesNotExist",
                     "--whitelist=~/.doesNotExist",
-                    "--private-etc=/java-8-openjdk"
-            ) + whitelist.map { it.toAbsolutePath() }.map { "--whitelist=$it" } +
-                    readOnlyWhitelist.map { it.toAbsolutePath() }.flatMap { listOf("--whitelist=$it", "--read-only=$it") }
+                    "--private-etc=java-8-openjdk"
+            ) + whitelist.map(Path::toAbsolutePath).map { "--whitelist=$it" } +
+                    readOnlyWhitelist.map(Path::toAbsolutePath).flatMap { listOf("--whitelist=$it", "--read-only=$it") }
 
             combinedCommand = firejailCommand + "--" + command
         } else {
