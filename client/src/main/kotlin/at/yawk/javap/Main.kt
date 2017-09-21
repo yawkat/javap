@@ -68,7 +68,7 @@ fun start() {
 
     var selectedLanguage = SdkLanguage.JAVA
     jq("#compiler-names").change {
-        val sdk = jq(this).find(":selected").data("sdk")
+        val sdk: dynamic = jq(this).find(":selected").data("sdk")
         if (sdk.language != selectedLanguage.name) {
             loadPaste("default:${sdk.language}", outputType = null, forceCompiler = sdk.name)
             selectedLanguage = SdkLanguage.valueOf(sdk.language)
