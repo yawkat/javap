@@ -3,6 +3,13 @@ defaults:
   KOTLIN: Kotlin 1.1.1
   SCALA: Scala 2.12.0
 sdks:
+  OpenJDK 9.0.0:
+    type: zulu
+    distribution:
+      url: http://cdn.azul.com/zulu/bin/zulu9.0.0.15-jdk9.0.0-linux_x64.tar.gz
+      md5: de913f2aa03c341d865dfb6a1698f31b
+    lombok:
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.18/lombok-1.16.18.jar
   OpenJDK 9.0.0.4 EA:
     type: zulu
     distribution:
