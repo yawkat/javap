@@ -3,11 +3,11 @@ defaults:
   KOTLIN: Kotlin 1.2.30
   SCALA: Scala 2.12.5
 sdks:
-  OpenJDK 10+23:
+  OpenJDK 10:
     type: zulu
     distribution:
-      url: https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/jdk-10%2B23/OpenJDK10_x64_Linux_jdk-10.23.tar.gz
-      sha512: 607b3d6ec708283dcfdd45d57afd532f7b4893cf9678c219fbf2e3f1ce68cf5ec48e62ceb3551ae5cf3399d222bd7cbfa83fcd2435dfae2130750b0b9173d091
+      url: https://download.java.net/java/GA/jdk10/10/binaries/openjdk-10_linux-x64_bin.tar.gz
+      sha512: 54f84f7b8f6425a3f92fe9c1fb8645b9c0b56d7d411e0053841d887d84ebc2d51aa6ac6c9d73df5bb3d6ec0c5f4c5f918c8c8cd7323d5a244c8cd0b5fdd839ff
     lombok:
       url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.20/lombok-1.16.20.jar
   OpenJDK 9.0.0:
