@@ -1,8 +1,15 @@
 defaults:
-  JAVA: OpenJDK 9.0.0
-  KOTLIN: Kotlin 1.1.4-3
-  SCALA: Scala 2.12.0
+  JAVA: OpenJDK 10+23
+  KOTLIN: Kotlin 1.2.30
+  SCALA: Scala 2.12.5
 sdks:
+  OpenJDK 10+23:
+    type: zulu
+    distribution:
+      url: https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/jdk-10%2B23/OpenJDK10_x64_Linux_jdk-10.23.tar.gz
+      sha512: 607b3d6ec708283dcfdd45d57afd532f7b4893cf9678c219fbf2e3f1ce68cf5ec48e62ceb3551ae5cf3399d222bd7cbfa83fcd2435dfae2130750b0b9173d091
+    lombok:
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.20/lombok-1.16.20.jar
   OpenJDK 9.0.0:
     type: zulu
     distribution:
@@ -44,6 +51,9 @@ sdks:
     lombok:
       url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar
 
+  Kotlin 1.2.30:
+    type: kotlin
+    url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.2.30/kotlin-compiler-1.2.30.jar
   Kotlin 1.1.4-3:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.1.4-3/kotlin-compiler-1.1.4-3.jar
@@ -66,6 +76,9 @@ sdks:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.2/kotlin-compiler-1.0.2.jar
 
+  Scala 2.12.5:
+    type: scala
+    url: https://downloads.lightbend.com/scala/2.12.5/scala-2.12.5.tgz
   Scala 2.12.0:
     type: scala
     url: http://downloads.lightbend.com/scala/2.12.0/scala-2.12.0.zip
