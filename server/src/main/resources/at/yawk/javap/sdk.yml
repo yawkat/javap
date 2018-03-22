@@ -78,7 +78,7 @@ sdks:
 
   Scala 2.12.5:
     type: scala
-    url: https://downloads.lightbend.com/scala/2.12.5/scala-2.12.5.tgz
+    url: https://downloads.lightbend.com/scala/2.12.5/scala-2.12.5.zip
   Scala 2.12.0:
     type: scala
     url: http://downloads.lightbend.com/scala/2.12.0/scala-2.12.0.zip
