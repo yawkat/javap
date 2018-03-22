@@ -1,5 +1,5 @@
 defaults:
-  JAVA: OpenJDK 10+23
+  JAVA: OpenJDK 10
   KOTLIN: Kotlin 1.2.30
   SCALA: Scala 2.12.5
 sdks:
