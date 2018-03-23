@@ -39,4 +39,17 @@ class SdkProviderImplTest {
                 .outputUTF8()
         Assert.assertTrue(version.trim().matches("Eclipse Compiler .*".toRegex()))
     }
+
+    @Test(enabled = false)
+    fun `kotlin`() {
+        val provider = SdkProviderImpl()
+        provider.start()
+        val version = ProcessExecutor()
+                .command(*provider.sdks.find { it.name.contains("Kotlin") }!!.compilerCommand.toTypedArray(), "-version")
+                .readOutput(true)
+                .exitValueNormal()
+                .execute()
+                .outputUTF8()
+        Assert.assertTrue(version.trim().matches("(Kotlin Compiler|info: kotlinc-jvm) .*".toRegex()), version)
+    }
 }

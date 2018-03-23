@@ -131,6 +131,7 @@ private fun buildSdkRootIfMissing(sdkRoot: Path, builder: (Path) -> Unit) {
         JsonSubTypes.Type(value = ZuluSdkConfig::class, name = "zulu"),
         JsonSubTypes.Type(value = EcjConfig::class, name = "ecj"),
         JsonSubTypes.Type(value = KotlinConfig::class, name = "kotlin"),
+        JsonSubTypes.Type(value = KotlinDistributionConfig::class, name = "kotlin-distribution"),
         JsonSubTypes.Type(value = ScalaConfig::class, name = "scala")
 )
 @JsonTypeInfo(property = "type", use = JsonTypeInfo.Id.NAME)
@@ -232,27 +233,36 @@ private class KotlinConfig : SdkConfig {
     }
 }
 
+private class KotlinDistributionConfig : SdkConfig {
+    @JsonUnwrapped lateinit var distribution: RemoteFile
+
+    override fun buildSdk(name: String, sdkRoot: Path): Sdk {
+        buildSdkRootIfMissing(sdkRoot) { tmp ->
+            distribution.download {
+                extractZip(it, tmp)
+            }
+
+            val compilerPath = tmp.resolve("bin/kotlinc")
+            Files.setPosixFilePermissions(compilerPath, Files.getPosixFilePermissions(compilerPath) + PosixFilePermission.OWNER_EXECUTE)
+        }
+
+        val compilerPath = sdkRoot.resolve("bin/kotlinc").toAbsolutePath()
+        return Sdk(
+                name,
+                baseDir = sdkRoot,
+                compilerCommand = listOf(compilerPath.toString()),
+                language = SdkLanguage.KOTLIN
+        )
+    }
+}
+
 private class ScalaConfig : SdkConfig {
     @JsonUnwrapped lateinit var sdk: RemoteFile
 
     override fun buildSdk(name: String, sdkRoot: Path): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             sdk.download {
-                ZipInputStream(it).use { stream ->
-                    while (true) {
-                        val entry = stream.nextEntry ?: break
-                        if (entry.isDirectory) continue
-                        var fileName = entry.name
-                        if (fileName.startsWith("/")) fileName = fileName.substring(1)
-                        // strip leading scala-a.b.c folder
-                        fileName = fileName.substring(fileName.indexOf('/') + 1)
-
-                        val relativePath = Paths.get(fileName)
-                        val target = tmp.resolve(relativePath)
-                        Files.createDirectories(target.parent)
-                        Files.copy(stream, target)
-                    }
-                }
+                extractZip(it, tmp)
             }
 
             val compilerPath = tmp.resolve("bin/scalac")
@@ -266,5 +276,23 @@ private class ScalaConfig : SdkConfig {
                 compilerCommand = listOf(compilerPath.toString()),
                 language = SdkLanguage.SCALA
         )
+    }
+}
+
+private fun extractZip(it: InputStream, out: Path) {
+    ZipInputStream(it).use { stream ->
+        while (true) {
+            val entry = stream.nextEntry ?: break
+            if (entry.isDirectory) continue
+            var fileName = entry.name
+            if (fileName.startsWith("/")) fileName = fileName.substring(1)
+            // strip leading scala-a.b.c folder
+            fileName = fileName.substring(fileName.indexOf('/') + 1)
+
+            val relativePath = Paths.get(fileName)
+            val target = out.resolve(relativePath)
+            Files.createDirectories(target.parent)
+            Files.copy(stream, target)
+        }
     }
 }
