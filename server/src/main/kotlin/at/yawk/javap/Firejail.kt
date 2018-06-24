@@ -48,7 +48,6 @@ class Firejail {
                     "--seccomp",
                     "--name=${UUID.randomUUID()}",
                     "--shell=none",
-                    "--blacklist=/var",
                     "--blacklist=/opt",
                     // make sure ~ and /tmp are blacklisted, need at least one whitelist entry for that
                     "--whitelist=/tmp/.doesNotExist",
