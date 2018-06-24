@@ -49,9 +49,8 @@ class Firejail {
                     "--name=${UUID.randomUUID()}",
                     "--shell=none",
                     "--blacklist=/opt",
-                    // make sure ~ and /tmp are blacklisted, need at least one whitelist entry for that
+                    // make sure /tmp is blacklisted, need at least one whitelist entry for that
                     "--whitelist=/tmp/.doesNotExist",
-                    "--whitelist=~/.doesNotExist",
                     "--private-etc=java-8-openjdk"
             ) + whitelist.map(Path::toAbsolutePath).map { "--whitelist=$it" } +
                     readOnlyWhitelist.map(Path::toAbsolutePath).flatMap { listOf("--whitelist=$it", "--read-only=$it") }
