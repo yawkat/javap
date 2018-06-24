@@ -9,44 +9,31 @@ package at.yawk.javap
 /**
  * @author yawkat
  */
-@native
-private val ace: dynamic = noImpl
+private external val ace: dynamic
 
 fun Editor(id: String): Editor = ace.edit(id)
 
-@native
-class Editor private constructor(DO_NOT_CALL: Nothing) {
-    @native
-    val commands: Commands = noImpl
+external class Editor {
+    val commands: Commands
 
-    @native
-    fun getSession(): Session = noImpl
+    fun getSession(): Session
 
-    @native
-    fun setReadOnly(mode: Boolean): Unit = noImpl
+    fun setReadOnly(mode: Boolean): Unit
 
-    @native
-    fun getValue(): String = noImpl
+    fun getValue(): String
 
-    @native
     class Session {
-        @native
-        fun setMode(mode: String): Unit = noImpl
+        fun setMode(mode: String): Unit
 
-        @native
-        fun setUseWrapMode(mode: Boolean): Unit = noImpl
+        fun setUseWrapMode(mode: Boolean): Unit
 
-        @native
-        fun addGutterDecoration(line: Int, cssClass: String): Unit = noImpl
+        fun addGutterDecoration(line: Int, cssClass: String): Unit
 
-        @native
-        fun removeGutterDecoration(line: Int, cssClass: String): Unit = noImpl
+        fun removeGutterDecoration(line: Int, cssClass: String): Unit
     }
 
-    @native
     class Commands {
-        @native
-        fun addCommand(command: dynamic): Unit = noImpl
+        fun addCommand(command: dynamic): Unit
     }
 }
 

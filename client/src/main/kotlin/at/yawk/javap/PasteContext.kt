@@ -8,8 +8,8 @@ package at.yawk.javap
 
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.ProcessingInput
-import jquery.jq
 import kotlin.browser.window
+import kotlin.js.json
 
 /**
  * @author yawkat
@@ -42,12 +42,12 @@ class PasteContext(var currentPaste: Paste) {
     fun displayPaste(requestedOutputType: OutputType? = null) {
         setEditorValue(Editors.codeEditor, currentPaste.input.code)
         jq("#compiler-names").find("option").each {
-            val tgt = jq(this)
+            val tgt = jq(jsThis)
             tgt.attr("selected", (tgt.`val`() == currentPaste.input.compilerName))
         }
         val outputType = jq("#output-type")
         outputType.find("option").each {
-            val option = jq(this)
+            val option = jq(jsThis)
             val type = OutputType.valueOf(option.`val`()!!)
             val enabled = !type.getter(currentPaste.output).isNullOrBlank()
             option.attr("disabled", !enabled)

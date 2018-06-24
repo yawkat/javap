@@ -6,10 +6,12 @@
 
 package at.yawk.javap
 
+import org.w3c.dom.get
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Date
-import kotlin.js.native
+import kotlin.js.Math
+import kotlin.math.floor
 
 /**
  * @author yawkat
@@ -21,12 +23,9 @@ data class Request(
         val data: String? = undefined
 )
 
-@native
-class RequestFuture {
-    @native
+external class RequestFuture {
     fun then(success: (dynamic) -> Unit, failure: (dynamic, Int, String) -> Unit): RequestFuture
 
-    @native
     fun always(success: (dynamic) -> Unit): RequestFuture
 }
 
@@ -37,7 +36,7 @@ fun ajax(request: Request): RequestFuture {
     if (userTokenMatch == null) {
         userToken = (0..63).map {
             val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            alphabet[Math.floor(Math.random() * alphabet.length)]
+            alphabet[floor(Math.random() * alphabet.length).toInt()]
         }.joinToString("")
         val expiryTime: dynamic = Date()
         expiryTime.setTime(expiryTime.getTime() + (120.toLong() * 24 * 60 * 60 * 1000)) // 4 months

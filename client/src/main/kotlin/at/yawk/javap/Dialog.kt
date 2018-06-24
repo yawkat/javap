@@ -9,12 +9,13 @@ package at.yawk.javap
 import jquery.jq
 import jquery.ui.dialog
 import org.w3c.dom.Element
+import kotlin.js.json
 
 /**
  * @author yawkat
  */
-@native("this")
-private val jsThis: Element = noImpl
+@JsName("this")
+external val jsThis: Element
 
 fun showDialog(title: String, message: String) {
     val dialog = jq("#dialog-message")

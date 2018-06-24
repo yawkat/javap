@@ -7,7 +7,7 @@
 package at.yawk.javap
 
 import at.yawk.javap.model.Paste
-import jquery.jq
+import org.w3c.dom.Element
 import kotlin.Pair
 import kotlin.browser.document
 import kotlin.browser.window
@@ -29,7 +29,7 @@ fun start() {
         compilerNames.empty()
 
         fun categoryForSdkName(name: String) =
-                name.match("""^((?:[A-Za-z]+ )+).*$""")[1]
+                name.match("""^((?:[A-Za-z]+ )+).*$""")!![1]
 
         var category: String? = null
         for (sdk in sdks) {
@@ -68,7 +68,7 @@ fun start() {
 
     var selectedLanguage = SdkLanguage.JAVA
     jq("#compiler-names").change {
-        val sdk: dynamic = jq(this).find(":selected").data("sdk")
+        val sdk: dynamic = jq(jsThis).find(":selected").data("sdk")
         if (sdk.language != selectedLanguage.name) {
             loadPaste("default:${sdk.language}", outputType = null, forceCompiler = sdk.name)
             selectedLanguage = SdkLanguage.valueOf(sdk.language)
@@ -76,7 +76,7 @@ fun start() {
     }
 
     jq("#output-type").change {
-        context?.showCurrentPasteOutput(OutputType.valueOf(jq(this).`val`()!!))
+        context?.showCurrentPasteOutput(OutputType.valueOf(jq(jsThis).`val`()!!))
     }
 
     jq(document).asDynamic().tooltip()

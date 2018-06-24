@@ -15,11 +15,6 @@ fun extractJavapLineMappings(javap: String): List<Pair<IntRange, IntRange>> {
     return parser.mappings
 }
 
-// stdlib has this without proper nullity
-@Suppress("unused")
-@native
-private fun String.match(regex: String): Array<String>? = noImpl
-
 private class Parser(val lines: List<String>) {
     val mappings = mutableListOf<Pair<IntRange, IntRange>>()
     var currentLine = -1
@@ -55,9 +50,9 @@ private class Parser(val lines: List<String>) {
                 return
             }
 
-            val match = line.match("""^\s*(\d+): .*$""") ?: null
-            if (match != null && match.size > 0) {
-                labels[currentLine] = parseInt(match[1])
+            val match = line.match("""^\s*(\d+): .*$""")
+            if (match != null && match.isNotEmpty()) {
+                labels[currentLine] = match[1].toInt()
             }
         }
 
@@ -75,23 +70,23 @@ private class Parser(val lines: List<String>) {
             val line = takeLine() ?: break
 
             val match = line.match("""^        line (\d+): (\d+)$""")
-            if (match == null || match.size <= 0) break
+            if (match == null || match.isEmpty()) break
 
-            val label = parseInt(match[2])
-            val sourceLine = parseInt(match[1]) - 1 // 1-indexed
+            val label = match[2].toInt()
+            val sourceLine = match[1].toInt() - 1 // 1-indexed
             lnt[label] = sourceLine
         }
 
         fun flush(sourceLine: Int?, rangeStart: Int?, rangeEndExclusive: Int) {
             if (sourceLine != null && rangeStart != null) {
-                mappings.add(sourceLine..sourceLine to rangeStart..rangeEndExclusive - 1)
+                mappings.add(sourceLine..sourceLine to (rangeStart until rangeEndExclusive))
             }
         }
 
         var currentRangeStart: Int? = null
         var currentSourceLine: Int? = null
 
-        for (i in bytecodeStart..bytecodeEnd - 1) {
+        for (i in bytecodeStart until bytecodeEnd) {
             val sourceLine = lnt[labels[i]]
             if (sourceLine != null) {
                 flush(currentSourceLine, currentRangeStart, i)

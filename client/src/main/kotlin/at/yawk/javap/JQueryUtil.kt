@@ -6,45 +6,50 @@
 
 package at.yawk.javap
 
-import jquery.JQuery
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.w3c.dom.events.Event
 
 /**
  * @author yawkat
  */
-@native("$")
-public fun jq(doc: Document): JQuery = JQuery();
+@JsName("$")
+external fun jq(doc: Document): JQuery
+@JsName("$")
+external fun jq(doc: String): JQuery
+@JsName("$")
+external fun jq(doc: Element): JQuery
 
-@native
-fun JQuery.find(selector: String): JQuery = noImpl
+external class JQuery {
+    fun find(selector: String): JQuery
 
-@native
-fun JQuery.each(action: Element.() -> Unit): JQuery = noImpl
+    fun each(action: (Element) -> Unit): JQuery
 
-@native
-fun JQuery.empty(): Unit = noImpl
+    fun empty(): Unit
 
-@native
-fun JQuery.first(): JQuery = noImpl
+    fun first(): JQuery
 
-@native
-fun JQuery.`val`(string: String?): Unit = noImpl
+    fun `val`(string: String?): Unit
 
-@native
-fun JQuery.data(key: String, value: Any?): Unit = noImpl
+    fun `val`(): String?
 
-@native
-fun <T> JQuery.data(key: String): T = noImpl
+    fun data(key: String, value: Any?): Unit
 
-@native
-fun JQuery.attr(key: String, value: Any?): Unit = noImpl
+    fun <T> data(key: String): T
 
-@native("attr")
-fun <T> JQuery.attrGen(key: String): T = noImpl
+    fun attr(key: String, value: Any?): Unit
 
-@native
-fun JQuery.append(jQuery: JQuery): Unit = noImpl
+    @JsName("attr")
+    fun <T> attrGen(key: String): T
 
-@native
-fun JQuery.toggleClass(clazz: String, value: Boolean? = null): Unit = noImpl
+    fun append(jQuery: JQuery): Unit
+
+    fun toggleClass(clazz: String, value: Boolean? = definedExternally): Unit
+
+    fun text(text: String): JQuery
+    fun addClass(text: String): JQuery
+    fun removeClass(text: String): JQuery
+
+    fun click(action: (Event) -> Unit): JQuery
+    fun change(action: (Event) -> Unit): JQuery
+}

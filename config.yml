@@ -1,7 +1,7 @@
 database:
-  driverClass: org.h2.Driver
+  driverClass: org.postgresql.Driver
   user: javap
   password:
-  url: jdbc:h2:./javap
+  url: jdbc:postgresql://127.0.0.1/javap
 server:
   rootPath: '/api/*'
