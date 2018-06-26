@@ -224,10 +224,11 @@ private class KotlinConfig : SdkConfig {
         }
 
         val compilerPath = sdkRoot.resolve("kotlin-compiler.jar").toAbsolutePath()
+        val javaPath = System.getenv("JAVA_HOME")?.let { it + "/bin/java" } ?: "java"
         return Sdk(
                 name,
                 baseDir = sdkRoot,
-                compilerCommand = listOf("java", "-jar", "$compilerPath", "-no-stdlib", "-cp", "$compilerPath:."),
+                compilerCommand = listOf(javaPath, "-jar", "$compilerPath", "-no-stdlib", "-cp", "$compilerPath:."),
                 language = SdkLanguage.KOTLIN
         )
     }

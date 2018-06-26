@@ -59,15 +59,4 @@ class FirejailTest {
             deleteRecursively(tempDirectory)
         }
     }
-
-    @Test
-    fun `cannot access files in home`() {
-        val tempDirectory = Files.createTempDirectory(null)
-        try {
-            val command = firejail.executeCommand(listOf("/bin/ls", System.getProperty("user.home")), tempDirectory)
-            Assert.assertEquals(command.outputUTF8(), "")
-        } finally {
-            deleteRecursively(tempDirectory)
-        }
-    }
 }
