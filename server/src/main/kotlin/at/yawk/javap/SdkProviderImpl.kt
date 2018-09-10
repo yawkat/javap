@@ -194,7 +194,8 @@ private class EcjConfig : SdkConfig {
             compilerJar.downloadTo(tmp.resolve("ecj.jar"))
         }
 
-        var compilerCommand = listOf("java")
+        val javaPath = System.getenv("JAVA_HOME")?.let { it + "/bin/java" } ?: "java"
+        var compilerCommand = listOf(javaPath)
 
         val lombokLocation = sdkRoot.resolve("lombok.jar")
         if (lombok != null) {
