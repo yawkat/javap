@@ -85,10 +85,10 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
                     command,
                     workingDir = sourceDir,
                     whitelist = listOf(tempDirectory),
-                    readOnlyWhitelist = if(sdk.baseDir == null) emptyList() else listOf(sdk.baseDir)
+                    readOnlyWhitelist = (if (sdk.baseDir == null) emptyList() else listOf(sdk.baseDir)) + sdk.hostJdk.path
             )
 
-            var javapOutput: String? = javap(classDir)
+            var javapOutput: String? = javap(sdk.hostJdk, classDir)
             val procyonOutput: String?
             if (javapOutput == null) {
                 if (javacResult.exitValue == 0) {
@@ -105,13 +105,17 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
         }
     }
 
-    private fun javap(classDir: Path): String? {
+    private fun javap(jdk: Jdk, classDir: Path): String? {
         val classFiles = Files.list(classDir).use { // close stream
             it.sorted().map { it.fileName.toString() }.collect(Collectors.toList<String>())
         }
         return if (!classFiles.isEmpty()) {
             val javapOutput = firejail.executeCommand(
-                    listOf("javap", "-v", "-private", "-constants", "-XDdetails:stackMaps,localVariables") + classFiles,
+                    listOf(jdk.javap.toAbsolutePath().toString(),
+                            "-v",
+                            "-private",
+                            "-constants",
+                            "-XDdetails:stackMaps,localVariables") + classFiles,
                     classDir,
                     runInJail = false
             ).outputUTF8()

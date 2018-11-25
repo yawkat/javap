@@ -11,10 +11,7 @@ import java.nio.file.Path
 /**
  * @author yawkat
  */
-data class Sdk(
-        val name: String,
-        val hostJdk: Jdk,
-        val baseDir: Path?,
-        val compilerCommand: List<String>,
-        val language: SdkLanguage
-)
+class Jdk(val path: Path) {
+    val java = path.resolve("bin/java")!!
+    val javap = path.resolve("bin/javap")!!
+}

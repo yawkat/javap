@@ -19,10 +19,17 @@ import org.zeroturnaround.exec.stream.slf4j.Slf4jStream
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.net.URL
-import java.nio.file.*
+import java.nio.charset.StandardCharsets
+import java.nio.file.DirectoryNotEmptyException
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
-import java.util.*
+import java.util.Arrays
+import java.util.NoSuchElementException
 import java.util.zip.ZipInputStream
 import javax.inject.Singleton
 import javax.xml.bind.DatatypeConverter
@@ -45,7 +52,12 @@ class SdkProviderImpl() : SdkProvider {
 
         val config = YAMLMapper().findAndRegisterModules()
                 .readValue(SdkProviderImpl::class.java.getResource("sdk.yml"), Config::class.java)
-        val downloaded = config.sdks.mapValues { it.value.buildSdk(it.key, root.resolve(it.key)) }
+        val downloaded = mutableMapOf<String, Sdk>()
+        config.sdks.mapValuesTo(downloaded) {
+            it.value.buildSdk(it.key,
+                    root.resolve(it.key),
+                    { (downloaded[it] ?: throw NoSuchElementException(it)).hostJdk })
+        }
         sdks = downloaded.values.toList()
         defaultSdkByLanguage = config.defaults.mapValues {
             val sdk = downloaded[it.value] ?: throw Exception("Invalid SDK reference ${it.value} for language ${it.key} (we have ${downloaded.values} available)")
@@ -58,6 +70,7 @@ class SdkProviderImpl() : SdkProvider {
 private data class RemoteFile(
         val url: URL,
         val md5: String? = null,
+        val sha256: String? = null,
         val sha512: String? = null
 ) {
     fun <R> download(consumer: (InputStream) -> R): R {
@@ -78,6 +91,7 @@ private data class RemoteFile(
             }
 
             if (md5 != null) validate(md5, Hashing.md5())
+            if (sha256 != null) validate(sha256, Hashing.sha256())
             if (sha512 != null) validate(sha512, Hashing.sha512())
 
             val ret = consumer(stream)
@@ -136,14 +150,16 @@ private fun buildSdkRootIfMissing(sdkRoot: Path, builder: (Path) -> Unit) {
 )
 @JsonTypeInfo(property = "type", use = JsonTypeInfo.Id.NAME)
 private interface SdkConfig {
-    fun buildSdk(name: String, sdkRoot: Path): Sdk
+    fun buildSdk(name: String, sdkRoot: Path, lookupJdk: (String) -> Jdk): Sdk
 }
 
 private class ZuluSdkConfig : SdkConfig {
     lateinit var distribution: RemoteFile
     var lombok: RemoteFile? = null
 
-    override fun buildSdk(name: String, sdkRoot: Path): Sdk {
+    override fun buildSdk(name: String,
+                          sdkRoot: Path,
+                          lookupJdk: (String) -> Jdk): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             val dist = tmp.resolve("dist.tgz")
             try {
@@ -165,8 +181,10 @@ private class ZuluSdkConfig : SdkConfig {
                 sdkRoot.resolve("bin/javac").toAbsolutePath().toString()
         )
 
-        val lombokLocation = sdkRoot.resolve("lombok.jar")
         if (lombok != null) {
+            val lombokLocation = sdkRoot.resolve("lombok-" + DatatypeConverter.printHexBinary(
+                    Hashing.sha256().hashString(lombok!!.url.toExternalForm(), StandardCharsets.UTF_8).asBytes())
+                    + ".jar")
             if (!Files.exists(lombokLocation)) {
                 lombok!!.downloadTo(lombokLocation)
             }
@@ -178,6 +196,7 @@ private class ZuluSdkConfig : SdkConfig {
 
         return Sdk(
                 name,
+                hostJdk = Jdk(sdkRoot),
                 baseDir = sdkRoot,
                 compilerCommand = compilerCommand,
                 language = SdkLanguage.JAVA
@@ -188,8 +207,11 @@ private class ZuluSdkConfig : SdkConfig {
 private class EcjConfig : SdkConfig {
     lateinit var compilerJar: RemoteFile
     var lombok: RemoteFile? = null
+    lateinit var hostJdk: String
 
-    override fun buildSdk(name: String, sdkRoot: Path): Sdk {
+    override fun buildSdk(name: String,
+                          sdkRoot: Path,
+                          lookupJdk: (String) -> Jdk): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             compilerJar.downloadTo(tmp.resolve("ecj.jar"))
         }
@@ -211,34 +233,43 @@ private class EcjConfig : SdkConfig {
                 name,
                 baseDir = sdkRoot,
                 compilerCommand = compilerCommand,
-                language = SdkLanguage.JAVA
+                language = SdkLanguage.JAVA,
+                hostJdk = lookupJdk(hostJdk)
         )
     }
 }
 
 private class KotlinConfig : SdkConfig {
     @JsonUnwrapped lateinit var compilerJar: RemoteFile
+    lateinit var hostJdk: String
 
-    override fun buildSdk(name: String, sdkRoot: Path): Sdk {
+    override fun buildSdk(name: String,
+                          sdkRoot: Path,
+                          lookupJdk: (String) -> Jdk): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             compilerJar.downloadTo(tmp.resolve("kotlin-compiler.jar"))
         }
 
         val compilerPath = sdkRoot.resolve("kotlin-compiler.jar").toAbsolutePath()
-        val javaPath = System.getenv("JAVA_HOME")?.let { it + "/bin/java" } ?: "java"
+        val host = lookupJdk(hostJdk)
+        val javaPath = host.java.toAbsolutePath().toString()
         return Sdk(
                 name,
                 baseDir = sdkRoot,
                 compilerCommand = listOf(javaPath, "-jar", "$compilerPath", "-no-stdlib", "-cp", "$compilerPath:."),
-                language = SdkLanguage.KOTLIN
+                language = SdkLanguage.KOTLIN,
+                hostJdk = host
         )
     }
 }
 
 private class KotlinDistributionConfig : SdkConfig {
     @JsonUnwrapped lateinit var distribution: RemoteFile
+    lateinit var hostJdk: String
 
-    override fun buildSdk(name: String, sdkRoot: Path): Sdk {
+    override fun buildSdk(name: String,
+                          sdkRoot: Path,
+                          lookupJdk: (String) -> Jdk): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             distribution.download {
                 extractZip(it, tmp)
@@ -253,15 +284,19 @@ private class KotlinDistributionConfig : SdkConfig {
                 name,
                 baseDir = sdkRoot,
                 compilerCommand = listOf(compilerPath.toString()),
-                language = SdkLanguage.KOTLIN
+                language = SdkLanguage.KOTLIN,
+                hostJdk = lookupJdk(hostJdk)
         )
     }
 }
 
 private class ScalaConfig : SdkConfig {
     @JsonUnwrapped lateinit var sdk: RemoteFile
+    lateinit var hostJdk: String
 
-    override fun buildSdk(name: String, sdkRoot: Path): Sdk {
+    override fun buildSdk(name: String,
+                          sdkRoot: Path,
+                          lookupJdk: (String) -> Jdk): Sdk {
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             sdk.download {
                 extractZip(it, tmp)
@@ -276,7 +311,8 @@ private class ScalaConfig : SdkConfig {
                 name,
                 baseDir = sdkRoot,
                 compilerCommand = listOf(compilerPath.toString()),
-                language = SdkLanguage.SCALA
+                language = SdkLanguage.SCALA,
+                hostJdk = lookupJdk(hostJdk)
         )
     }
 }

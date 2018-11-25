@@ -1,20 +1,29 @@
 defaults:
   JAVA: OpenJDK 9.0.0
-  KOTLIN: Kotlin 1.2.30
+  KOTLIN: Kotlin 1.3.10
   SCALA: Scala 2.12.5
 sdks:
+  OpenJDK 11:
+    type: zulu
+    distribution:
+      url: https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.1%2B13/OpenJDK11U-jdk_x64_linux_hotspot_11.0.1_13.tar.gz
+      sha256: 22bd2f1a2e0cb6e4075967bfeda4a960b0325879305aa739a0ba2d6e5cd4c3e2
+    lombok:
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 10:
     type: zulu
     distribution:
       url: https://download.java.net/java/GA/jdk10/10/binaries/openjdk-10_linux-x64_bin.tar.gz
       sha512: 54f84f7b8f6425a3f92fe9c1fb8645b9c0b56d7d411e0053841d887d84ebc2d51aa6ac6c9d73df5bb3d6ec0c5f4c5f918c8c8cd7323d5a244c8cd0b5fdd839ff
+    lombok:
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 9.0.0:
     type: zulu
     distribution:
       url: http://cdn.azul.com/zulu/bin/zulu9.0.0.15-jdk9.0.0-linux_x64.tar.gz
       md5: de913f2aa03c341d865dfb6a1698f31b
     lombok:
-      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.18/lombok-1.16.18.jar
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 9.0.0.4 EA:
     type: zulu
     distribution:
@@ -26,60 +35,76 @@ sdks:
       url: http://cdn.azul.com/zulu/bin/zulu8.15.0.1-jdk8.0.92-linux_x64.tar.gz
       md5: 509fef886f7c6992d0f6f133c4928ec9
     lombok:
-      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 7u101:
     type: zulu
     distribution:
       url: http://cdn.azul.com/zulu/bin/zulu7.14.0.5-jdk7.0.101-linux_x64.tar.gz
       md5: 6fd6af8bc9a696116b7eeff8d28b0e98
     lombok:
-      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 6u79:
     type: zulu
     distribution:
       url: http://cdn.azul.com/zulu/bin/zulu6.12.0.2-jdk6.0.79-linux_x64.tar.gz
       md5: a54fb082c89de3909df5b69cd50a2155
     lombok:
-      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
 
   Eclipse ECJ 4.5.1:
     type: ecj
     compilerJar:
       url: http://central.maven.org/maven2/org/eclipse/jdt/core/compiler/ecj/4.5.1/ecj-4.5.1.jar
     lombok:
-      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
+    hostJdk: OpenJDK 8u92
 
+  Kotlin 1.3.10:
+    type: kotlin-distribution
+    url: https://github.com/JetBrains/kotlin/releases/download/v1.3.10/kotlin-compiler-1.3.10.zip
+    hostJdk: OpenJDK 8u92
   Kotlin 1.2.30:
     type: kotlin-distribution
     url: https://github.com/JetBrains/kotlin/releases/download/v1.2.31/kotlin-compiler-1.2.31.zip
+    hostJdk: OpenJDK 8u92
   Kotlin 1.1.4-3:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.1.4-3/kotlin-compiler-1.1.4-3.jar
+    hostJdk: OpenJDK 8u92
   Kotlin 1.1.1:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.1.1/kotlin-compiler-1.1.1.jar
+    hostJdk: OpenJDK 8u92
   Kotlin 1.0.6:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.6/kotlin-compiler-1.0.6.jar
+    hostJdk: OpenJDK 8u92
   Kotlin 1.0.5:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.5/kotlin-compiler-1.0.5.jar
+    hostJdk: OpenJDK 8u92
   Kotlin 1.0.4:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.4/kotlin-compiler-1.0.4.jar
+    hostJdk: OpenJDK 8u92
   Kotlin 1.0.3:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.3/kotlin-compiler-1.0.3.jar
+    hostJdk: OpenJDK 8u92
   Kotlin 1.0.2:
     type: kotlin
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.2/kotlin-compiler-1.0.2.jar
+    hostJdk: OpenJDK 8u92
 
   Scala 2.12.5:
     type: scala
     url: https://downloads.lightbend.com/scala/2.12.5/scala-2.12.5.zip
+    hostJdk: OpenJDK 8u92
   Scala 2.12.0:
     type: scala
     url: http://downloads.lightbend.com/scala/2.12.0/scala-2.12.0.zip
+    hostJdk: OpenJDK 8u92
   Scala 2.11.8:
     type: scala
     url: http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.zip
+    hostJdk: OpenJDK 8u92
