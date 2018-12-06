@@ -266,10 +266,16 @@ private class KotlinConfig : SdkConfig {
 private class KotlinDistributionConfig : SdkConfig {
     @JsonUnwrapped lateinit var distribution: RemoteFile
     lateinit var hostJdk: String
+    var coroutines: RemoteFile? = null
 
     override fun buildSdk(name: String,
                           sdkRoot: Path,
                           lookupJdk: (String) -> Jdk): Sdk {
+        val coroutinesPath = sdkRoot.resolve("kotlin-coroutines.jar").toAbsolutePath()
+        if (coroutines != null && !Files.exists(coroutinesPath)) {
+            deleteRecursively(sdkRoot)
+        }
+
         buildSdkRootIfMissing(sdkRoot) { tmp ->
             distribution.download {
                 extractZip(it, tmp)
@@ -277,13 +283,18 @@ private class KotlinDistributionConfig : SdkConfig {
 
             val compilerPath = tmp.resolve("bin/kotlinc")
             Files.setPosixFilePermissions(compilerPath, Files.getPosixFilePermissions(compilerPath) + PosixFilePermission.OWNER_EXECUTE)
+
+            coroutines?.downloadTo(tmp.resolve("kotlin-coroutines.jar"))
         }
 
-        val compilerPath = sdkRoot.resolve("bin/kotlinc").toAbsolutePath()
+        var compilerCommand = listOf(sdkRoot.resolve("bin/kotlinc").toAbsolutePath().toString())
+        if (coroutines != null) {
+            compilerCommand += listOf("-cp", coroutinesPath.toString())
+        }
         return Sdk(
                 name,
                 baseDir = sdkRoot,
-                compilerCommand = listOf(compilerPath.toString()),
+                compilerCommand = compilerCommand,
                 language = SdkLanguage.KOTLIN,
                 hostJdk = lookupJdk(hostJdk)
         )

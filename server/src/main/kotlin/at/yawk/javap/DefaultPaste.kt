@@ -26,6 +26,7 @@ public class Main {
     }
 }"""
             SdkLanguage.KOTLIN -> """import java.util.*
+import kotlinx.coroutines.*
 
 class Main() {
     init {
