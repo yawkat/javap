@@ -1,8 +1,22 @@
 defaults:
-  JAVA: OpenJDK 11
-  KOTLIN: Kotlin 1.3.10
-  SCALA: Scala 2.12.5
+  JAVA: OpenJDK 13
+  KOTLIN: Kotlin 1.3.50
+  SCALA: Scala 2.13.1
 sdks:
+  OpenJDK 13:
+    type: zulu
+    distribution:
+      url: https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33/OpenJDK13U-jdk_x64_linux_hotspot_13_33.tar.gz
+      sha256: e562caeffa89c834a69a44242d802eae3523875e427f07c05b1902c152638368
+    lombok:
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.10/lombok-1.18.10.jar
+  OpenJDK 12.0.2:
+    type: zulu
+    distribution:
+      url: https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_x64_linux_hotspot_12.0.2_10.tar.gz
+      sha256: 1202f536984c28d68681d51207a84b6c76e5998579132d3fe1b8085aa6a5f21e
+    lombok:
+      url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.10/lombok-1.18.10.jar
   OpenJDK 11:
     type: zulu
     distribution:
@@ -13,15 +27,15 @@ sdks:
   OpenJDK 10:
     type: zulu
     distribution:
-      url: https://download.java.net/java/GA/jdk10/10/binaries/openjdk-10_linux-x64_bin.tar.gz
-      sha512: 54f84f7b8f6425a3f92fe9c1fb8645b9c0b56d7d411e0053841d887d84ebc2d51aa6ac6c9d73df5bb3d6ec0c5f4c5f918c8c8cd7323d5a244c8cd0b5fdd839ff
+      url: https://github.com/AdoptOpenJDK/openjdk10-binaries/releases/download/jdk-10.0.2%2B13.1/OpenJDK10U-jdk_x64_linux_hotspot_10.0.2_13.tar.gz
+      sha256: 3998c36c7feb4bb7a565b3d33609ec67acd40f1ae5addf103378f2ef32ab377f
     lombok:
       url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 9.0.0:
     type: zulu
     distribution:
-      url: http://cdn.azul.com/zulu/bin/zulu9.0.0.15-jdk9.0.0-linux_x64.tar.gz
-      md5: de913f2aa03c341d865dfb6a1698f31b
+      url: https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk-9.0.4%2B11/OpenJDK9U-jdk_x64_linux_hotspot_9.0.4_11.tar.gz
+      sha256: aa4fc8bda11741facaf3b8537258a4497c6e0046b9f4931e31f713d183b951f1
     lombok:
       url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 9.0.0.4 EA:
@@ -59,6 +73,12 @@ sdks:
       url: http://central.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
     hostJdk: OpenJDK 8u92
 
+  Kotlin 1.3.50:
+    type: kotlin-distribution
+    url: https://github.com/JetBrains/kotlin/releases/download/v1.3.50/kotlin-compiler-1.3.50.zip
+    hostJdk: OpenJDK 8u92
+    coroutines:
+      url: http://central.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.3.2/kotlinx-coroutines-core-1.3.2.jar
   Kotlin 1.3.10:
     type: kotlin-distribution
     url: https://github.com/JetBrains/kotlin/releases/download/v1.3.10/kotlin-compiler-1.3.10.zip
@@ -100,6 +120,10 @@ sdks:
     url: http://central.maven.org/maven2/org/jetbrains/kotlin/kotlin-compiler/1.0.2/kotlin-compiler-1.0.2.jar
     hostJdk: OpenJDK 8u92
 
+  Scala 2.13.1:
+    type: scala
+    url: https://downloads.lightbend.com/scala/2.13.1/scala-2.13.1.zip
+    hostJdk: OpenJDK 8u92
   Scala 2.12.5:
     type: scala
     url: https://downloads.lightbend.com/scala/2.12.5/scala-2.12.5.zip

@@ -272,7 +272,7 @@ private class KotlinDistributionConfig : SdkConfig {
                           sdkRoot: Path,
                           lookupJdk: (String) -> Jdk): Sdk {
         val coroutinesPath = sdkRoot.resolve("kotlin-coroutines.jar").toAbsolutePath()
-        if (coroutines != null && !Files.exists(coroutinesPath)) {
+        if (coroutines != null && !Files.exists(coroutinesPath) && Files.exists(sdkRoot)) {
             deleteRecursively(sdkRoot)
         }
 
