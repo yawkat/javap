@@ -5,6 +5,11 @@ javap pastebin for viewing the bytecode of small pieces of code.
 
 MPL 2.0 licensed.
 
+Prerequisites
+----
+
+- PostgreSQL server with a `javap` role, owner of a `javap` database 
+
 Build
 -----
 
