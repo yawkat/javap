@@ -120,7 +120,6 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
                     runInJail = false
             ).outputUTF8()
             javapOutput
-                    .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
                     .replace("Classfile .*\n  Last modified.*\n  MD5.*\n  ".toRegex(RegexOption.MULTILINE), "")
         } else null
     }
