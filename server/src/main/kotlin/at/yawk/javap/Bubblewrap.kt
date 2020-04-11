@@ -2,9 +2,31 @@ package at.yawk.javap
 
 import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.ProcessResult
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class Bubblewrap {
+    private val basicCommand: List<String>
+
+    init {
+        val bindLocations = listOf("/usr", "/lib", "/lib64", "/bin", "/sbin")
+                .map { Paths.get(it) }
+                .filter { Files.exists(it) }
+        basicCommand = listOf(
+                "bwrap",
+                "--unshare-all",
+                "--die-with-parent",
+                "--proc", "/proc"
+        ) +
+                // bind the normal files
+                bindLocations.filter { !Files.isSymbolicLink(it) }
+                        .flatMap { listOf("--ro-bind", it.toString(), it.toString()) } +
+                // copy the links
+                bindLocations.filter { Files.isSymbolicLink(it) }
+                        .flatMap { listOf("--symlink", Files.readSymbolicLink(it).toString(), it.toString()) }
+    }
+
     fun executeCommand(
             command: List<String>,
             workingDir: Path,
@@ -18,18 +40,7 @@ class Bubblewrap {
 
         val combinedCommand: List<String>
         if (runInJail) {
-            val bubblewrapCommand = listOf(
-                    "bwrap",
-                    "--unshare-all",
-                    "--die-with-parent",
-                    "--proc", "/proc",
-                    // basic runtime
-                    "--ro-bind", "/usr", "/usr",
-                    "--symlink", "/usr/lib", "/lib",
-                    "--symlink", "/usr/lib64", "/lib64",
-                    "--symlink", "/usr/bin", "/bin",
-                    "--symlink", "/usr/sbin", "/sbin"
-            ) + writable.flatMap {
+            val bubblewrapCommand = basicCommand + writable.flatMap {
                 val abs = it.toAbsolutePath().toString()
                 listOf("--bind", abs, abs)
             } + (readable - writable).flatMap {
@@ -41,7 +52,6 @@ class Bubblewrap {
 
             // would like to add -- before the command but that's not available on all versions
             combinedCommand = bubblewrapCommand + command
-            println(combinedCommand.map { "'$it'" }.joinToString(" "))
         } else {
             combinedCommand = command
         }
