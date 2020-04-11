@@ -39,7 +39,8 @@ class Bubblewrap {
                 listOf("--setenv", k, v)
             } + listOf("--chdir", workingDir.toString())
 
-            combinedCommand = bubblewrapCommand + "--" + command
+            // would like to add -- before the command but that's not available on all versions
+            combinedCommand = bubblewrapCommand + command
             println(combinedCommand.map { "'$it'" }.joinToString(" "))
         } else {
             combinedCommand = command
