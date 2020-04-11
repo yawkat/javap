@@ -22,6 +22,7 @@ class Bubblewrap {
                     "bwrap",
                     "--unshare-all",
                     "--die-with-parent",
+                    "--proc", "/proc",
                     // basic runtime
                     "--ro-bind", "/usr", "/usr",
                     "--symlink", "/usr/lib", "/lib",
