@@ -39,15 +39,19 @@ enum class Decompiler {
         }
 
         override fun decompile(classDir: Path): String {
-            val astBuilder = AstBuilder(DecompilerContext(settings))
+            val ctx = DecompilerContext(settings)
+            val astBuilder = AstBuilder(ctx)
             Files.newDirectoryStream(classDir).use {
                 for (classFile in it.sorted()) {
                     if (!classFile.toString().endsWith(".class")) continue
-                    astBuilder.addType(ClassFileReader.readClass(
+                    val def = ClassFileReader.readClass(
                             ClassFileReader.OPTION_PROCESS_ANNOTATIONS or ClassFileReader.OPTION_PROCESS_CODE,
                             IMetadataResolver.EMPTY,
                             Buffer(Files.readAllBytes(classFile))
-                    ))
+                    )
+                    astBuilder.addType(def)
+                    // only need this to avoid errors. would be better to decompile separately, but... TODO
+                    ctx.currentType = def
                 }
             }
             val output = PlainTextOutput()
