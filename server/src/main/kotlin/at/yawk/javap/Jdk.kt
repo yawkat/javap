@@ -13,7 +13,8 @@ import java.nio.file.Path
  */
 class Jdk(
         val path: Path,
-        val libPaths: List<Path>
+        val libPaths: List<Path>,
+        val extraPaths: List<Path> = emptyList()
 ) {
     val java = path.resolve("bin/java")!!
     val javap = path.resolve("bin/javap")!!

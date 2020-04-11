@@ -38,16 +38,23 @@
         <select id="compiler-names" title="Compiler"></select>
     </div>
 
-    <div id="result-editor-wrapper">
-        <div id="result-editor"></div>
-    </div>
+    <div id="result-wrapper">
+        <details id="compiler-log">
+            <summary>Compiler log</summary>
+            <code><pre></pre></code>
+        </details>
 
-    <div id="buttons-output">
-        <select id="output-type" title="Output Type">
-            <option value="compilerLog">Compiler Log</option>
-            <option value="javap" selected>javap</option>
-            <option value="procyon">Procyon</option>
-        </select>
+        <div id="tool-output-wrapper">
+            <h2>
+                <select id="output-type" title="Output Type">
+                    <option value="javap" selected>javap</option>
+                    <option value="procyon">Procyon</option>
+                </select>
+
+                output:
+            </h2>
+            <div id="tool-output"></div>
+        </div>
     </div>
 
     <div id="buttons-social">

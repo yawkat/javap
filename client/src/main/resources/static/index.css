@@ -9,6 +9,10 @@
     padding: 0;
 }
 
+body {
+    font-family: sans-serif;
+}
+
 #main-pane {
     width: 100%;
     height: 100%;
@@ -23,26 +27,22 @@
     height: 100%;
 }
 
-#result-editor-wrapper {
+#result-wrapper {
     position: absolute;
     top: 0;
     right: 0;
     width: 50%;
     height: 100%;
     border-left: 1px solid grey;
+    overflow: auto;
+    /* match ace editor font size */
+    font-size: 12px;
 }
 
 #buttons-code-editor {
     position: absolute;
     bottom: 0;
     right: 50%;
-    z-index: 1;
-}
-
-#buttons-output {
-    position: absolute;
-    bottom: 0;
-    right: 0;
     z-index: 1;
 }
 
@@ -53,12 +53,12 @@
     z-index: 1;
 }
 
-#result-editor, #code-editor {
+#code-editor {
     width: 100%;
     height: 100%;
 }
 
-#buttons-code-editor > *, #buttons-output > *, #buttons-social > * {
+#buttons-code-editor > *, #output-type, #buttons-social > * {
     padding: .5em;
     margin: .2em;
     display: block;
@@ -105,7 +105,7 @@
         overflow: hidden;
     }
 
-    #code-editor-wrapper, #result-editor-wrapper {
+    #code-editor-wrapper, #result-wrapper {
         height: 75vh;
         width: 100%;
         overflow: hidden;
@@ -115,7 +115,7 @@
         min-height: 2em;
     }
 
-    #code-editor-wrapper, #result-editor-wrapper, #buttons-code-editor, #buttons-output, #buttons-social {
+    #code-editor-wrapper, #result-wrapper, #buttons-code-editor, #buttons-output, #buttons-social {
         position: relative;
         float: none;
         left: auto;
@@ -130,12 +130,58 @@ select {
     border-color: #d3d3d3;
 }
 
-.compiling #result-editor-wrapper {
+.compiling #result-wrapper {
     opacity: 0.5;
 }
 
-.compile-error #result-editor-wrapper .ace_text-layer * {
-    color: red !important;
+.line {
+    padding-right: 6px;
+    margin-right: 4px;
+    width: 3em;
+    color: #333;
+    background: #f0f0f0;
+    display: inline-block;
+    text-align: right;
+}
+
+.line::before {
+    content: attr(data-line);
+}
+
+#compiler-log[data-log-type='error'] code {
+    color: red;
+}
+
+#compiler-log, .output-file {
+    margin: 1em 0;
+}
+
+#compiler-log summary, .output-file > summary {
+    padding: 0 1em;
+    font-weight: bold;
+}
+
+.hide {
+    display: none;
+}
+
+#output-type {
+    display: inline-block;
+}
+
+.output-expander-region > summary {
+    list-style: none;
+}
+
+.output-expander-region:not([open]) > summary pre::after {
+    content: "…";
+    display: inline;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    padding: 0 5px;
+    margin-left: 1em;
+    font-size: .8em;
+    cursor: pointer;
 }
 
 .line-color-0 {

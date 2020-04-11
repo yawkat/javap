@@ -85,7 +85,7 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubbl
                     command,
                     workingDir = sourceDir,
                     writable = setOf(tempDirectory),
-                    readable = listOf(sdk.baseDir, sdk.hostJdk.path).filterNotNullTo(HashSet()),
+                    readable = listOf(sdk.baseDir, sdk.hostJdk.path).filterNotNullTo(HashSet()) + sdk.hostJdk.extraPaths,
                     env = jdkEnv(sdk.hostJdk)
             )
 
@@ -116,18 +116,16 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubbl
             it.sorted().map { it.fileName.toString() }.collect(Collectors.toList<String>())
         }
         return if (!classFiles.isEmpty()) {
-            val javapOutput = firejail.executeCommand(
+            bubblewrap.executeCommand(
                     listOf(jdk.javap.toAbsolutePath().toString(),
                             "-v",
                             "-private",
                             "-constants",
                             "-XDdetails:stackMaps,localVariables") + classFiles,
                     classDir,
+                    readable = setOf(classDir, jdk.path) + jdk.extraPaths,
                     env = jdkEnv(jdk)
             ).outputUTF8()
-            javapOutput
-                    .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")
-                    .replace("Classfile .*\n  Last modified.*\n  MD5.*\n  ".toRegex(RegexOption.MULTILINE), "")
         } else null
     }
 

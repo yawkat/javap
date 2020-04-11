@@ -104,14 +104,11 @@ fun loadPaste(name: String, outputType: OutputType?, forceCompiler: String? = nu
 
 object Editors {
     lateinit var codeEditor: Editor
-    lateinit var resultEditor: Editor
 
     fun start() {
         codeEditor = Editor("code-editor")
-        resultEditor = Editor("result-editor")
 
         codeEditor.getSession().setMode("ace/mode/java")
-        resultEditor.getSession().setMode("ace/mode/java")
         codeEditor.commands.addCommand(Command(
                 name = "trigger compile ctrl-enter",
                 bindKey = jsMap(
@@ -130,8 +127,6 @@ object Editors {
                 exec = { context?.triggerCompile() },
                 readOnly = false
         ))
-        resultEditor.getSession().setUseWrapMode(true)
-        resultEditor.setReadOnly(true)
     }
 }
 
