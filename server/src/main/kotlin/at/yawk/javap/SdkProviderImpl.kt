@@ -13,6 +13,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
 import com.google.common.hash.HashingInputStream
+import com.google.common.io.BaseEncoding
 import org.slf4j.LoggerFactory
 import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream
@@ -32,7 +33,6 @@ import java.util.Arrays
 import java.util.NoSuchElementException
 import java.util.zip.ZipInputStream
 import javax.inject.Singleton
-import javax.xml.bind.DatatypeConverter
 
 private val log = LoggerFactory.getLogger(SdkProviderImpl::class.java)
 
@@ -84,8 +84,8 @@ private data class RemoteFile(
                 stream = hashing
                 callbacks += {
                     val actualHash = hashing.hash().asBytes()
-                    if (!Arrays.equals(DatatypeConverter.parseHexBinary(hash), actualHash)) {
-                        throw RuntimeException("Hash for $url is invalid (expected $hash but was ${DatatypeConverter.printHexBinary(actualHash)}, corrupted download?)")
+                    if (!Arrays.equals(BaseEncoding.base16().lowerCase().decode(hash), actualHash)) {
+                        throw RuntimeException("Hash for $url is invalid (expected $hash but was ${BaseEncoding.base16().lowerCase().encode(actualHash)}, corrupted download?)")
                     }
                 }
             }
@@ -182,7 +182,7 @@ private class ZuluSdkConfig : SdkConfig {
         )
 
         if (lombok != null) {
-            val lombokLocation = sdkRoot.resolve("lombok-" + DatatypeConverter.printHexBinary(
+            val lombokLocation = sdkRoot.resolve("lombok-" + BaseEncoding.base16().encode(
                     Hashing.sha256().hashString(lombok!!.url.toExternalForm(), StandardCharsets.UTF_8).asBytes())
                     + ".jar")
             if (!Files.exists(lombokLocation)) {

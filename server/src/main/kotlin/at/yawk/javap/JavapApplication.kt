@@ -12,12 +12,12 @@ import com.google.inject.Guice
 import com.google.inject.Module
 import io.dropwizard.Application
 import io.dropwizard.assets.AssetsBundle
-import io.dropwizard.jdbi.DBIFactory
+import io.dropwizard.jdbi3.JdbiFactory
 import io.dropwizard.servlets.assets.AssetServlet
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import org.flywaydb.core.Flyway
-import org.skife.jdbi.v2.DBI
+import org.jdbi.v3.core.Jdbi
 import java.net.URL
 import java.nio.charset.StandardCharsets
 
@@ -57,9 +57,9 @@ class JavapApplication : Application<JavapConfiguration>() {
         flyway.dataSource = dataSource
         flyway.migrate()
 
-        val dbi = DBIFactory().build(environment, configuration.database, dataSource, "postgresql")
+        val dbi = JdbiFactory().build(environment, configuration.database, dataSource, "postgresql")
         val injector = Guice.createInjector(Module {
-            it.bind(DBI::class.java).toInstance(dbi)
+            it.bind(Jdbi::class.java).toInstance(dbi)
             it.bind(PasteDao::class.java).toInstance(dbi.onDemand(PasteDao::class.java))
             it.bind(SdkProvider::class.java).to(SdkProviderImpl::class.java)
         })

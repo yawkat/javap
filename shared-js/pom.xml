@@ -15,25 +15,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>javap-client</artifactId>
+    <artifactId>javap-shared-js</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-js</artifactId>
             <version>${kotlin.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>at.yawk.javap</groupId>
-            <artifactId>javap-shared-js</artifactId>
-            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+        <sourceDirectory>../shared/src/main/kotlin</sourceDirectory>
 
         <plugins>
             <plugin>
@@ -43,17 +37,16 @@
 
                 <executions>
                     <execution>
-                        <id>compile</id>
+                        <id>compile-js</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>js</goal>
                         </goals>
+                        <configuration>
+                            <outputFile>${project.build.outputDirectory}/static/shared.js</outputFile>
+                        </configuration>
                     </execution>
                 </executions>
-
-                <configuration>
-                    <outputFile>${project.build.outputDirectory}/static/index.js</outputFile>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -13,11 +13,12 @@ import at.yawk.javap.model.ProcessingOutput
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.flywaydb.core.Flyway
 import org.h2.jdbcx.JdbcConnectionPool
-import org.skife.jdbi.v2.DBI
+import org.jdbi.v3.core.Jdbi
 import org.testng.Assert
 import org.testng.annotations.AfterTest
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
+import java.lang.Exception
 import javax.sql.DataSource
 import javax.ws.rs.BadRequestException
 import javax.ws.rs.NotAuthorizedException
@@ -33,7 +34,7 @@ class PasteResourceTest {
         }
     }
     val dataSource: DataSource = JdbcConnectionPool.create("jdbc:h2:mem:test", "", "")
-    val dbi = DBI(dataSource)
+    val dbi = Jdbi.create(dataSource).installPlugins()
     val pasteResource: PasteResource = PasteResource(dbi, dbi.onDemand(PasteDao::class.java), processor,
             DefaultPaste(SystemSdkProvider, processor))
 
@@ -46,7 +47,7 @@ class PasteResourceTest {
 
     @AfterTest
     fun clearDb() {
-        dbi.useHandle { it.update("DELETE FROM paste") }
+        dbi.useHandle<Exception> { it.createUpdate("DELETE FROM paste").execute() }
     }
 
     @Test

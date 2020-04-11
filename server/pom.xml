@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-jdbi</artifactId>
+            <artifactId>dropwizard-jdbi3</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
         <dependency>
@@ -83,6 +83,26 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>at.yawk.javap</groupId>
+            <artifactId>javap-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery-ui</artifactId>
+            <version>1.11.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>ace</artifactId>
+            <version>01.08.2014</version>
         </dependency>
 
         <!-- test -->

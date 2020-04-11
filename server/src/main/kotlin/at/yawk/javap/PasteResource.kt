@@ -10,7 +10,7 @@ import at.yawk.javap.model.Paste
 import at.yawk.javap.model.PasteDao
 import at.yawk.javap.model.ProcessingInput
 import com.fasterxml.jackson.annotation.JsonUnwrapped
-import org.skife.jdbi.v2.DBI
+import org.jdbi.v3.core.Jdbi
 import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -28,7 +28,7 @@ fun generateId(length: Int): String {
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 class PasteResource @Inject constructor(
-        val dbi: DBI,
+        val dbi: Jdbi,
         val pasteDao: PasteDao,
         val processor: Processor,
         val defaultPaste: DefaultPaste

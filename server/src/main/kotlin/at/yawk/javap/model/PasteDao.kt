@@ -6,19 +6,19 @@
 
 package at.yawk.javap.model
 
-import org.skife.jdbi.v2.StatementContext
-import org.skife.jdbi.v2.sqlobject.Bind
-import org.skife.jdbi.v2.sqlobject.BindBean
-import org.skife.jdbi.v2.sqlobject.SqlQuery
-import org.skife.jdbi.v2.sqlobject.SqlUpdate
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper
-import org.skife.jdbi.v2.tweak.ResultSetMapper
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper
+import org.jdbi.v3.sqlobject.customizer.Bind
+import org.jdbi.v3.sqlobject.customizer.BindBean
+import org.jdbi.v3.sqlobject.statement.SqlQuery
+import org.jdbi.v3.sqlobject.statement.SqlUpdate
 import java.sql.ResultSet
 
 /**
  * @author yawkat
  */
-@RegisterMapper(PasteDao.PasteMapper::class)
+@RegisterRowMapper(PasteDao.PasteMapper::class)
 interface PasteDao {
     @SqlQuery("select * from paste where id = :id")
     fun getPasteById(@Bind("id") id: String): Paste?
@@ -34,8 +34,8 @@ interface PasteDao {
     fun updatePaste(@Bind("ownerToken") ownerToken: String, @Bind("id") id: String,
                     @BindBean("input") input: ProcessingInput, @BindBean("output") output: ProcessingOutput)
 
-    class PasteMapper : ResultSetMapper<Paste> {
-        override fun map(index: Int, r: ResultSet, ctx: StatementContext) = Paste(
+    class PasteMapper : RowMapper<Paste> {
+        override fun map(r: ResultSet, ctx: StatementContext) = Paste(
                 id = r.getString("id"),
                 ownerToken = r.getString("ownerToken"),
                 input = ProcessingInput(
