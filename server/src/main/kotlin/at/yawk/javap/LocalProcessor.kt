@@ -48,7 +48,7 @@ fun deleteRecursively(path: Path) {
     })
 }
 
-class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firejail: Firejail) : Processor {
+class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubblewrap: Bubblewrap) : Processor {
     override fun process(input: ProcessingInput): ProcessingOutput {
         val tempDirectory = Files.createTempDirectory(null)
         try {
@@ -81,11 +81,12 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
                     sdk.compilerCommand +
                             flags +
                             listOf("-d", classDir.toAbsolutePath().toString(), sourceFile.fileName.toString())
-            val javacResult = firejail.executeCommand(
+            val javacResult = bubblewrap.executeCommand(
                     command,
                     workingDir = sourceDir,
-                    whitelist = listOf(tempDirectory),
-                    readOnlyWhitelist = (if (sdk.baseDir == null) emptyList() else listOf(sdk.baseDir)) + sdk.hostJdk.path
+                    writable = setOf(tempDirectory),
+                    readable = listOf(sdk.baseDir, sdk.hostJdk.path).filterNotNullTo(HashSet()),
+                    env = jdkEnv(sdk.hostJdk)
             )
 
             var javapOutput: String? = javap(sdk.hostJdk, classDir)
@@ -105,6 +106,11 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
         }
     }
 
+    private fun jdkEnv(jdk: Jdk) = mapOf(
+            "LD_LIBRARY_PATH" to jdk.libPaths.map { it.toAbsolutePath() }.joinToString(":"),
+            "JAVA_HOME" to jdk.path.toAbsolutePath().toString()
+    )
+
     private fun javap(jdk: Jdk, classDir: Path): String? {
         val classFiles = Files.list(classDir).use { // close stream
             it.sorted().map { it.fileName.toString() }.collect(Collectors.toList<String>())
@@ -117,7 +123,7 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val firej
                             "-constants",
                             "-XDdetails:stackMaps,localVariables") + classFiles,
                     classDir,
-                    runInJail = false
+                    env = jdkEnv(jdk)
             ).outputUTF8()
             javapOutput
                     .replace("\nConstant pool:(\n\\s*#\\d+ =.*)*".toRegex(RegexOption.MULTILINE), "")

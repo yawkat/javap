@@ -8,6 +8,7 @@ package at.yawk.javap
 
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.ProcessingInput
+import java.lang.Exception
 import javax.inject.Inject
 
 /**
@@ -40,5 +41,13 @@ class Main() {
         }
         val input = ProcessingInput(code, it.value.name)
         Paste("default:${it.key}", "", input, processor.process(input))
+    }
+
+    init {
+        for (defaultPaste in defaultPastes) {
+            if (defaultPaste.output.javap == null) {
+                throw Exception("Compilation error in default paste: ${defaultPaste.output.compilerLog}")
+            }
+        }
     }
 }

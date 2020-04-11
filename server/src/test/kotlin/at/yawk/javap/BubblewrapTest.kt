@@ -8,21 +8,14 @@ package at.yawk.javap
 
 import org.testng.Assert
 import org.testng.Assert.assertEquals
-import org.testng.SkipException
-import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.nio.file.Files
 
 /**
  * @author yawkat
  */
-class FirejailTest {
-    val firejail = Firejail()
-
-    @BeforeClass
-    fun checkSkip() {
-        if (!firejail.enableJail) throw SkipException("Firejail support disabled")
-    }
+class BubblewrapTest {
+    private val bubblewrap = Bubblewrap()
 
     @Test
     fun `whitelist reading`() {
@@ -30,8 +23,8 @@ class FirejailTest {
         try {
             Files.write(tempDirectory.resolve("test"), "test".toByteArray())
 
-            assertEquals(firejail.executeCommand(listOf("/bin/ls"), tempDirectory).outputUTF8(), "test\n")
-            assertEquals(firejail.executeCommand(listOf("/bin/cat", "test"), tempDirectory).outputUTF8(), "test")
+            assertEquals(bubblewrap.executeCommand(listOf("/bin/ls"), tempDirectory, readable = setOf(tempDirectory)).outputUTF8(), "test\n")
+            assertEquals(bubblewrap.executeCommand(listOf("/bin/cat", "test"), tempDirectory, readable = setOf(tempDirectory)).outputUTF8(), "test")
         } finally {
             deleteRecursively(tempDirectory)
         }
@@ -41,7 +34,7 @@ class FirejailTest {
     fun `allow writing writable directory`() {
         val tempDirectory = Files.createTempDirectory(null)
         try {
-            val command = firejail.executeCommand(listOf("/bin/touch", "test"), tempDirectory)
+            val command = bubblewrap.executeCommand(listOf("/bin/touch", "test"), tempDirectory, writable = setOf(tempDirectory))
             Assert.assertEquals(command.exitValue, 0, command.outputUTF8())
             Assert.assertTrue(Files.isRegularFile(tempDirectory.resolve("test")))
         } finally {
@@ -53,7 +46,7 @@ class FirejailTest {
     fun `cannot access files outside whitelist`() {
         val tempDirectory = Files.createTempDirectory(null)
         try {
-            val command = firejail.executeCommand(listOf("/bin/ls", "/opt"), tempDirectory)
+            val command = bubblewrap.executeCommand(listOf("/bin/ls", "/opt"), tempDirectory)
             Assert.assertNotEquals(command.exitValue, 0, command.outputUTF8())
         } finally {
             deleteRecursively(tempDirectory)

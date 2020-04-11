@@ -8,6 +8,7 @@ sdks:
     distribution:
       url: https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33/OpenJDK13U-jdk_x64_linux_hotspot_13_33.tar.gz
       sha256: e562caeffa89c834a69a44242d802eae3523875e427f07c05b1902c152638368
+    libPaths: ['lib']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.10/lombok-1.18.10.jar
   OpenJDK 12.0.2:
@@ -15,6 +16,7 @@ sdks:
     distribution:
       url: https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jdk_x64_linux_hotspot_12.0.2_10.tar.gz
       sha256: 1202f536984c28d68681d51207a84b6c76e5998579132d3fe1b8085aa6a5f21e
+    libPaths: ['lib']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.10/lombok-1.18.10.jar
   OpenJDK 11:
@@ -22,6 +24,7 @@ sdks:
     distribution:
       url: https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.1%2B13/OpenJDK11U-jdk_x64_linux_hotspot_11.0.1_13.tar.gz
       sha256: 22bd2f1a2e0cb6e4075967bfeda4a960b0325879305aa739a0ba2d6e5cd4c3e2
+    libPaths: ['lib']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 10:
@@ -29,6 +32,7 @@ sdks:
     distribution:
       url: https://github.com/AdoptOpenJDK/openjdk10-binaries/releases/download/jdk-10.0.2%2B13.1/OpenJDK10U-jdk_x64_linux_hotspot_10.0.2_13.tar.gz
       sha256: 3998c36c7feb4bb7a565b3d33609ec67acd40f1ae5addf103378f2ef32ab377f
+    libPaths: ['lib']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 9.0.0:
@@ -36,6 +40,7 @@ sdks:
     distribution:
       url: https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk-9.0.4%2B11/OpenJDK9U-jdk_x64_linux_hotspot_9.0.4_11.tar.gz
       sha256: aa4fc8bda11741facaf3b8537258a4497c6e0046b9f4931e31f713d183b951f1
+    libPaths: ['lib'] # todo
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 9.0.0.4 EA:
@@ -43,11 +48,13 @@ sdks:
     distribution:
       url: http://cdn.azul.com/zulu-pre/bin/zulu9.0.0.4-ea-jdk9.0.0-linux_x64.tar.gz
       md5: e8904591fc029152a38804f3f3c02461
+    libPaths: ['lib/amd64']
   OpenJDK 8u92:
     type: zulu
     distribution:
       url: http://cdn.azul.com/zulu/bin/zulu8.15.0.1-jdk8.0.92-linux_x64.tar.gz
       md5: 509fef886f7c6992d0f6f133c4928ec9
+    libPaths: ['lib/amd64', 'lib/amd64/jli']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 7u101:
@@ -55,6 +62,7 @@ sdks:
     distribution:
       url: http://cdn.azul.com/zulu/bin/zulu7.14.0.5-jdk7.0.101-linux_x64.tar.gz
       md5: 6fd6af8bc9a696116b7eeff8d28b0e98
+    libPaths: ['lib/amd64', 'lib/amd64/jli']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
   OpenJDK 6u79:
@@ -62,6 +70,7 @@ sdks:
     distribution:
       url: http://cdn.azul.com/zulu/bin/zulu6.12.0.2-jdk6.0.79-linux_x64.tar.gz
       md5: a54fb082c89de3909df5b69cd50a2155
+    libPaths: ['lib/amd64', 'lib/amd64/jli']
     lombok:
       url: https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
 

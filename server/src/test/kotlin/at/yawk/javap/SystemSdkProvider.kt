@@ -15,7 +15,7 @@ object SystemSdkProvider : SdkProvider {
     val JDK = "SYSTEM"
 
     override val defaultSdkByLanguage = mapOf(
-            SdkLanguage.JAVA to Sdk(JDK, Jdk(Paths.get("/usr")), null, listOf("javac"), SdkLanguage.JAVA)
+            SdkLanguage.JAVA to Sdk(JDK, Jdk(Paths.get("/usr"), emptyList()), null, listOf("javac"), SdkLanguage.JAVA)
     )
     override val sdks = defaultSdkByLanguage.values.toList()
 }

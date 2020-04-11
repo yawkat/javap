@@ -156,6 +156,7 @@ private interface SdkConfig {
 private class ZuluSdkConfig : SdkConfig {
     lateinit var distribution: RemoteFile
     var lombok: RemoteFile? = null
+    lateinit var libPaths: Set<Path>
 
     override fun buildSdk(name: String,
                           sdkRoot: Path,
@@ -196,7 +197,7 @@ private class ZuluSdkConfig : SdkConfig {
 
         return Sdk(
                 name,
-                hostJdk = Jdk(sdkRoot),
+                hostJdk = Jdk(sdkRoot, libPaths.map { sdkRoot.resolve(it) }),
                 baseDir = sdkRoot,
                 compilerCommand = compilerCommand,
                 language = SdkLanguage.JAVA

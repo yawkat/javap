@@ -16,7 +16,7 @@ import org.testng.annotations.Test
  */
 
 class LocalProcessorTest {
-    val localProcessor = LocalProcessor(SystemSdkProvider, Firejail())
+    val localProcessor = LocalProcessor(SystemSdkProvider, Bubblewrap())
 
     @Test
     fun `empty file`() {
