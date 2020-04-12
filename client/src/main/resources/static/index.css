@@ -123,6 +123,12 @@ body {
         right: auto;
         top: auto;
     }
+
+    #result-wrapper {
+        height: auto;
+        width: auto;
+        clear: both;
+    }
 }
 
 select {
