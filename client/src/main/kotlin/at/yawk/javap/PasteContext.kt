@@ -141,10 +141,7 @@ class PasteContext(var currentPaste: Paste) {
 
     fun displayPaste(requestedOutputType: OutputType? = null) {
         setEditorValue(Editors.codeEditor, currentPaste.input.code)
-        jq("#compiler-names").find("option").each {
-            val tgt = jq(jsThis)
-            tgt.attr("selected", (tgt.`val`() == currentPaste.input.compilerName))
-        }
+        SdkManager.selectedSdkName = currentPaste.input.compilerName
         val outputType = jq("#output-type")
 
         if (requestedOutputType != null) {
@@ -184,7 +181,7 @@ class PasteContext(var currentPaste: Paste) {
                 contentType = "application/json; charset=utf-8",
                 data = JSON.stringify(json("input" to ProcessingInput(
                         code = Editors.codeEditor.getValue(),
-                        compilerName = jq("#compiler-names").`val`()!!
+                        compilerName = SdkManager.selectedSdkName
                 )))
         )).then({
             val s = PasteContext(Paste.fromJson(it))

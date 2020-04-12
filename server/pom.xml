@@ -100,9 +100,9 @@
             <version>1.11.4</version>
         </dependency>
         <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>ace</artifactId>
-            <version>01.08.2014</version>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>ace-builds</artifactId>
+            <version>1.4.2</version>
         </dependency>
 
         <!-- test -->

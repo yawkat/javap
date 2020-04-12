@@ -19,35 +19,7 @@ import kotlin.browser.window
 fun start() {
     Editors.start()
 
-    data class Sdk(val name: String, val language: SdkLanguage)
-
-    ajax(Request(
-            method = "GET",
-            url = "/api/sdk"
-    )).then({ sdks: Array<Sdk> ->
-        val compilerNames = jq("#compiler-names")
-        compilerNames.empty()
-
-        fun categoryForSdkName(name: String) =
-                name.match("""^((?:[A-Za-z]+ )+).*$""")!![1]
-
-        var category: String? = null
-        for (sdk in sdks) {
-            if (categoryForSdkName(sdk.name) != category) {
-                category = categoryForSdkName(sdk.name)
-                val option = jq("<option>")
-                option.attr("disabled", "disabled")
-                option.text("${category.trim()}:")
-                compilerNames.append(option)
-            }
-
-            val option = jq("<option>")
-            option.data("sdk", sdk)
-            option.text(sdk.name)
-            option.`val`(sdk.name)
-            compilerNames.append(option)
-        }
-
+    SdkManager.loadSdks {
         val hash = window.location.hash
         var pasteId = (if (hash.isNotEmpty()) hash else "#default:JAVA").substring(1)
         val outputType: OutputType?
@@ -58,21 +30,12 @@ fun start() {
             outputType = null
         }
         loadPaste(pasteId, outputType)
-    }, handleError)
+    }
 
     jq("#compile").click { context?.triggerCompile() }
     jq("#fork").click {
         context?.fork()
         context?.triggerCompile()
-    }
-
-    var selectedLanguage = SdkLanguage.JAVA
-    jq("#compiler-names").change {
-        val sdk: Sdk = jq(jsThis).find(":selected").data("sdk")
-        if (sdk.language != selectedLanguage) {
-            loadPaste("default:${sdk.language}", outputType = null, forceCompiler = sdk.name)
-            selectedLanguage = sdk.language
-        }
     }
 
     jq("#output-type").change {
@@ -105,10 +68,17 @@ fun loadPaste(name: String, outputType: OutputType?, forceCompiler: String? = nu
 object Editors {
     lateinit var codeEditor: Editor
 
+    fun setLanguage(sdkLanguage: SdkLanguage) {
+        codeEditor.getSession().setMode(when (sdkLanguage) {
+            SdkLanguage.JAVA -> "ace/mode/java"
+            SdkLanguage.KOTLIN -> "ace/mode/kotlin"
+            SdkLanguage.SCALA -> "ace/mode/scala"
+        })
+    }
+
     fun start() {
         codeEditor = Editor("code-editor")
 
-        codeEditor.getSession().setMode("ace/mode/java")
         codeEditor.commands.addCommand(Command(
                 name = "trigger compile ctrl-enter",
                 bindKey = jsMap(
