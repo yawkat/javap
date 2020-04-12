@@ -7,11 +7,11 @@
 package at.yawk.javap
 
 import org.w3c.dom.get
+import org.w3c.dom.set
 import kotlin.browser.document
+import kotlin.browser.localStorage
 import kotlin.browser.window
-import kotlin.js.Date
-import kotlin.js.Math
-import kotlin.math.floor
+import kotlin.random.Random
 
 /**
  * @author yawkat
@@ -29,24 +29,31 @@ external class RequestFuture {
     fun always(success: (dynamic) -> Unit): RequestFuture
 }
 
-fun ajax(request: Request): RequestFuture {
-    val userToken: String
+private const val ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-    val userTokenMatch = "userToken=(\\w+)".toRegex().find(document.cookie)
-    if (userTokenMatch == null) {
-        userToken = (0..63).map {
-            val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            alphabet[floor(Math.random() * alphabet.length).toInt()]
-        }.joinToString("")
-        val expiryTime: dynamic = Date()
-        expiryTime.setTime(expiryTime.getTime() + (120.toLong() * 24 * 60 * 60 * 1000)) // 4 months
-        document.cookie = "userToken=" + userToken + "; expires=" + expiryTime.toUTCString()
-    } else {
-        userToken = userTokenMatch.groupValues[1]
+private fun getOrCreateUserToken(): String {
+    // check local storage first
+    localStorage["userToken"]?.let { return it }
+
+    val cookieUserTokenMatch = "userToken=(\\w+)".toRegex().find(document.cookie)
+    if (cookieUserTokenMatch != null) {
+        val userToken = cookieUserTokenMatch.groupValues[1]
+        localStorage["userToken"] = userToken
+        // clear cookie
+        document.cookie = "userToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC"
+        return userToken
     }
 
+    val generated = (0..63).map {
+        ALPHABET[Random.nextInt(ALPHABET.length)]
+    }.joinToString("")
+    localStorage["userToken"] = generated
+    return generated
+}
+
+fun ajax(request: Request): RequestFuture {
     request.asDynamic().beforeSend = { xhr: dynamic ->
-        xhr.setRequestHeader("X-User-Token", userToken)
+        xhr.setRequestHeader("X-User-Token", getOrCreateUserToken())
     }
 
     return window["$"].ajax(request)
@@ -55,7 +62,7 @@ fun ajax(request: Request): RequestFuture {
 val handleError: dynamic = { xhr: dynamic, status: Int, msg: String ->
     val message: String
     if (xhr.responseJSON && xhr.responseJSON.message) {
-        message = xhr.responseJSON.message
+        message = xhr.responseJSON.message as String
     } else {
         message = msg
     }
