@@ -9,6 +9,7 @@ package at.yawk.javap
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.PasteDao
 import at.yawk.javap.model.ProcessingInput
+import at.yawk.javap.model.ProcessingOutput
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import org.jdbi.v3.core.Jdbi
 import java.util.concurrent.ThreadLocalRandom
@@ -52,8 +53,18 @@ class PasteResource @Inject constructor(
             throw BadRequestException("Illegal user token")
         }
 
-        val input = body.input
-        val output = processor.process(body.input)
+        val input = ProcessingInput(
+                code = body.input.code.sanitizeText(),
+                compilerName = body.input.compilerName
+        )
+
+        var output = processor.process(body.input)
+
+        output = ProcessingOutput(
+                compilerLog = output.compilerLog.sanitizeText(),
+                javap = output.javap?.sanitizeText(),
+                procyon = output.procyon?.sanitizeText()
+        )
 
         while (true) {
             val id = generateId(6)
@@ -63,6 +74,9 @@ class PasteResource @Inject constructor(
             return PasteDto(Paste(id, userToken, input, output), userToken)
         }
     }
+
+    // postgres does not like 0 bytes
+    private fun String.sanitizeText() = replace("\u0000", "\\u0000")
 
     data class Create(
             val input: ProcessingInput
