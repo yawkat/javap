@@ -188,6 +188,7 @@ class PasteContext(var currentPaste: Paste) {
 
     fun triggerCompile() {
         document.body!!.addClass("compiling")
+        Editors.codeEditor.setReadOnly(true)
         ajax(Request(
                 method = if (currentPaste.editable) "PUT" else "POST",
                 url = "/api/paste" + (if (currentPaste.editable) "/${currentPaste.id}" else ""),
@@ -202,6 +203,7 @@ class PasteContext(var currentPaste: Paste) {
             s.displayPaste()
         }, handleError).always {
             document.body!!.removeClass("compiling")
+            Editors.codeEditor.setReadOnly(false)
         }
     }
 }

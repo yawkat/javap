@@ -20,16 +20,7 @@ fun start() {
     Editors.start()
 
     SdkManager.loadSdks {
-        val hash = window.location.hash
-        var pasteId = (if (hash.isNotEmpty()) hash else "#default:JAVA").substring(1)
-        val outputType: OutputType?
-        if (pasteId.contains('/')) {
-            outputType = OutputType.valueOf(pasteId.substring(pasteId.indexOf('/') + 1))
-            pasteId = pasteId.substring(0, pasteId.indexOf('/'))
-        } else {
-            outputType = null
-        }
-        loadPaste(pasteId, outputType)
+        loadPasteFromHash()
     }
 
     document.getElementById("compile")!!.addEventListener("click", { context?.triggerCompile() })
@@ -42,6 +33,10 @@ fun start() {
         context?.showCurrentPasteOutput(OutputType.valueOf(outputType.value))
     })
 
+    window.addEventListener("hashchange", {
+        loadPasteFromHash()
+    }, false)
+
     js("$(document).tooltip()")
 }
 
@@ -51,7 +46,21 @@ fun setEditorValue(editor: dynamic, text: String) {
     editor.selection.setRange(selection)
 }
 
+private fun loadPasteFromHash() {
+    val hash = window.location.hash
+    var pasteId = (if (hash.isNotEmpty()) hash else "#default:JAVA").substring(1)
+    val outputType: OutputType?
+    if (pasteId.contains('/')) {
+        outputType = OutputType.valueOf(pasteId.substring(pasteId.indexOf('/') + 1))
+        pasteId = pasteId.substring(0, pasteId.indexOf('/'))
+    } else {
+        outputType = null
+    }
+    loadPaste(pasteId, outputType)
+}
+
 fun loadPaste(name: String, outputType: OutputType?, forceCompiler: String? = null) {
+    Editors.codeEditor.setReadOnly(true)
     ajax(Request(
             method = "GET",
             url = "/api/paste/" + name
@@ -62,7 +71,9 @@ fun loadPaste(name: String, outputType: OutputType?, forceCompiler: String? = nu
         } else data)
         context = s
         s.displayPaste(outputType)
-    }, handleError)
+    }, handleError).always {
+        Editors.codeEditor.setReadOnly(false)
+    }
 }
 
 object Editors {
