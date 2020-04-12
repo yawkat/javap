@@ -48,6 +48,10 @@ private val Editor.gutterDecorations: MutableMap<Int, String>
 
 fun Editor.addGutter(line: Int, cssClass: String) {
     val old = gutterDecorations[line]
+    if (old == cssClass) {
+        return
+    }
+
     if (old != null) {
         getSession().removeGutterDecoration(line, old)
     }
@@ -55,6 +59,8 @@ fun Editor.addGutter(line: Int, cssClass: String) {
     gutterDecorations[line] = cssClass
     getSession().addGutterDecoration(line, cssClass)
 }
+
+fun Editor.getGutter(line: Int) = gutterDecorations[line]
 
 fun Editor.clearGutter() {
     for ((line, cssClass) in gutterDecorations) {

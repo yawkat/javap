@@ -67,9 +67,16 @@ class PasteContext(var currentPaste: Paste) {
                             currentLineColorIndex++
                         } else {
                             if (i in mapping.javapLines) {
-                                val cssClass = "line-color-${currentLineColorIndex % COLOR_COUNT}"
-                                if (i == mapping.javapLines.first) {
-                                    mapping.sourceLines.forEach { Editors.codeEditor.addGutter(it, cssClass) }
+                                var cssClass = "line-color-${currentLineColorIndex % COLOR_COUNT}"
+                                for (sourceLine in mapping.sourceLines) {
+                                    val existingGutter = Editors.codeEditor.getGutter(sourceLine)
+                                    // if the source line already has a gutter color, use that.
+                                    // this isn't perfect, but it should work in most cases.
+                                    // see [javap#7]
+                                    if (existingGutter != null) {
+                                        cssClass = existingGutter
+                                    }
+                                    Editors.codeEditor.addGutter(sourceLine, cssClass)
                                 }
                                 lineColorClass = cssClass
                             }
