@@ -40,6 +40,7 @@ class PasteContext(var currentPaste: Paste) {
             window.location.hash = path
         }
 
+        Editors.codeEditor.clearGutter()
         val toolOutput = document.getElementById("tool-output")!!
         toolOutput.clear()
         when (type) {
@@ -173,20 +174,6 @@ class PasteContext(var currentPaste: Paste) {
             compilerLog.addClass("hide")
         }
         showCurrentPasteOutput(OutputType.valueOf(selected.`val`()!!))
-    }
-
-    fun showMappingColors(mappings: List<Pair<IntRange, IntRange>>) {
-        var colorIndex = 0
-        for ((codeLines, resultLines) in mappings) {
-            val cssClass = "line-color-$colorIndex"
-            codeLines.forEach { Editors.codeEditor.addGutter(it, cssClass) }
-
-            colorIndex = (colorIndex + 1) % 8
-        }
-    }
-
-    fun clearMappingColors() {
-        Editors.codeEditor.clearGutter()
     }
 
     fun triggerCompile() {
