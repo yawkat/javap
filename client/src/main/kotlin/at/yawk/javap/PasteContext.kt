@@ -9,6 +9,10 @@ package at.yawk.javap
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.ProcessingInput
 import org.w3c.dom.Element
+import org.w3c.dom.HTMLOptionElement
+import org.w3c.dom.HTMLSelectElement
+import org.w3c.dom.asList
+import org.w3c.dom.get
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.dom.addClass
@@ -142,13 +146,14 @@ class PasteContext(var currentPaste: Paste) {
     fun displayPaste(requestedOutputType: OutputType? = null) {
         setEditorValue(Editors.codeEditor, currentPaste.input.code)
         SdkManager.selectedSdkName = currentPaste.input.compilerName
-        val outputType = jq("#output-type")
+        val outputType = document.getElementById("output-type") as HTMLSelectElement
 
         if (requestedOutputType != null) {
-            outputType.find(":selected").attr("selected", false)
-            outputType.find("[value=$requestedOutputType]").attr("selected", true)
+            @Suppress("UNCHECKED_CAST")
+            (outputType.options.asList() as List<HTMLOptionElement>)
+                    .single { it.value == requestedOutputType.name }
+                    .selected = true
         }
-        val selected = outputType.find(":selected")
         val compilerLog = document.getElementById("compiler-log")!!
         val compilerLogContent = compilerLog.querySelector("pre")!!
         compilerLogContent.clear()
@@ -170,11 +175,12 @@ class PasteContext(var currentPaste: Paste) {
         } else {
             compilerLog.addClass("hide")
         }
-        showCurrentPasteOutput(OutputType.valueOf(selected.`val`()!!))
+        val selected = outputType.selectedOptions[0] as HTMLOptionElement
+        showCurrentPasteOutput(OutputType.valueOf(selected.value))
     }
 
     fun triggerCompile() {
-        jq("body").addClass("compiling")
+        document.body!!.addClass("compiling")
         ajax(Request(
                 method = if (currentPaste.editable) "PUT" else "POST",
                 url = "/api/paste" + (if (currentPaste.editable) "/${currentPaste.id}" else ""),
@@ -188,7 +194,7 @@ class PasteContext(var currentPaste: Paste) {
             context = s
             s.displayPaste()
         }, handleError).always {
-            jq("body").removeClass("compiling")
+            document.body!!.removeClass("compiling")
         }
     }
 }

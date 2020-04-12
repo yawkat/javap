@@ -9,6 +9,7 @@ package at.yawk.javap
 import jquery.jq
 import jquery.ui.dialog
 import org.w3c.dom.Element
+import kotlin.browser.document
 import kotlin.js.json
 
 /**
@@ -18,10 +19,10 @@ import kotlin.js.json
 external val jsThis: Element
 
 fun showDialog(title: String, message: String) {
-    val dialog = jq("#dialog-message")
-    dialog.attr("title", title)
-    dialog.text(message)
-    dialog.dialog(json(
+    val dialog = document.getElementById("dialog-message")!!
+    dialog.setAttribute("title", title)
+    dialog.textContent = message
+    jq(dialog).dialog(json(
             "modal" to true,
             "buttons" to json(
                     "Ok" to {

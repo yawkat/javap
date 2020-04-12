@@ -11,7 +11,7 @@ import at.yawk.javap.model.ProcessingOutput
 /**
  * @author yawkat
  */
-enum class OutputType(val getter: (ProcessingOutput) -> String?) {
-    javap({ it.javap }),
-    procyon({ it.procyon }),
+enum class OutputType {
+    javap,
+    procyon,
 }

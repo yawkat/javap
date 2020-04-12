@@ -7,7 +7,7 @@
 package at.yawk.javap
 
 import at.yawk.javap.model.Paste
-import org.w3c.dom.Element
+import org.w3c.dom.HTMLSelectElement
 import kotlin.Pair
 import kotlin.browser.document
 import kotlin.browser.window
@@ -32,17 +32,17 @@ fun start() {
         loadPaste(pasteId, outputType)
     }
 
-    jq("#compile").click { context?.triggerCompile() }
-    jq("#fork").click {
+    document.getElementById("compile")!!.addEventListener("click", { context?.triggerCompile() })
+    document.getElementById("fork")!!.addEventListener("click", {
         context?.fork()
         context?.triggerCompile()
-    }
+    })
+    val outputType = document.getElementById("output-type")!! as HTMLSelectElement
+    outputType.addEventListener("click", {
+        context?.showCurrentPasteOutput(OutputType.valueOf(outputType.value))
+    })
 
-    jq("#output-type").change {
-        context?.showCurrentPasteOutput(OutputType.valueOf(jq(jsThis).`val`()!!))
-    }
-
-    jq(document).asDynamic().tooltip()
+    js("$(document).tooltip()")
 }
 
 fun setEditorValue(editor: dynamic, text: String) {
