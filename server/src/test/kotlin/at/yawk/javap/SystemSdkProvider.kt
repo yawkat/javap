@@ -18,7 +18,8 @@ object SystemSdkProvider : SdkProvider {
         return object : RunnableSdk(sdk) {
             override val jdkHome: Path
                 get() {
-                    var path = Paths.get(System.getenv("JAVA_HOME") ?: "/usr/lib/jvm/default")
+                    var path = Paths.get(
+                            System.getenv("JAVA_HOME") ?: System.getProperty("java.home") ?: "/usr/lib/jvm/default")
                     if (path.endsWith("jre")) path = path.parent
                     return path
                 }
