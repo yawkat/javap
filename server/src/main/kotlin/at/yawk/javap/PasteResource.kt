@@ -53,18 +53,8 @@ class PasteResource @Inject constructor(
             throw BadRequestException("Illegal user token")
         }
 
-        val input = ProcessingInput(
-                code = body.input.code.sanitizeText(),
-                compilerName = body.input.compilerName
-        )
-
-        var output = processor.process(body.input)
-
-        output = ProcessingOutput(
-                compilerLog = output.compilerLog.sanitizeText(),
-                javap = output.javap?.sanitizeText(),
-                procyon = output.procyon?.sanitizeText()
-        )
+        val input = sanitizeInput(body.input)
+        val output = sanitizeOutput(processor.process(body.input))
 
         while (true) {
             val id = generateId(6)
@@ -77,6 +67,19 @@ class PasteResource @Inject constructor(
 
     // postgres does not like 0 bytes
     private fun String.sanitizeText() = replace("\u0000", "\\u0000")
+
+    private fun sanitizeInput(input: ProcessingInput) = ProcessingInput(
+            code = input.code.sanitizeText(),
+            compilerName = input.compilerName
+    )
+
+    private fun sanitizeOutput(output: ProcessingOutput): ProcessingOutput {
+        return ProcessingOutput(
+                compilerLog = output.compilerLog.sanitizeText(),
+                javap = output.javap?.sanitizeText(),
+                procyon = output.procyon?.sanitizeText()
+        )
+    }
 
     data class Create(
             val input: ProcessingInput
@@ -93,9 +96,12 @@ class PasteResource @Inject constructor(
         if (paste.ownerToken != userToken) {
             throw NotAuthorizedException("Not your paste")
         }
-        if (body.input != null && body.input != paste.input) {
-            val output = processor.process(body.input)
-            paste = paste.copy(input = body.input, output = output)
+        if (body.input != null) {
+            val newInput = sanitizeInput(body.input)
+            if (newInput != paste.input) {
+                val output = sanitizeOutput(processor.process(newInput))
+                paste = paste.copy(input = newInput, output = output)
+            }
         }
         pasteDao.updatePaste(userToken, paste.id, paste.input, paste.output)
         return PasteDto(paste, userToken)
