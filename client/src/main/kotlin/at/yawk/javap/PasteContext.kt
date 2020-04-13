@@ -158,7 +158,7 @@ class PasteContext(var currentPaste: Paste) {
 
     fun displayPaste(requestedOutputType: OutputType? = null) {
         setEditorValue(Editors.codeEditor, currentPaste.input.code)
-        SdkManager.selectedSdkName = currentPaste.input.compilerName
+        SdkSelector.selectedSdkName = currentPaste.input.compilerName
         val outputType = document.getElementById("output-type") as HTMLSelectElement
 
         for (option in outputType.options.asList()) {
@@ -211,7 +211,7 @@ class PasteContext(var currentPaste: Paste) {
                 contentType = "application/json; charset=utf-8",
                 data = JSON.stringify(json("input" to ProcessingInput(
                         code = Editors.codeEditor.getValue(),
-                        compilerName = SdkManager.selectedSdkName
+                        compilerName = SdkSelector.selectedSdkName
                 )))
         )).then({
             val s = PasteContext(Paste.fromJson(it))

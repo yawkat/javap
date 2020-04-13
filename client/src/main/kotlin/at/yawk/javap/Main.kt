@@ -19,9 +19,8 @@ import kotlin.browser.window
 fun start() {
     Editors.start()
 
-    SdkManager.loadSdks {
-        loadPasteFromHash()
-    }
+    SdkSelector.loadSdks()
+    loadPasteFromHash()
 
     document.getElementById("compile")!!.addEventListener("click", { context?.triggerCompile() })
     document.getElementById("fork")!!.addEventListener("click", {

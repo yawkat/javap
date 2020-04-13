@@ -6,7 +6,7 @@ import kotlin.browser.document
 import kotlin.dom.appendElement
 import kotlin.dom.clear
 
-object SdkManager {
+object SdkSelector {
     private val compilerNames = document.getElementById("compiler-names") as HTMLSelectElement
 
     private lateinit var options: Map<Sdk, HTMLOptionElement>
@@ -38,7 +38,7 @@ object SdkManager {
         Editors.setLanguage(selectedSdk.language)
     }
 
-    fun loadSdks(ready: () -> Unit) {
+    fun loadSdks() {
         compilerNames.clear()
 
         val options = mutableMapOf<Sdk, HTMLOptionElement>()
@@ -61,7 +61,5 @@ object SdkManager {
         }
 
         this.options = options
-
-        ready()
     }
 }
