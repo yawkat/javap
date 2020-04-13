@@ -50,6 +50,15 @@ object Sdks {
     private val lombok1_18_10 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.10/lombok-1.18.10.jar")
     private val lombok1_18_4 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar")
 
+    private val openjdk14 = Sdk.OpenJdk(
+            name = "OpenJDK 14",
+            distribution = RemoteFile(
+                    "https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14%2B36/OpenJDK14U-jdk_x64_linux_hotspot_14_36.tar.gz",
+                    sha256 = "6c06853332585ab58834d9e8a02774b388e6e062ef6c4084b4f058c67f2e81b5"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_10
+    )
     private val openjdk13 = Sdk.OpenJdk(
             name = "OpenJDK 13",
             distribution = RemoteFile(
@@ -122,8 +131,8 @@ object Sdks {
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
             lombok = lombok1_18_4
     )
-    private val openjdk = listOf(openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
-    val defaultJava = openjdk13
+    private val openjdk = listOf(openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
+    val defaultJava = openjdk14
 
     private val ecj4_5 = Sdk.Ecj(
             name = "Eclipse ECJ 4.5.1",
