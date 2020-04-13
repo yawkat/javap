@@ -24,7 +24,7 @@ object SystemSdkProvider : SdkProvider {
                     return path
                 }
             override val readable: Set<Path>
-                get() = setOf(Paths.get("/etc"))
+                get() = setOf(Paths.get("/etc"), jdkHome)
             override val libraryPath: List<Path>
                 get() = listOf(
                         Paths.get("/usr/lib/jvm/default/lib/amd64"),
