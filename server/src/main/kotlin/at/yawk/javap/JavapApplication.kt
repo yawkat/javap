@@ -40,9 +40,18 @@ class JavapApplication : Application<JavapConfiguration>() {
         bootstrap.addBundle(object : AssetsBundle("/static", "/static", "", "js") {
             override fun createServlet(): AssetServlet {
                 return object : AssetServlet(resourcePath, uriPath, indexFile, StandardCharsets.UTF_8) {
+                    private val kotlinFiles = setOf(
+                            "static/kotlin.js",
+                            "static/kotlin.meta.js",
+                            "static/kotlin.js.map",
+                            "static/kotlinx-serialization-kotlinx-serialization-runtime.js",
+                            "static/kotlinx-serialization-kotlinx-serialization-runtime.meta.js",
+                            "static/kotlinx-serialization-kotlinx-serialization-runtime.js.map"
+                    )
+
                     override fun getResourceUrl(absoluteRequestedResourcePath: String): URL {
-                        if (absoluteRequestedResourcePath == "static/kotlin.js") {
-                            return super.getResourceUrl("kotlin.js")
+                        if (absoluteRequestedResourcePath in kotlinFiles) {
+                            return super.getResourceUrl(absoluteRequestedResourcePath.removePrefix("static/"))
                         }
                         return super.getResourceUrl(absoluteRequestedResourcePath)
                     }

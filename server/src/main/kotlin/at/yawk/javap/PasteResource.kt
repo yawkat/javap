@@ -6,12 +6,10 @@
 
 package at.yawk.javap
 
-import at.yawk.javap.model.Paste
 import at.yawk.javap.model.PasteDao
+import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
-import com.fasterxml.jackson.annotation.JsonUnwrapped
-import org.jdbi.v3.core.Jdbi
 import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -29,26 +27,25 @@ fun generateId(length: Int): String {
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 class PasteResource @Inject constructor(
-        val dbi: Jdbi,
-        val pasteDao: PasteDao,
-        val processor: Processor,
-        val defaultPaste: DefaultPaste
+        private val pasteDao: PasteDao,
+        private val processor: Processor,
+        private val defaultPaste: DefaultPaste
 ) {
-    class PasteDto(@JsonUnwrapped val paste: Paste, requestUserToken: String?) {
-        @Suppress("unused")
-        val editable = requestUserToken == paste.ownerToken
-    }
-
     @GET
     @Path("/{id}")
     fun getPaste(@HeaderParam("X-User-Token") userToken: String?, @PathParam("id") id: String): PasteDto {
         val paste = defaultPaste.defaultPastes.find { it.id == id }
                 ?: pasteDao.getPasteById(id) ?: throw NotFoundException()
-        return PasteDto(paste, userToken)
+        return PasteDto(
+                id = id,
+                editable = paste.ownerToken == userToken,
+                input = paste.input,
+                output = paste.output
+        )
     }
 
     @POST
-    fun createPaste(@HeaderParam("X-User-Token") userToken: String?, body: Create): PasteDto {
+    fun createPaste(@HeaderParam("X-User-Token") userToken: String?, body: PasteDto.Create): PasteDto {
         if (userToken == null || !userToken.matches("[a-zA-Z0-9]+".toRegex())) {
             throw BadRequestException("Illegal user token")
         }
@@ -61,7 +58,12 @@ class PasteResource @Inject constructor(
             if (defaultPaste.defaultPastes.any { it.id == id }) continue
             // todo: handle PK violation and retry with different ID
             pasteDao.createPaste(userToken, id, input, output)
-            return PasteDto(Paste(id, userToken, input, output), userToken)
+            return PasteDto(
+                    id = id,
+                    editable = true,
+                    input = input,
+                    output = output
+            )
         }
     }
 
@@ -81,13 +83,9 @@ class PasteResource @Inject constructor(
         )
     }
 
-    data class Create(
-            val input: ProcessingInput
-    )
-
     @PUT
     @Path("/{id}")
-    fun updatePaste(@HeaderParam("X-User-Token") userToken: String?, @PathParam("id") id: String, body: Update): PasteDto {
+    fun updatePaste(@HeaderParam("X-User-Token") userToken: String?, @PathParam("id") id: String, body: PasteDto.Update): PasteDto {
         if (userToken == null || !userToken.matches("[a-zA-Z0-9]+".toRegex())) {
             throw BadRequestException("Illegal user token")
         }
@@ -97,17 +95,18 @@ class PasteResource @Inject constructor(
             throw NotAuthorizedException("Not your paste")
         }
         if (body.input != null) {
-            val newInput = sanitizeInput(body.input)
+            val newInput = sanitizeInput(body.input!!)
             if (newInput != paste.input) {
                 val output = sanitizeOutput(processor.process(newInput))
                 paste = paste.copy(input = newInput, output = output)
             }
         }
         pasteDao.updatePaste(userToken, paste.id, paste.input, paste.output)
-        return PasteDto(paste, userToken)
+        return PasteDto(
+                id = id,
+                editable = paste.ownerToken == userToken,
+                input = paste.input,
+                output = paste.output
+        )
     }
-
-    data class Update(
-            val input: ProcessingInput? = null
-    )
 }

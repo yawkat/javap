@@ -6,7 +6,9 @@
 
 package at.yawk.javap
 
-import at.yawk.javap.model.Paste
+import at.yawk.javap.model.PasteDto
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import org.w3c.dom.HTMLSelectElement
 import kotlin.Pair
 import kotlin.browser.document
@@ -60,19 +62,20 @@ private fun loadPasteFromHash() {
 
 fun loadPaste(name: String, outputType: OutputType?, forceCompiler: String? = null) {
     Editors.codeEditor.setReadOnly(true)
-    ajax(Request(
-            method = "GET",
-            url = "/api/paste/" + name
-    )).then({
-        val data = Paste.fromJson(it)
-        val s = PasteContext(if (forceCompiler != null) {
-            data.copy(input = data.input.copy(compilerName = forceCompiler))
-        } else data)
-        context = s
-        s.displayPaste(outputType)
-    }, handleError).always {
-        Editors.codeEditor.setReadOnly(false)
-    }
+    Ajax.get(
+            url = "/api/paste/$name",
+            outStrategy = PasteDto.serializer(),
+            onSuccess = {
+                val s = PasteContext(if (forceCompiler != null) {
+                    it.copy(input = it.input.copy(compilerName = forceCompiler))
+                } else it)
+                context = s
+                s.displayPaste(outputType)
+            },
+            always = {
+                Editors.codeEditor.setReadOnly(false)
+            }
+    )
 }
 
 object Editors {
@@ -110,7 +113,7 @@ object Editors {
     }
 }
 
-fun jsMap(vararg elements: Pair<String, Any>) {
+fun jsMap(vararg elements: Pair<String, Any>): dynamic {
     val o = js("Object()")
     for ((k, v) in elements) {
         o[k] = v

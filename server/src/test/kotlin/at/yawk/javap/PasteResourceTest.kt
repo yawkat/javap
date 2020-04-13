@@ -8,6 +8,7 @@ package at.yawk.javap
 
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.PasteDao
+import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -28,15 +29,17 @@ import javax.ws.rs.NotFoundException
  * @author yawkat
  */
 class PasteResourceTest {
-    val processor = object : Processor {
+    private val processor = object : Processor {
         override fun process(input: ProcessingInput): ProcessingOutput {
             return ProcessingOutput("compiler log " + input.code, "javap " + input.code, "procyon " + input.code)
         }
     }
-    val dataSource: DataSource = JdbcConnectionPool.create("jdbc:h2:mem:test", "", "")
-    val dbi = Jdbi.create(dataSource).installPlugins()
-    val pasteResource: PasteResource = PasteResource(dbi, dbi.onDemand(PasteDao::class.java), processor,
-            DefaultPaste(processor))
+    private val dataSource: DataSource = JdbcConnectionPool.create("jdbc:h2:mem:test", "", "")
+    private val dbi = Jdbi.create(dataSource).installPlugins()
+    private val defaultPaste = DefaultPaste(processor)
+    private val pasteResource: PasteResource = PasteResource(dbi.onDemand(PasteDao::class.java),
+            processor,
+            defaultPaste)
 
     @BeforeClass
     fun setupDb() {
@@ -56,61 +59,64 @@ class PasteResourceTest {
         val input1 = ProcessingInput("test code 1", Sdks.defaultJava.name)
         val input2 = ProcessingInput("test code 2", Sdks.defaultJava.name)
 
-        val created = pasteResource.createPaste(token, PasteResource.Create(input1)).paste
-        Assert.assertEquals(created, Paste(created.id, token, input1, processor.process(input1)))
+        val created = pasteResource.createPaste(token, PasteDto.Create(input1))
+        Assert.assertEquals(created, PasteDto(created.id, true, input1, processor.process(input1)))
 
-        Assert.assertEquals(pasteResource.getPaste(token, created.id).paste, created)
+        Assert.assertEquals(pasteResource.getPaste(token, created.id), created)
 
-        val updated = pasteResource.updatePaste(token, created.id, PasteResource.Update(input2)).paste
+        val updated = pasteResource.updatePaste(token, created.id, PasteDto.Update(input2))
         Assert.assertEquals(updated, created.copy(input = input2, output = processor.process(input2)))
 
-        Assert.assertEquals(pasteResource.getPaste(token, created.id).paste, updated)
+        Assert.assertEquals(pasteResource.getPaste(token, created.id), updated)
     }
 
-    @Test(expectedExceptions = arrayOf(NotFoundException::class))
+    @Test(expectedExceptions = [NotFoundException::class])
     fun `paste get not found`() {
         pasteResource.getPaste(null, "xyz")
     }
 
-    @Test(expectedExceptions = arrayOf(NotFoundException::class))
+    @Test(expectedExceptions = [NotFoundException::class])
     fun `paste update not found`() {
-        pasteResource.updatePaste("abcdef", "xyz", PasteResource.Update())
+        pasteResource.updatePaste("abcdef", "xyz", PasteDto.Update())
     }
 
-    @Test(expectedExceptions = arrayOf(BadRequestException::class))
+    @Test(expectedExceptions = [BadRequestException::class])
     fun `paste create invalid user token`() {
-        pasteResource.createPaste("#", PasteResource.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.createPaste("#", PasteDto.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
     }
 
-    @Test(expectedExceptions = arrayOf(BadRequestException::class))
+    @Test(expectedExceptions = [BadRequestException::class])
     fun `paste create no user token`() {
-        pasteResource.createPaste(null, PasteResource.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.createPaste(null, PasteDto.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
     }
 
-    @Test(expectedExceptions = arrayOf(BadRequestException::class))
+    @Test(expectedExceptions = [BadRequestException::class])
     fun `paste create empty user token`() {
-        pasteResource.createPaste("", PasteResource.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.createPaste("", PasteDto.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
     }
 
-    @Test(expectedExceptions = arrayOf(BadRequestException::class))
+    @Test(expectedExceptions = [BadRequestException::class])
     fun `paste update invalid user token`() {
-        pasteResource.updatePaste("#", "xyz", PasteResource.Update(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.updatePaste("#", "xyz", PasteDto.Update(ProcessingInput("abc", Sdks.defaultJava.name)))
     }
 
-    @Test(expectedExceptions = arrayOf(BadRequestException::class))
+    @Test(expectedExceptions = [BadRequestException::class])
     fun `paste update no user token`() {
-        pasteResource.updatePaste(null, "xyz", PasteResource.Update(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.updatePaste(null, "xyz", PasteDto.Update(ProcessingInput("abc", Sdks.defaultJava.name)))
     }
 
-    @Test(expectedExceptions = arrayOf(BadRequestException::class))
+    @Test(expectedExceptions = [BadRequestException::class])
     fun `paste update empty user token`() {
-        pasteResource.updatePaste("", "xyz", PasteResource.Update(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.updatePaste("", "xyz", PasteDto.Update(ProcessingInput("abc", Sdks.defaultJava.name)))
     }
 
-    @Test(expectedExceptions = arrayOf(NotAuthorizedException::class))
+    @Test(expectedExceptions = [NotAuthorizedException::class])
     fun `deny paste update for other user`() {
-        val created = pasteResource.createPaste("abc", PasteResource.Create(ProcessingInput("abc", Sdks.defaultJava.name))).paste
-        pasteResource.updatePaste("def", created.id, PasteResource.Update(ProcessingInput("def", Sdks.defaultJava.name)))
+        val created = pasteResource.createPaste("abc",
+                PasteDto.Create(ProcessingInput("abc", Sdks.defaultJava.name)))
+        pasteResource.updatePaste("def",
+                created.id,
+                PasteDto.Update(ProcessingInput("def", Sdks.defaultJava.name)))
     }
 
     @Test
@@ -118,16 +124,20 @@ class PasteResourceTest {
         val objectMapper = ObjectMapper().findAndRegisterModules()
         val input = ProcessingInput("in", Sdks.defaultJava.name)
         Assert.assertEquals(
-                objectMapper.writeValueAsString(PasteResource.PasteDto(Paste("a", "b", input, processor.process(input)), "a")),
-                """{"id":"a","input":{"code":"in","compilerName":"${Sdks.defaultJava.name}"},"output":{"compilerLog":"compiler log in","javap":"javap in","procyon":"procyon in"},"editable":false}"""
+                objectMapper.writeValueAsString(PasteDto("a", false, input, processor.process(input))),
+                """{"id":"a","editable":false,"input":{"code":"in","compilerName":"${Sdks.defaultJava.name}"},"output":{"compilerLog":"compiler log in","javap":"javap in","procyon":"procyon in"}}"""
         )
     }
 
     @Test
     fun `get default paste`() {
         Assert.assertEquals(
-                pasteResource.getPaste(null, "default:JAVA").paste,
-                pasteResource.defaultPaste.defaultPastes[0]
+                pasteResource.getPaste(null, "default:JAVA").input,
+                defaultPaste.defaultPastes[0].input
+        )
+        Assert.assertEquals(
+                pasteResource.getPaste(null, "default:JAVA").output,
+                defaultPaste.defaultPastes[0].output
         )
     }
 }

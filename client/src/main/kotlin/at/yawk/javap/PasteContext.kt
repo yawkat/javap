@@ -6,8 +6,10 @@
 
 package at.yawk.javap
 
-import at.yawk.javap.model.Paste
+import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLOptionElement
 import org.w3c.dom.HTMLSelectElement
@@ -21,7 +23,6 @@ import kotlin.dom.appendText
 import kotlin.dom.clear
 import kotlin.dom.createElement
 import kotlin.dom.removeClass
-import kotlin.js.json
 
 /**
  * @author yawkat
@@ -30,7 +31,7 @@ var context: PasteContext? = null
 
 private const val COLOR_COUNT = 8
 
-class PasteContext(var currentPaste: Paste) {
+class PasteContext(var currentPaste: PasteDto) {
     fun fork() {
         currentPaste = currentPaste.copy(editable = false)
     }
@@ -39,7 +40,7 @@ class PasteContext(var currentPaste: Paste) {
         if (!currentPaste.id.matches("^default:.*$")) {
             var path = currentPaste.id
             if (type != OutputType.javap) {
-                path += "/" + type
+                path += "/$type"
             }
             window.location.hash = path
         }
@@ -205,21 +206,25 @@ class PasteContext(var currentPaste: Paste) {
     fun triggerCompile() {
         document.body!!.addClass("compiling")
         Editors.codeEditor.setReadOnly(true)
-        ajax(Request(
+        Ajax.postPut(
                 method = if (currentPaste.editable) "PUT" else "POST",
                 url = "/api/paste" + (if (currentPaste.editable) "/${currentPaste.id}" else ""),
-                contentType = "application/json; charset=utf-8",
-                data = JSON.stringify(json("input" to ProcessingInput(
+                // technically we should send a create or update here, but they have the same structure
+                data = PasteDto.Create(ProcessingInput(
                         code = Editors.codeEditor.getValue(),
                         compilerName = SdkSelector.selectedSdkName
-                )))
-        )).then({
-            val s = PasteContext(Paste.fromJson(it))
-            context = s
-            s.displayPaste()
-        }, handleError).always {
-            document.body!!.removeClass("compiling")
-            Editors.codeEditor.setReadOnly(false)
-        }
+                )),
+                inStrategy = PasteDto.Create.serializer(),
+                outStrategy = PasteDto.serializer(),
+                onSuccess = {
+                    val s = PasteContext(it)
+                    context = s
+                    s.displayPaste()
+                },
+                always = {
+                    document.body!!.removeClass("compiling")
+                    Editors.codeEditor.setReadOnly(false)
+                }
+        )
     }
 }

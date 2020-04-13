@@ -6,7 +6,13 @@
 
 package at.yawk.javap.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * @author yawkat
  */
-data class ProcessingInput(val code: String, val compilerName: String)
+@Serializable
+data class ProcessingInput(
+        val code: String,
+        val compilerName: String
+)
