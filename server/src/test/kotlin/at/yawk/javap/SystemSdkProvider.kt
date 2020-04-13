@@ -6,23 +6,33 @@
 
 package at.yawk.javap
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
  * @author yawkat
  */
 object SystemSdkProvider : SdkProvider {
-    val JDK = "SYSTEM"
+    override fun lookupSdk(sdk: Sdk): RunnableSdk {
+        require(sdk.language == SdkLanguage.JAVA)
+        return object : RunnableSdk(sdk) {
+            override val jdkHome: Path
+                get() = Paths.get("/usr/lib/jvm/default")
+            override val readable: Set<Path>
+                get() = setOf(Paths.get("/etc"))
+            override val libraryPath: List<Path>
+                get() = listOf(
+                        Paths.get("/usr/lib/jvm/default/lib/amd64"),
+                        Paths.get("/usr/lib/jvm/default/lib/amd64/jli"),
+                        Paths.get("/usr/lib/jvm/default/lib")
+                )
 
-    override val defaultSdkByLanguage = mapOf(
-            SdkLanguage.JAVA to Sdk(JDK, Jdk(Paths.get("/usr"),
-                    listOf(
-                            Paths.get("/usr/lib/jvm/default/lib/amd64"),
-                            Paths.get("/usr/lib/jvm/default/lib/amd64/jli"),
-                            Paths.get("/usr/lib/jvm/default/lib")
-                    ),
-                    extraPaths = listOf(Paths.get("/etc"))
-            ), null, listOf("javac"), SdkLanguage.JAVA)
-    )
-    override val sdks = defaultSdkByLanguage.values.toList()
+            override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
+                    jdkHome.resolve("bin/javac").toAbsolutePath().toString(),
+                    "-encoding", "utf-8",
+                    "-g", // debugging info
+                    "-d", outputDir.toString(), inputFile.toString()
+            )
+        }
+    }
 }

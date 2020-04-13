@@ -14,8 +14,8 @@ import javax.inject.Inject
 /**
  * @author yawkat
  */
-class DefaultPaste @Inject constructor(sdkProvider: SdkProvider, processor: Processor) {
-    val defaultPastes = sdkProvider.defaultSdkByLanguage.map {
+class DefaultPaste @Inject constructor(processor: Processor) {
+    val defaultPastes = Sdks.defaultSdks.map {
         val code = when(it.key) {
             SdkLanguage.JAVA -> """import java.util.*;
 import lombok.*;

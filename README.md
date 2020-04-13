@@ -17,7 +17,7 @@ dev:
 
 ```
 mvn -pl shared,shared-js,server,client install &&
-mvn -pl server exec:java -Dexec.mainClass=at.yawk.javap.JavapApplicationKt -Dexec.args="server config.yml"
+mvn -pl server compile exec:java -Dexec.mainClass=at.yawk.javap.JavapApplicationKt -Dexec.args="server config.yml"
 ```
 
 prod:

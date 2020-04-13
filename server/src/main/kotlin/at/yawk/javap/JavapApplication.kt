@@ -66,6 +66,5 @@ class JavapApplication : Application<JavapConfiguration>() {
         injector.getInstance(SdkProviderImpl::class.java).start()
 
         environment.jersey().register(injector.getInstance(PasteResource::class.java))
-        environment.jersey().register(injector.getInstance(SdkResource::class.java))
     }
 }

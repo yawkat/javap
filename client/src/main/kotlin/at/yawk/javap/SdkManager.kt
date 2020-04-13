@@ -7,27 +7,24 @@ import kotlin.dom.appendElement
 import kotlin.dom.clear
 
 object SdkManager {
-    private data class SdkDto(val name: String, val language: String)
-    private class Sdk(val name: String, val language: SdkLanguage, val option: HTMLOptionElement)
-
     private val compilerNames = document.getElementById("compiler-names") as HTMLSelectElement
 
-    private lateinit var sdks: Map<String, Sdk>
+    private lateinit var options: Map<Sdk, HTMLOptionElement>
     private lateinit var selectedSdk: Sdk
 
     var selectedSdkName: String
         get() = selectedSdk.name
         set(name) {
-            val sdk = sdks[name] ?: throw NoSuchElementException(name)
+            val sdk = Sdks.sdksByName[name] ?: throw NoSuchElementException(name)
             selectedSdk = sdk
-            sdk.option.selected = true
+            options.getValue(sdk).selected = true
 
             onChangeSelect()
         }
 
     init {
         compilerNames.addEventListener("change", {
-            val sdk = sdks.getValue(compilerNames.value)
+            val sdk = Sdks.sdksByName.getValue(compilerNames.value)
             if (sdk.language != selectedSdk.language) {
                 loadPaste("default:${sdk.language}", outputType = null, forceCompiler = sdk.name)
             }
@@ -42,38 +39,29 @@ object SdkManager {
     }
 
     fun loadSdks(ready: () -> Unit) {
-        ajax(Request(
-                method = "GET",
-                url = "/api/sdk"
-        )).then({ sdkArray: Array<SdkDto> ->
-            compilerNames.clear()
+        compilerNames.clear()
 
-            fun categoryForSdkName(name: String) =
-                    name.match("""^((?:[A-Za-z]+ )+).*$""")!![1]
+        val options = mutableMapOf<Sdk, HTMLOptionElement>()
 
-            val sdkMap = mutableMapOf<String, Sdk>()
+        for ((category, sdks) in Sdks.sdkByLabel) {
+            compilerNames.appendElement("option") {
+                require(this is HTMLOptionElement)
+                disabled = true
+                text = "$category:"
+            }
 
-            var currentCategory: String? = null
-            for (sdk in sdkArray) {
-                if (categoryForSdkName(sdk.name) != currentCategory) {
-                    currentCategory = categoryForSdkName(sdk.name)
-                    compilerNames.appendElement("option") {
-                        require(this is HTMLOptionElement)
-                        disabled = true
-                        text = "${currentCategory.trim()}:"
-                    }
-                }
-
+            for (sdk in sdks) {
                 compilerNames.appendElement("option") {
                     require(this is HTMLOptionElement)
                     value = sdk.name
                     text = sdk.name
-                    sdkMap[sdk.name] = Sdk(sdk.name, SdkLanguage.valueOf(sdk.language), this)
+                    options[sdk] = this
                 }
             }
-            sdks = sdkMap
+        }
 
-            ready()
-        }, handleError)
+        this.options = options
+
+        ready()
     }
 }

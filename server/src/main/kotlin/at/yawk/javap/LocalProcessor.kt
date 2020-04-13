@@ -26,6 +26,7 @@ import javax.ws.rs.BadRequestException
 @VisibleForTesting
 internal const val NO_CLASSES_GENERATED = "No classes generated"
 
+@Suppress("ConvertTryFinallyToUseCall")
 private inline fun <T, R> Stream<T>.use(f: (Stream<T>) -> R): R {
     try {
         return f(this)
@@ -48,7 +49,8 @@ fun deleteRecursively(path: Path) {
     })
 }
 
-class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubblewrap: Bubblewrap) : Processor {
+class LocalProcessor @Inject constructor(private val sdkProvider: SdkProvider,
+                                         private val bubblewrap: Bubblewrap) : Processor {
     override fun process(input: ProcessingInput): ProcessingOutput {
         val tempDirectory = Files.createTempDirectory(null)
         try {
@@ -57,8 +59,8 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubbl
             val classDir = tempDirectory.resolve("classes")
             Files.createDirectories(classDir)
 
-            val sdk = sdkProvider.sdks.find { it.name == input.compilerName }
-                    ?: throw BadRequestException("Unknown compiler name")
+            val sdk = Sdks.sdksByName[input.compilerName] ?: throw BadRequestException("Unknown compiler name")
+            val runnableSdk = sdkProvider.lookupSdk(sdk)
 
             val sourceFile = sourceDir.resolve(when (sdk.language) {
                 SdkLanguage.JAVA -> "Main.java"
@@ -68,28 +70,15 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubbl
 
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
-            val flags = when (sdk.language) {
-                SdkLanguage.JAVA -> listOf(
-                        "-encoding", "utf-8",
-                        "-g" // debugging info
-                )
-                SdkLanguage.KOTLIN -> emptyList()
-                SdkLanguage.SCALA -> emptyList()
-            }
-
-            val command =
-                    sdk.compilerCommand +
-                            flags +
-                            listOf("-d", classDir.toAbsolutePath().toString(), sourceFile.fileName.toString())
             val javacResult = bubblewrap.executeCommand(
-                    command,
+                    runnableSdk.compilerCommand(sourceFile.fileName, classDir.toAbsolutePath()),
                     workingDir = sourceDir,
                     writable = setOf(tempDirectory),
-                    readable = listOf(sdk.baseDir, sdk.hostJdk.path).filterNotNullTo(HashSet()) + sdk.hostJdk.extraPaths,
-                    env = jdkEnv(sdk.hostJdk)
+                    readable = runnableSdk.readable,
+                    env = env(runnableSdk)
             )
 
-            var javapOutput: String? = javap(sdk.hostJdk, classDir)
+            var javapOutput: String? = javap(runnableSdk, classDir)
             val procyonOutput: String?
             if (javapOutput == null) {
                 if (javacResult.exitValue == 0) {
@@ -106,35 +95,36 @@ class LocalProcessor @Inject constructor(val sdkProvider: SdkProvider, val bubbl
         }
     }
 
-    private fun jdkEnv(jdk: Jdk) = mapOf(
-            "LD_LIBRARY_PATH" to jdk.libPaths.map { it.toAbsolutePath() }.joinToString(":"),
-            "JAVA_HOME" to jdk.path.toAbsolutePath().toString()
+    private fun env(sdk: RunnableSdk) = mapOf(
+            "LD_LIBRARY_PATH" to sdk.libraryPath.map { it.toAbsolutePath() }.joinToString(":"),
+            "JAVA_HOME" to sdk.jdkHome.toAbsolutePath().toString()
     )
 
-    private fun javap(jdk: Jdk, classDir: Path): String? {
+    private fun javap(sdk: RunnableSdk, classDir: Path): String? {
         val classFiles = Files.list(classDir).use { // close stream
-            it.sorted().map { it.fileName.toString() }.collect(Collectors.toList<String>())
+            it.sorted().map { classFile -> classFile.fileName.toString() }.collect(Collectors.toList())
         }
-        return if (!classFiles.isEmpty()) {
+        return if (classFiles.isNotEmpty()) {
             bubblewrap.executeCommand(
-                    listOf(jdk.javap.toAbsolutePath().toString(),
+                    listOf(sdk.jdkHome.resolve("bin/javap").toAbsolutePath().toString(),
                             "-v",
                             "-private",
                             "-constants",
                             "-XDdetails:stackMaps,localVariables") + classFiles,
                     classDir,
-                    readable = setOf(classDir, jdk.path) + jdk.extraPaths,
-                    env = jdkEnv(jdk)
+                    readable = sdk.readable + listOf(classDir),
+                    env = env(sdk)
             ).outputUTF8()
         } else null
     }
 
+    @Suppress("SameParameterValue")
     private fun decompile(classDir: Path, decompiler: Decompiler): String {
-        try {
-            return decompiler.decompile(classDir)
+        return try {
+            decompiler.decompile(classDir)
         } catch(e: Throwable) {
             e.printStackTrace()
-            return e.toString()
+            e.toString()
         }
     }
 }
