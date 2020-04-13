@@ -17,7 +17,11 @@ object SystemSdkProvider : SdkProvider {
         require(sdk.language == SdkLanguage.JAVA)
         return object : RunnableSdk(sdk) {
             override val jdkHome: Path
-                get() = Paths.get("/usr/lib/jvm/default")
+                get() {
+                    var path = Paths.get(System.getenv("JAVA_HOME") ?: "/usr/lib/jvm/default")
+                    if (path.endsWith("jre")) path = path.parent
+                    return path
+                }
             override val readable: Set<Path>
                 get() = setOf(Paths.get("/etc"))
             override val libraryPath: List<Path>
