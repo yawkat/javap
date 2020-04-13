@@ -150,17 +150,32 @@ class PasteContext(var currentPaste: Paste) {
         if (additionalClass != null) addClass(additionalClass)
     }
 
+    private fun hasOutputOfType(outputType: OutputType) =
+            when (outputType) {
+                OutputType.javap -> currentPaste.output.javap
+                OutputType.procyon -> currentPaste.output.procyon
+            } != null
+
     fun displayPaste(requestedOutputType: OutputType? = null) {
         setEditorValue(Editors.codeEditor, currentPaste.input.code)
         SdkManager.selectedSdkName = currentPaste.input.compilerName
         val outputType = document.getElementById("output-type") as HTMLSelectElement
 
-        if (requestedOutputType != null) {
-            @Suppress("UNCHECKED_CAST")
-            (outputType.options.asList() as List<HTMLOptionElement>)
-                    .single { it.value == requestedOutputType.name }
-                    .selected = true
+        for (option in outputType.options.asList()) {
+            require(option is HTMLOptionElement)
+            val type = OutputType.valueOf(option.value)
+            if (type == requestedOutputType) option.selected = true
+            option.disabled = !hasOutputOfType(type)
         }
+
+        // show tool output iff there are any outputs to select
+        val toolOutputWrapper = document.getElementById("tool-output-wrapper")!!
+        if (OutputType.values().any { hasOutputOfType(it) }) {
+            toolOutputWrapper.removeClass("hide")
+        } else {
+            toolOutputWrapper.addClass("hide")
+        }
+
         val compilerLog = document.getElementById("compiler-log")!!
         val compilerLogContent = compilerLog.querySelector("pre")!!
         compilerLogContent.clear()
@@ -182,6 +197,7 @@ class PasteContext(var currentPaste: Paste) {
         } else {
             compilerLog.addClass("hide")
         }
+
         val selected = outputType.selectedOptions[0] as HTMLOptionElement
         showCurrentPasteOutput(OutputType.valueOf(selected.value))
     }
