@@ -25,6 +25,33 @@ body {
     left: 0;
     width: 50%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#code-editor-wrapper > * {
+    width: 100%;
+}
+
+#buttons-code-editor {
+    flex-grow: 0;
+}
+
+#buttons-code-editor > button, #buttons-code-editor > select, #buttons-social > * {
+    padding: .5em;
+    margin: .2em;
+    display: block;
+    border: 1px solid;
+    border-radius: 2px;
+    float: right;
+}
+
+#buttons-code-editor select, #buttons-code-editor select option {
+    padding: .5em 1em;
+}
+
+#code-editor {
+    flex-grow: 1;
 }
 
 #result-wrapper {
@@ -39,39 +66,11 @@ body {
     font-size: 12px;
 }
 
-#buttons-code-editor {
-    position: absolute;
-    bottom: 0;
-    right: 50%;
-    z-index: 1;
-}
-
 #buttons-social {
     position: absolute;
     top: 0;
     right: 0;
     z-index: 1;
-}
-
-#code-editor {
-    width: 100%;
-    height: 100%;
-}
-
-#buttons-code-editor > *, #output-type, #buttons-social > * {
-    padding: .5em;
-    margin: .2em;
-    display: block;
-    border: 1px solid;
-    border-radius: 2px;
-}
-
-#buttons-code-editor select {
-    padding: 0 .5em;
-}
-
-#buttons-code-editor select option {
-    padding: .5em 1em;
 }
 
 #buttons-code-editor select option:disabled {
@@ -81,7 +80,6 @@ body {
 
 #github, #fork {
     text-decoration: none;
-    float: right;
     color: #ddd;
     border-color: #000;
     cursor: pointer;
@@ -90,12 +88,34 @@ body {
 }
 
 #compile {
-    float: right;
     background-color: #4caf50;
     color: white;
     cursor: pointer;
     border-color: #43a047;
-    clear: both;
+}
+
+#compiler-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(auto, 200px));
+}
+
+#compiler-options label {
+    display: inline-block;
+    padding: .2em;
+    white-space: nowrap;
+}
+
+#compiler-options label input {
+    margin-right: .5em;
+}
+
+#compiler-options-lint {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, auto));
+}
+
+#compiler-command-line {
+    overflow-x: auto;
 }
 
 @media (max-width: 1000px) {
@@ -106,9 +126,12 @@ body {
     }
 
     #code-editor-wrapper, #result-wrapper {
-        height: 75vh;
         width: 100%;
         overflow: hidden;
+    }
+
+    #code-editor {
+        height: 75vh;
     }
 
     #buttons-code-editor, #buttons-output, #buttons-social {
@@ -129,6 +152,10 @@ body {
         width: auto;
         clear: both;
         overflow-x: auto;
+    }
+
+    #compiler-options-wrapper {
+        clear: both;
     }
 }
 
@@ -169,7 +196,7 @@ select {
 }
 
 .hide {
-    display: none;
+    display: none !important;
 }
 
 #output-type {

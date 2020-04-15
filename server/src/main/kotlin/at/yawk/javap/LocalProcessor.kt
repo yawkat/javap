@@ -63,16 +63,13 @@ class LocalProcessor constructor(private val sdkProvider: SdkProvider,
                     ?: throw HttpException(StatusCodes.BAD_REQUEST, "Unknown compiler name")
             val runnableSdk = sdkProvider.lookupSdk(sdk)
 
-            val sourceFile = sourceDir.resolve(when (sdk.language) {
-                SdkLanguage.JAVA -> "Main.java"
-                SdkLanguage.KOTLIN -> "Main.kt"
-                SdkLanguage.SCALA -> "Main.scala"
-            })
+            val sourceFile = sourceDir.resolve(sdk.language.fileName)
 
             Files.write(sourceFile, input.code.toByteArray(Charsets.UTF_8))
 
             val javacResult = bubblewrap.executeCommand(
-                    runnableSdk.compilerCommand(sourceFile.fileName, classDir.toAbsolutePath()),
+                    runnableSdk.compilerCommand(sourceFile.fileName, classDir.toAbsolutePath(),
+                            input.compilerConfiguration),
                     workingDir = sourceDir,
                     writable = setOf(tempDirectory),
                     readable = runnableSdk.readable,

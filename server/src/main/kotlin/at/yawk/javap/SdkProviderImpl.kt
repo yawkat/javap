@@ -6,6 +6,8 @@
 
 package at.yawk.javap
 
+import at.yawk.javap.model.CompilerConfiguration
+import at.yawk.javap.model.ConfigProperties
 import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
 import com.google.common.hash.HashingInputStream
@@ -29,14 +31,6 @@ import java.util.Arrays
 import java.util.zip.ZipInputStream
 
 private val log = LoggerFactory.getLogger(SdkProviderImpl::class.java)
-
-abstract class RunnableSdk(val sdk: Sdk) {
-    abstract val jdkHome: Path
-    abstract val readable: Set<Path>
-    abstract val libraryPath: List<Path>
-
-    abstract fun compilerCommand(inputFile: Path, outputDir: Path): List<String>
-}
 
 class SdkProviderImpl : SdkProvider {
     private lateinit var sdks: Map<Sdk, RunnableSdk>
@@ -96,15 +90,25 @@ class SdkProviderImpl : SdkProvider {
                 override val libraryPath: List<Path> = sdk.libPaths.map { sdkRoot.resolve(it) }
                 override val readable = setOf(sdkRoot)
 
-                override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
-                        jdkHome.resolve("bin/javac").toAbsolutePath().toString(),
-                        "-cp", lombokLocation.toAbsolutePath().toString(),
-                        "-processor",
-                        "lombok.launch.AnnotationProcessorHider\$AnnotationProcessor,lombok.launch.AnnotationProcessorHider\$ClaimingProcessor",
-                        "-encoding", "utf-8",
-                        "-g", // debugging info
-                        "-d", outputDir.toString(), inputFile.toString()
-                )
+                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration): List<String> {
+                    val command = mutableListOf(
+                            jdkHome.resolve("bin/javac").toAbsolutePath().toString(),
+                            "-encoding", "utf-8",
+                            "-d", outputDir.toString()
+                    )
+
+                    command.addAll(ConfigProperties.validateAndBuildCommandLine(sdk, config))
+                    if (ConfigProperties.lombok.get(config)) {
+                        command.addAll(listOf(
+                                "-cp", lombokLocation.toAbsolutePath().toString(),
+                                "-processor",
+                                "lombok.launch.AnnotationProcessorHider\$AnnotationProcessor,lombok.launch.AnnotationProcessorHider\$ClaimingProcessor"
+                        ))
+                    }
+
+                    command.add(inputFile.toString())
+                    return command
+                }
             }
         }
         is Sdk.Ecj -> {
@@ -118,7 +122,7 @@ class SdkProviderImpl : SdkProvider {
             }
 
             object : HostedSdk(sdk, sdkRoot, sdk.hostJdk) {
-                override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
+                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                         jdkHome.resolve("bin/java").toAbsolutePath().toString(),
                         "-javaagent:${lombokLocation.toAbsolutePath()}=ECJ",
                         "-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(),
@@ -134,7 +138,7 @@ class SdkProviderImpl : SdkProvider {
 
             val compilerPath = sdkRoot.resolve("kotlin-compiler.jar").toAbsolutePath()
             object : HostedSdk(sdk, sdkRoot, sdk.hostJdk) {
-                override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
+                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                         jdkHome.resolve("bin/java").toAbsolutePath().toString(),
                         "-jar", compilerPath.toString(),
                         "-no-stdlib", "-cp", "$compilerPath",
@@ -160,7 +164,7 @@ class SdkProviderImpl : SdkProvider {
                 sdk.coroutines.downloadTo(tmp.resolve("kotlin-coroutines.jar"))
             }
             object : HostedSdk(sdk, sdkRoot, sdk.hostJdk) {
-                override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
+                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                         sdkRoot.resolve("bin/kotlinc").toAbsolutePath().toString(),
                         "-cp", coroutinesPath.toString(),
                         "-d", outputDir.toString(), inputFile.toString()
@@ -179,7 +183,7 @@ class SdkProviderImpl : SdkProvider {
             }
 
             object : HostedSdk(sdk, sdkRoot, sdk.hostJdk) {
-                override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
+                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                         sdkRoot.resolve("bin/scalac").toAbsolutePath().toString(),
                         "-d", outputDir.toString(), inputFile.toString()
                 )

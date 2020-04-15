@@ -23,8 +23,8 @@
     <script src="/webjars/ace-builds/1.4.2/src-min/mode-scala.js"></script>
 
     <link rel="stylesheet" href="/static/index.css">
-    <script src="/static/lib/kotlin.js"></script>
-    <script src="/static/lib/kotlinx-serialization-kotlinx-serialization-runtime.js"></script>
+    <script src="/static/kotlin.js"></script>
+    <script src="/static/kotlinx-serialization-kotlinx-serialization-runtime.js"></script>
     <script src="/static/shared.js"></script>
     <script src="/static/index.js"></script>
     <script>$(function () {
@@ -35,11 +35,22 @@
 <div id="main-pane">
     <div id="code-editor-wrapper">
         <div id="code-editor"></div>
-    </div>
-    <div id="buttons-code-editor">
-        <button class="ui-widget" id="fork" title="Fork this paste">Fork</button>
-        <button class="ui-widget" id="compile" title="Ctrl-Enter to compile">Compile</button>
-        <select id="compiler-names" title="Compiler"></select>
+        <div id="buttons-code-editor">
+            <button class="ui-widget" id="fork" title="Fork this paste">Fork</button>
+            <button class="ui-widget" id="compile" title="Ctrl-Enter to compile">Compile</button>
+            <select id="compiler-names" title="Compiler"></select>
+
+            <details id="compiler-options-wrapper">
+                <summary>Compiler Options</summary>
+
+                <code><pre id="compiler-command-line"></pre></code>
+
+                <div id="compiler-options">
+                    <div id="compiler-options-grid"></div>
+                    <div id="compiler-options-lint"></div>
+                </div>
+            </details>
+        </div>
     </div>
 
     <div id="result-wrapper">

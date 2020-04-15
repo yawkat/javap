@@ -8,15 +8,16 @@ package at.yawk.javap
 
 import at.yawk.javap.model.HttpException
 import at.yawk.javap.model.PasteDao
-import com.google.common.net.MediaType
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.undertow.Undertow
 import io.undertow.server.HttpHandler
-import io.undertow.server.handlers.ExceptionHandler
 import io.undertow.server.handlers.PathHandler
 import io.undertow.server.handlers.resource.ClassPathResourceManager
+import io.undertow.server.handlers.resource.Resource
+import io.undertow.server.handlers.resource.ResourceChangeListener
 import io.undertow.server.handlers.resource.ResourceHandler
+import io.undertow.server.handlers.resource.ResourceManager
 import io.undertow.util.StatusCodes
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -62,6 +63,7 @@ fun main(args: Array<String>) {
     var handler = handleExceptions(HttpHandler { throw HttpException(StatusCodes.NOT_FOUND, "Not found") })
     handler = PathHandler(handler).apply {
         val cl = object {}.javaClass.classLoader
+
         val kotlinFiles = setOf(
                 "kotlin.js",
                 "kotlin.meta.js",
@@ -70,13 +72,19 @@ fun main(args: Array<String>) {
                 "kotlinx-serialization-kotlinx-serialization-runtime.meta.js",
                 "kotlinx-serialization-kotlinx-serialization-runtime.js.map"
         )
+        val rootClasspath = ClassPathResourceManager(cl)
+        // kotlin files are at classpath root
+        for (kotlinFile in kotlinFiles) {
+            addExactPath("/static/$kotlinFile",
+                    ResourceHandler(ExactResourceManager(kotlinFile, rootClasspath), handler))
+        }
         addPrefixPath("/webjars", ResourceHandler(ClassPathResourceManager(cl, "META-INF/resources/webjars"), handler)
                 .apply {
                     cacheTime = TimeUnit.DAYS.toSeconds(1).toInt()
                 })
         addPrefixPath("/static", ResourceHandler(ClassPathResourceManager(cl, "static"), handler))
         // serve index.html
-        addExactPath("/", ResourceHandler(ClassPathResourceManager(cl, "static"), handler))
+        addExactPath("/", ResourceHandler(ExactResourceManager("/static/index.html", rootClasspath), handler))
     }
     handler = handleExceptions(pasteResource.buildHandler(handler))
 

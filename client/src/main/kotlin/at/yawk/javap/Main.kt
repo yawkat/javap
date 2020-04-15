@@ -7,8 +7,6 @@
 package at.yawk.javap
 
 import at.yawk.javap.model.PasteDto
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import org.w3c.dom.HTMLSelectElement
 import kotlin.Pair
 import kotlin.browser.document
@@ -38,6 +36,7 @@ fun start() {
         loadPasteFromHash()
     }, false)
 
+    CompilerConfigUi.init()
     js("$(document).tooltip()")
 }
 

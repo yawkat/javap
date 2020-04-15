@@ -6,6 +6,8 @@
 
 package at.yawk.javap
 
+import at.yawk.javap.model.CompilerConfiguration
+import at.yawk.javap.model.ConfigProperties
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -14,7 +16,7 @@ import java.nio.file.Paths
  */
 object SystemSdkProvider : SdkProvider {
     override fun lookupSdk(sdk: Sdk): RunnableSdk {
-        require(sdk.language == SdkLanguage.JAVA)
+        require(sdk is Sdk.Java)
         return object : RunnableSdk(sdk) {
             override val jdkHome: Path
                 get() {
@@ -32,12 +34,11 @@ object SystemSdkProvider : SdkProvider {
                         Paths.get("/usr/lib/jvm/default/lib")
                 )
 
-            override fun compilerCommand(inputFile: Path, outputDir: Path) = listOf(
+            override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                     jdkHome.resolve("bin/javac").toAbsolutePath().toString(),
                     "-encoding", "utf-8",
-                    "-g", // debugging info
-                    "-d", outputDir.toString(), inputFile.toString()
-            )
+                    "-d", outputDir.toString()
+            ) + ConfigProperties.validateAndBuildCommandLine(sdk, config) + inputFile.toString()
         }
     }
 }

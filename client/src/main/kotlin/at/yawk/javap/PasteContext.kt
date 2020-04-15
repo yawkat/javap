@@ -159,7 +159,7 @@ class PasteContext(var currentPaste: PasteDto) {
 
     fun displayPaste(requestedOutputType: OutputType? = null) {
         setEditorValue(Editors.codeEditor, currentPaste.input.code)
-        SdkSelector.selectedSdkName = currentPaste.input.compilerName
+        SdkSelector.selectedSdk = Sdks.sdksByName.getValue(currentPaste.input.compilerName)
         val outputType = document.getElementById("output-type") as HTMLSelectElement
 
         for (option in outputType.options.asList()) {
@@ -201,6 +201,8 @@ class PasteContext(var currentPaste: PasteDto) {
 
         val selected = outputType.selectedOptions[0] as HTMLOptionElement
         showCurrentPasteOutput(OutputType.valueOf(selected.value))
+
+        CompilerConfigUi.updatePaste()
     }
 
     fun triggerCompile() {
@@ -212,7 +214,8 @@ class PasteContext(var currentPaste: PasteDto) {
                 // technically we should send a create or update here, but they have the same structure
                 data = PasteDto.Create(ProcessingInput(
                         code = Editors.codeEditor.getValue(),
-                        compilerName = SdkSelector.selectedSdkName
+                        compilerName = SdkSelector.selectedSdk.name,
+                        compilerConfiguration = CompilerConfigUi.buildConfig()
                 )),
                 inStrategy = PasteDto.Create.serializer(),
                 outStrategy = PasteDto.serializer(),

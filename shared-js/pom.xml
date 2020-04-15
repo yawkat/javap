@@ -27,7 +27,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-runtime-js</artifactId>
-            <version>0.20.0</version>
+            <version>${kotlinx-ser.version}</version>
         </dependency>
     </dependencies>
 

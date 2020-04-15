@@ -31,6 +31,7 @@
 
     <properties>
         <kotlin.version>1.3.71</kotlin.version>
+        <kotlinx-ser.version>0.20.0</kotlinx-ser.version>
         <guice.version>4.2.3</guice.version>
         <zt-exec.version>1.9</zt-exec.version>
         <guava.version>28.2-jre</guava.version>

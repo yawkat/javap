@@ -10,13 +10,12 @@ object SdkSelector {
     private val compilerNames = document.getElementById("compiler-names") as HTMLSelectElement
 
     private lateinit var options: Map<Sdk, HTMLOptionElement>
-    private lateinit var selectedSdk: Sdk
+    private lateinit var _selectedSdk: Sdk
 
-    var selectedSdkName: String
-        get() = selectedSdk.name
-        set(name) {
-            val sdk = Sdks.sdksByName[name] ?: throw NoSuchElementException(name)
-            selectedSdk = sdk
+    var selectedSdk: Sdk
+        get() = _selectedSdk
+        set(sdk) {
+            _selectedSdk = sdk
             options.getValue(sdk).selected = true
 
             onChangeSelect()
@@ -25,17 +24,18 @@ object SdkSelector {
     init {
         compilerNames.addEventListener("change", {
             val sdk = Sdks.sdksByName.getValue(compilerNames.value)
-            if (sdk.language != selectedSdk.language) {
+            if (sdk.language != _selectedSdk.language) {
                 loadPaste("default:${sdk.language}", outputType = null, forceCompiler = sdk.name)
             }
-            selectedSdk = sdk
+            _selectedSdk = sdk
 
             onChangeSelect()
         })
     }
 
     private fun onChangeSelect() {
-        Editors.setLanguage(selectedSdk.language)
+        Editors.setLanguage(_selectedSdk.language)
+        CompilerConfigUi.updateSdk()
     }
 
     fun loadSdks() {

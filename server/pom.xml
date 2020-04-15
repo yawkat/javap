@@ -84,6 +84,11 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.jakewharton</groupId>
+            <artifactId>jax-rs-kotlinx-serialization</artifactId>
+            <version>0.2.1</version>
+        </dependency>
 
         <!-- test -->
         <dependency>

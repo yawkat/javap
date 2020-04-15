@@ -55,7 +55,7 @@ class PasteResource constructor(
         val accept = xhg.accept?.withoutParameters()
         if (accept == null || MediaType.JSON_UTF_8.`is`(accept)) {
             xhg.responseHeaders.put(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8.toString())
-            xhg.responseSender.send(json.stringify(serializer,value))
+            xhg.responseSender.send(json.stringify(serializer, value))
         } else {
             throw HttpException(StatusCodes.NOT_ACCEPTABLE, "Unsupported Accept")
         }
@@ -94,8 +94,9 @@ class PasteResource constructor(
     }
 
     fun getPaste(userToken: String?, id: String): PasteDto {
-        val paste = defaultPaste.defaultPastes.find { it.id == id }
-                ?: pasteDao.getPasteById(id) ?: throw HttpException(StatusCodes.NOT_FOUND, "No such paste")
+        val paste = defaultPaste.defaultPastes[id]
+                ?: pasteDao.getPasteById(id)
+                ?: throw HttpException(StatusCodes.NOT_FOUND, "No such paste")
         return PasteDto(
                 id = id,
                 editable = paste.ownerToken == userToken,
@@ -114,7 +115,7 @@ class PasteResource constructor(
 
         while (true) {
             val id = generateId(6)
-            if (defaultPaste.defaultPastes.any { it.id == id }) continue
+            if (defaultPaste.defaultPastes.containsKey(id)) continue
             // todo: handle PK violation and retry with different ID
             pasteDao.createPaste(userToken, id, input, output)
             return PasteDto(
@@ -131,7 +132,8 @@ class PasteResource constructor(
 
     private fun sanitizeInput(input: ProcessingInput) = ProcessingInput(
             code = input.code.sanitizeText(),
-            compilerName = input.compilerName
+            compilerName = input.compilerName,
+            compilerConfiguration = input.compilerConfiguration
     )
 
     private fun sanitizeOutput(output: ProcessingOutput): ProcessingOutput {

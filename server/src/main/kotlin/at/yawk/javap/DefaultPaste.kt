@@ -6,17 +6,22 @@
 
 package at.yawk.javap
 
+import at.yawk.javap.model.CompilerConfiguration
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.ProcessingInput
 import java.lang.Exception
+import java.util.stream.Collectors
 
 /**
  * @author yawkat
  */
 class DefaultPaste constructor(processor: Processor) {
-    val defaultPastes = Sdks.defaultSdks.map {
-        val code = when(it.key) {
-            SdkLanguage.JAVA -> """import java.util.*;
+    val defaultPastes: Map<String, Paste>
+
+    init {
+        fun createDefaultPaste(language: SdkLanguage, sdk: Sdk): Paste {
+            val code = when (language) {
+                SdkLanguage.JAVA -> """import java.util.*;
 import lombok.*;
 
 public class Main {
@@ -25,7 +30,7 @@ public class Main {
         i++;
     }
 }"""
-            SdkLanguage.KOTLIN -> """import java.util.*
+                SdkLanguage.KOTLIN -> """import java.util.*
 import kotlinx.coroutines.*
 
 class Main() {
@@ -34,19 +39,24 @@ class Main() {
         i++
     }
 }"""
-            SdkLanguage.SCALA -> """object Main {
+                SdkLanguage.SCALA -> """object Main {
     def test(i: Int) = i + 1
 }"""
-        }
-        val input = ProcessingInput(code, it.value.name)
-        Paste("default:${it.key}", "", input, processor.process(input))
-    }
-
-    init {
-        for (defaultPaste in defaultPastes) {
-            if (defaultPaste.output.javap == null) {
-                throw Exception("Compilation error in default paste: ${defaultPaste.output.compilerLog}")
             }
+            val input = ProcessingInput(code, sdk.name, emptyMap())
+            val output = processor.process(input)
+            if (output.javap == null) {
+                throw Exception("Compilation error in default paste: ${output.compilerLog}")
+            }
+            return Paste("default:$language", "", input, output)
         }
+
+        @Suppress("USELESS_CAST")
+        defaultPastes = (Sdks.defaultSdks.entries as Set<Map.Entry<SdkLanguage, Sdk>>).stream()
+                .parallel()
+                .map { (language, sdk) ->
+                    createDefaultPaste(language, sdk)
+                }
+                .collect(Collectors.toMap({ it.id }, { it }))
     }
 }

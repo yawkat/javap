@@ -9,8 +9,8 @@ package at.yawk.javap
 /**
  * @author yawkat
  */
-enum class SdkLanguage {
-    JAVA,
-    KOTLIN,
-    SCALA,
+enum class SdkLanguage(val fileName: String) {
+    JAVA("Main.java"),
+    KOTLIN("Main.kt"),
+    SCALA("Main.scala"),
 }

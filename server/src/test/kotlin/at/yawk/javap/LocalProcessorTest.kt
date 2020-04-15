@@ -6,6 +6,7 @@
 
 package at.yawk.javap
 
+import at.yawk.javap.model.CompilerConfiguration
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
 import org.testng.Assert.assertEquals
@@ -16,12 +17,12 @@ import org.testng.annotations.Test
  */
 
 class LocalProcessorTest {
-    val localProcessor = LocalProcessor(SystemSdkProvider, Bubblewrap())
+    private val localProcessor = LocalProcessor(SystemSdkProvider, Bubblewrap())
 
     @Test
     fun `empty file`() {
         assertEquals(
-                localProcessor.process(ProcessingInput("", Sdks.defaultJava.name)),
+                localProcessor.process(ProcessingInput("", Sdks.defaultJava.name, emptyMap())),
                 ProcessingOutput("", NO_CLASSES_GENERATED, null)
         )
     }
@@ -29,7 +30,8 @@ class LocalProcessorTest {
     @Test
     fun `compile error`() {
         assertEquals(
-                localProcessor.process(ProcessingInput("abc", Sdks.defaultJava.name)),
+                localProcessor.process(ProcessingInput(
+                        "abc", Sdks.defaultJava.name, emptyMap())),
                 ProcessingOutput("""Main.java:1: error: reached end of file while parsing
 abc
 ^
