@@ -6,10 +6,21 @@
 
 package at.yawk.javap
 
-import io.dropwizard.Configuration
-import io.dropwizard.db.DataSourceFactory
+import kotlinx.serialization.Serializable
 
 /**
  * @author yawkat
  */
-class JavapConfiguration(val database: DataSourceFactory) : Configuration()
+@Serializable
+data class JavapConfiguration(
+        val database: Database,
+        val bindAddress: String = "127.0.0.1",
+        val bindPort: Int = 8080
+) {
+    @Serializable
+    data class Database(
+            val user: String? = null,
+            val password: String? = null,
+            val url: String
+    )
+}

@@ -9,12 +9,11 @@ package at.yawk.javap
 import at.yawk.javap.model.Paste
 import at.yawk.javap.model.ProcessingInput
 import java.lang.Exception
-import javax.inject.Inject
 
 /**
  * @author yawkat
  */
-class DefaultPaste @Inject constructor(processor: Processor) {
+class DefaultPaste constructor(processor: Processor) {
     val defaultPastes = Sdks.defaultSdks.map {
         val code = when(it.key) {
             SdkLanguage.JAVA -> """import java.util.*;

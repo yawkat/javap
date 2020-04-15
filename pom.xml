@@ -31,9 +31,7 @@
 
     <properties>
         <kotlin.version>1.3.71</kotlin.version>
-        <dropwizard.version>2.0.7</dropwizard.version>
         <guice.version>4.2.3</guice.version>
-        <jackson.version>2.10.3</jackson.version>
         <zt-exec.version>1.9</zt-exec.version>
         <guava.version>28.2-jre</guava.version>
         <flyway.version>4.0.1</flyway.version>

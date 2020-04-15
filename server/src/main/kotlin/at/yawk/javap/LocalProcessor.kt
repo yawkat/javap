@@ -6,9 +6,11 @@
 
 package at.yawk.javap
 
+import at.yawk.javap.model.HttpException
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
 import com.google.common.annotations.VisibleForTesting
+import io.undertow.util.StatusCodes
 import java.io.IOException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
@@ -17,8 +19,6 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.stream.Collectors
 import java.util.stream.Stream
-import javax.inject.Inject
-import javax.ws.rs.BadRequestException
 
 /**
  * @author yawkat
@@ -49,8 +49,8 @@ fun deleteRecursively(path: Path) {
     })
 }
 
-class LocalProcessor @Inject constructor(private val sdkProvider: SdkProvider,
-                                         private val bubblewrap: Bubblewrap) : Processor {
+class LocalProcessor constructor(private val sdkProvider: SdkProvider,
+                                 private val bubblewrap: Bubblewrap) : Processor {
     override fun process(input: ProcessingInput): ProcessingOutput {
         val tempDirectory = Files.createTempDirectory(null)
         try {
@@ -59,7 +59,8 @@ class LocalProcessor @Inject constructor(private val sdkProvider: SdkProvider,
             val classDir = tempDirectory.resolve("classes")
             Files.createDirectories(classDir)
 
-            val sdk = Sdks.sdksByName[input.compilerName] ?: throw BadRequestException("Unknown compiler name")
+            val sdk = Sdks.sdksByName[input.compilerName]
+                    ?: throw HttpException(StatusCodes.BAD_REQUEST, "Unknown compiler name")
             val runnableSdk = sdkProvider.lookupSdk(sdk)
 
             val sourceFile = sourceDir.resolve(when (sdk.language) {
@@ -122,7 +123,7 @@ class LocalProcessor @Inject constructor(private val sdkProvider: SdkProvider,
     private fun decompile(classDir: Path, decompiler: Decompiler): String {
         return try {
             decompiler.decompile(classDir)
-        } catch(e: Throwable) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             e.toString()
         }

@@ -6,14 +6,22 @@
 
 package at.yawk.javap
 
+import at.yawk.javap.model.HttpException
 import at.yawk.javap.model.PasteDao
 import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
+import com.google.common.net.MediaType
+import io.undertow.server.HttpHandler
+import io.undertow.server.HttpServerExchange
+import io.undertow.server.handlers.PathTemplateHandler
+import io.undertow.util.Headers
+import io.undertow.util.Methods
+import io.undertow.util.StatusCodes
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.json.Json
 import java.util.concurrent.ThreadLocalRandom
-import javax.inject.Inject
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
 
 /**
  * @author yawkat
@@ -23,19 +31,71 @@ fun generateId(length: Int): String {
     return String(CharArray(length) { possibilities[ThreadLocalRandom.current().nextInt(possibilities.length)] })
 }
 
-@Path("/paste") // /api/paste
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-class PasteResource @Inject constructor(
+class PasteResource constructor(
+        private val json: Json,
         private val pasteDao: PasteDao,
         private val processor: Processor,
         private val defaultPaste: DefaultPaste
 ) {
-    @GET
-    @Path("/{id}")
-    fun getPaste(@HeaderParam("X-User-Token") userToken: String?, @PathParam("id") id: String): PasteDto {
+    @Suppress("UnstableApiUsage")
+    private fun <T> parse(xhg: HttpServerExchange, deserializer: DeserializationStrategy<T>, callback: (T) -> Unit) {
+        if (xhg.contentType.withoutParameters() == MediaType.JSON_UTF_8.withoutParameters()) {
+            xhg.requestReceiver.receiveFullString { _, s ->
+                handleExceptions(xhg) {
+                    callback(json.parse(deserializer, s))
+                }
+            }
+        } else {
+            throw HttpException(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type")
+        }
+    }
+
+    @Suppress("UnstableApiUsage")
+    private fun <T> write(xhg: HttpServerExchange, serializer: SerializationStrategy<T>, value: T) {
+        val accept = xhg.accept?.withoutParameters()
+        if (accept == null || MediaType.JSON_UTF_8.`is`(accept)) {
+            xhg.responseHeaders.put(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8.toString())
+            xhg.responseSender.send(json.stringify(serializer,value))
+        } else {
+            throw HttpException(StatusCodes.NOT_ACCEPTABLE, "Unsupported Accept")
+        }
+    }
+
+    fun buildHandler(next: HttpHandler): HttpHandler {
+        val handler = PathTemplateHandler(next)
+        handler.add("/api/paste/{id}") { xhg ->
+            val id = xhg.queryParameters["id"]?.peekFirst()
+                    ?: throw HttpException(StatusCodes.NOT_FOUND, "id not given")
+            val userToken: String? = xhg.requestHeaders.getFirst("X-User-Token")
+            when (xhg.requestMethod) {
+                Methods.PUT -> {
+                    parse(xhg, PasteDto.Update.serializer()) {
+                        write(xhg, PasteDto.serializer(), updatePaste(userToken, id, it))
+                    }
+                }
+                Methods.GET -> {
+                    write(xhg, PasteDto.serializer(), getPaste(userToken, id))
+                }
+                else -> next.handleRequest(xhg)
+            }
+        }
+        handler.add("/api/paste") { xhg ->
+            val userToken: String? = xhg.requestHeaders.getFirst("X-User-Token")
+            when (xhg.requestMethod) {
+                Methods.POST -> {
+                    parse(xhg, PasteDto.Create.serializer()) {
+                        write(xhg, PasteDto.serializer(), createPaste(userToken, it))
+                    }
+                }
+                else -> next.handleRequest(xhg)
+            }
+        }
+        return handler
+    }
+
+    fun getPaste(userToken: String?, id: String): PasteDto {
         val paste = defaultPaste.defaultPastes.find { it.id == id }
-                ?: pasteDao.getPasteById(id) ?: throw NotFoundException()
+                ?: pasteDao.getPasteById(id) ?: throw HttpException(StatusCodes.NOT_FOUND, "No such paste")
         return PasteDto(
                 id = id,
                 editable = paste.ownerToken == userToken,
@@ -44,10 +104,9 @@ class PasteResource @Inject constructor(
         )
     }
 
-    @POST
-    fun createPaste(@HeaderParam("X-User-Token") userToken: String?, body: PasteDto.Create): PasteDto {
+    fun createPaste(userToken: String?, body: PasteDto.Create): PasteDto {
         if (userToken == null || !userToken.matches("[a-zA-Z0-9]+".toRegex())) {
-            throw BadRequestException("Illegal user token")
+            throw HttpException(StatusCodes.BAD_REQUEST, "Illegal user token")
         }
 
         val input = sanitizeInput(body.input)
@@ -83,16 +142,16 @@ class PasteResource @Inject constructor(
         )
     }
 
-    @PUT
-    @Path("/{id}")
-    fun updatePaste(@HeaderParam("X-User-Token") userToken: String?, @PathParam("id") id: String, body: PasteDto.Update): PasteDto {
+    fun updatePaste(userToken: String?,
+                    id: String,
+                    body: PasteDto.Update): PasteDto {
         if (userToken == null || !userToken.matches("[a-zA-Z0-9]+".toRegex())) {
-            throw BadRequestException("Illegal user token")
+            throw HttpException(StatusCodes.BAD_REQUEST, "Illegal user token")
         }
 
-        var paste = pasteDao.getPasteById(id) ?: throw NotFoundException()
+        var paste = pasteDao.getPasteById(id) ?: throw HttpException(StatusCodes.NOT_FOUND, "No such paste")
         if (paste.ownerToken != userToken) {
-            throw NotAuthorizedException("Not your paste")
+            throw HttpException(StatusCodes.UNAUTHORIZED, "Not your paste")
         }
         if (body.input != null) {
             val newInput = sanitizeInput(body.input!!)

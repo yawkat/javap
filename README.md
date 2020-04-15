@@ -17,12 +17,12 @@ dev:
 
 ```
 mvn -pl shared,shared-js,server,client install &&
-mvn -pl server compile exec:java -Dexec.mainClass=at.yawk.javap.JavapApplicationKt -Dexec.args="server config.yml"
+mvn -pl server compile exec:java -Dexec.mainClass=at.yawk.javap.JavapApplicationKt -Dexec.args="config.json"
 ```
 
 prod:
 
 ```
 mvn clean install &&
-java -jar server/target/javap-server-1.0-SNAPSHOT-shaded.jar server config.yml
+java -jar server/target/javap-server-1.0-SNAPSHOT-shaded.jar config.json
 ```

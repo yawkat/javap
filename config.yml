@@ -1,7 +1,0 @@
-database:
-  driverClass: org.postgresql.Driver
-  user: javap
-  password:
-  url: jdbc:postgresql://127.0.0.1/javap
-server:
-  rootPath: '/api/*'

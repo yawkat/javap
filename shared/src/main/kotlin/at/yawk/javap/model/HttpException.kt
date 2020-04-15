@@ -6,13 +6,7 @@
 
 package at.yawk.javap.model
 
-/**
- * @author yawkat
- */
-data class Paste(
-        val id: String,
-        val ownerToken: String,
+import kotlinx.serialization.Serializable
 
-        val input: ProcessingInput,
-        val output: ProcessingOutput
-)
+@Serializable
+data class HttpException(val code: Int, override val message: String) : Exception(message)

@@ -27,7 +27,6 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 import java.util.Arrays
 import java.util.zip.ZipInputStream
-import javax.inject.Singleton
 
 private val log = LoggerFactory.getLogger(SdkProviderImpl::class.java)
 
@@ -39,7 +38,6 @@ abstract class RunnableSdk(val sdk: Sdk) {
     abstract fun compilerCommand(inputFile: Path, outputDir: Path): List<String>
 }
 
-@Singleton
 class SdkProviderImpl : SdkProvider {
     private lateinit var sdks: Map<Sdk, RunnableSdk>
 
