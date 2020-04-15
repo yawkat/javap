@@ -72,7 +72,7 @@ class SdkProviderImpl : SdkProvider {
 
                     ProcessExecutor()
                             .directory(tmp.toFile())
-                            .command("tar", "xzf", dist.toString(), "--strip", "1")
+                            .command("tar", "xzf", dist.toString(), "--transform", "s|^\\./||", "--strip", "1")
                             .redirectOutput(Slf4jStream.of(log).asInfo())
                             .exitValueNormal()
                             .destroyOnExit()
