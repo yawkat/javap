@@ -108,7 +108,11 @@ body {
     padding: .2em;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+/* This is usually the custom warnings checkbox */
+#compiler-options label:last-child {
+    overflow: visible;
 }
 
 #compiler-options label input, #compiler-options label select {
