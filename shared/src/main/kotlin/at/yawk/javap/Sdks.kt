@@ -12,9 +12,12 @@ sealed class Sdk(
 ) {
     abstract val name: String
 
-    interface Java {
-        val release: Int
+    interface HasLint {
         val supportedWarnings: Set<String>
+    }
+
+    interface Java : HasLint {
+        val release: Int
     }
 
     data class OpenJdk(
@@ -57,10 +60,12 @@ sealed class Sdk(
     ) : Sdk(SdkLanguage.KOTLIN), Kotlin
 
     data class Scala(
+            val release: KotlinVersion,
             override val name: String,
             val sdk: RemoteFile,
-            val hostJdk: OpenJdk
-    ) : Sdk(SdkLanguage.SCALA)
+            val hostJdk: OpenJdk,
+            override val supportedWarnings: Set<String>
+    ) : Sdk(SdkLanguage.SCALA), HasLint
 }
 
 object Sdks {
@@ -255,16 +260,24 @@ object Sdks {
             kotlin1_0_3, kotlin1_0_2)
     private val defaultKotlin = kotlin1_3_50
 
-    private fun scalaSdk(version: String) = Sdk.Scala(
-            name = "Scala $version",
-            sdk = RemoteFile("https://downloads.lightbend.com/scala/$version/scala-$version.zip"),
-            hostJdk = openjdk8
+    private fun scalaSdk(release: KotlinVersion, warnings: Set<String>) = Sdk.Scala(
+            release = release,
+            name = "Scala $release",
+            sdk = RemoteFile("https://downloads.lightbend.com/scala/$release/scala-$release.zip"),
+            hostJdk = openjdk8,
+            supportedWarnings = warnings
     )
 
-    private val scala2_13 = scalaSdk("2.13.1")
-    private val scala2_12_5 = scalaSdk("2.12.5")
-    private val scala2_12_0 = scalaSdk("2.12.0")
-    private val scala2_11_8 = scalaSdk("2.11.8")
+    private val scala2_11_8 = scalaSdk(KotlinVersion(2, 11, 8), warnings = setOf(
+            "adapted-args","nullary-unit","inaccessible","nullary-override","infer-any","missing-interpolator",
+            "doc-detached","private-shadow","type-parameter-shadow","poly-implicit-overload","option-implicit",
+            "delayedinit-select","by-name-right-associative","package-object-classes","unsound-match","stars-align"))
+    private val scala2_12_0 = scalaSdk(KotlinVersion(2, 12, 0), warnings = scala2_11_8.supportedWarnings + "constant")
+    private val scala2_12_5 = scalaSdk(KotlinVersion(2, 12, 5), warnings = scala2_12_0.supportedWarnings + "unused")
+    private val scala2_13 = scalaSdk(KotlinVersion(2, 13, 1), warnings = scala2_12_5.supportedWarnings -
+            setOf("by-name-right-associative", "unsound-match") +
+            setOf("nonlocal-return", "implicit-not-found", "serial", "valpattern", "eta-zero", "eta-sam",
+                    "deprecation"))
 
     private val scala = listOf(scala2_13, scala2_12_5, scala2_12_0, scala2_11_8)
     private val defaultScala = scala2_13
@@ -282,6 +295,6 @@ object Sdks {
     )
     val sdksByName = (openjdk as List<Sdk> + ecj + kotlin + scala).associateBy { it.name }
 
-    val allSupportedWarnings: Set<String> = (openjdk as List<Sdk.Java> + ecj)
+    val allSupportedWarnings: Set<String> = (openjdk as List<Sdk.HasLint> + ecj + scala)
             .flatMapTo(mutableSetOf()) { it.supportedWarnings }
 }

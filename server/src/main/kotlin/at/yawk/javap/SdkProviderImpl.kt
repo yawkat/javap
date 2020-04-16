@@ -122,13 +122,19 @@ class SdkProviderImpl : SdkProvider {
             }
 
             object : HostedSdk(sdk, sdkRoot, sdk.hostJdk) {
-                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
-                        jdkHome.resolve("bin/java").toAbsolutePath().toString(),
-                        "-javaagent:${lombokLocation.toAbsolutePath()}=ECJ",
-                        "-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(),
-                        "-source", "8", "-proceedOnError",
-                        "-d", outputDir.toString(), inputFile.toString()
-                )
+                override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration): List<String> {
+                    val command = mutableListOf(jdkHome.resolve("bin/java").toAbsolutePath().toString())
+                    if (ConfigProperties.lombok.get(config)) {
+                        command.add("-javaagent:${lombokLocation.toAbsolutePath()}=ECJ")
+                    }
+                    command.addAll(listOf(
+                            "-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(),
+                            "-d", outputDir.toString()
+                    ))
+                    command.addAll(ConfigProperties.validateAndBuildCommandLine(sdk, config))
+                    command.add(inputFile.toString())
+                    return command
+                }
             }
         }
         is Sdk.KotlinJar -> {
@@ -142,8 +148,8 @@ class SdkProviderImpl : SdkProvider {
                         jdkHome.resolve("bin/java").toAbsolutePath().toString(),
                         "-jar", compilerPath.toString(),
                         "-no-stdlib", "-cp", "$compilerPath",
-                        "-d", outputDir.toString(), inputFile.toString()
-                )
+                        "-d", outputDir.toString()
+                ) + ConfigProperties.validateAndBuildCommandLine(sdk, config) + inputFile.toString()
             }
         }
         is Sdk.KotlinDistribution -> {
@@ -167,8 +173,8 @@ class SdkProviderImpl : SdkProvider {
                 override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                         sdkRoot.resolve("bin/kotlinc").toAbsolutePath().toString(),
                         "-cp", coroutinesPath.toString(),
-                        "-d", outputDir.toString(), inputFile.toString()
-                )
+                        "-d", outputDir.toString()
+                ) + ConfigProperties.validateAndBuildCommandLine(sdk, config) + inputFile.toString()
             }
         }
         is Sdk.Scala -> {
@@ -185,8 +191,8 @@ class SdkProviderImpl : SdkProvider {
             object : HostedSdk(sdk, sdkRoot, sdk.hostJdk) {
                 override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
                         sdkRoot.resolve("bin/scalac").toAbsolutePath().toString(),
-                        "-d", outputDir.toString(), inputFile.toString()
-                )
+                        "-d", outputDir.toString()
+                ) + ConfigProperties.validateAndBuildCommandLine(sdk, config) + inputFile.toString()
             }
         }
     }

@@ -43,6 +43,13 @@ fun main() {
                 is Sdk.Scala -> {
                     runner().command("sdk/${sdk.name}/bin/scalac", "-help").start().future.get()
                     runner().command("sdk/${sdk.name}/bin/scalac", "-X").start().future.get()
+                    runner().command("sdk/${sdk.name}/bin/scalac", "-Y").start().future.get()
+                    runner().command("sdk/${sdk.name}/bin/scalac", "-language:help").start().future.get()
+                    if (sdk.release >= KotlinVersion(2, 12)) {
+                        runner().command("sdk/${sdk.name}/bin/scalac", "-opt:help").start().future.get()
+                        runner().command("sdk/${sdk.name}/bin/scalac", "-Xmixin-force-forwarders:help").start().future.get()
+                    }
+                    runner().command("sdk/${sdk.name}/bin/scalac", "-Xlint:help").start().future.get()
                 }
             }
         }

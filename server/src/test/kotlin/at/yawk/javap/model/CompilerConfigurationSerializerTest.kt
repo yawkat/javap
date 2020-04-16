@@ -29,7 +29,7 @@ class CompilerConfigurationSerializerTest {
                 config[property.id] = ThreadLocalRandom.current().nextBoolean()
             }
         }
-        config[ConfigProperties.javaLint.id] = setOf("a", "b")
+        config[ConfigProperties.lint.id] = setOf("a", "b")
 
         val serializer = ConfigProperties.serializers.getValue(SdkLanguage.JAVA)
         val json = Json(jsonConfiguration)

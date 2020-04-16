@@ -22,11 +22,7 @@ object ConfigProperties {
 
     fun validateAndBuildCommandLine(sdk: Sdk, config: CompilerConfiguration): List<String> {
         val out = mutableListOf<String>()
-        val properties: Iterable<ConfigProperty<*>> = when (sdk.language) {
-            SdkLanguage.JAVA -> propertiesJava
-            SdkLanguage.KOTLIN -> propertiesKotlin
-            SdkLanguage.SCALA -> TODO()
-        }
+        val properties: Iterable<ConfigProperty<*>> = properties.getValue(sdk.language)
         val remaining = config.keys.toMutableSet()
         for (property in properties) {
             if (property.canApplyTo(sdk)) {
@@ -61,20 +57,40 @@ object ConfigProperties {
                     out.add("-Werror")
                 }
             }
-            val lint = config["lint"] as Set<Any?>?
+        } else if (sdk is Sdk.Scala) {
+            val languageOpts = listOf("dynamics", "postfixOps", "reflectiveCalls", "implicitConversions",
+                    "higherKinds", "existentials")
+            if (languageOpts.any { config[it] == true }) {
+                out.add("-language:" + languageOpts.filter { config[it] == true }.joinToString(","))
+            }
+        }
+        if (sdk is Sdk.HasLint) {
+            val lint = lint.get(config)
             if (lint != null) {
-                require(Sdks.allSupportedWarnings.containsAll(lint))
-                if (sdk is Sdk.Ecj) {
-                    when {
-                        lint.isEmpty() -> out.add("-warn:none")
-                        lint.containsAll(sdk.supportedWarnings) -> out.add("-warn:all")
-                        else -> out.add("-warn:" + lint.intersect(sdk.supportedWarnings).joinToString(","))
+                when (sdk) {
+                    is Sdk.Ecj -> {
+                        when {
+                            lint.isEmpty() -> out.add("-warn:none")
+                            lint.containsAll(sdk.supportedWarnings) -> out.add("-warn:all")
+                            else -> out.add("-warn:" + lint.intersect(sdk.supportedWarnings).joinToString(","))
+                        }
                     }
-                } else {
-                    when {
-                        lint.isEmpty() -> out.add("-Xlint:none")
-                        lint.containsAll(sdk.supportedWarnings) -> out.add("-Xlint:all")
-                        else -> out.add("-Xlint:" + lint.intersect(sdk.supportedWarnings).joinToString(","))
+                    is Sdk.OpenJdk -> {
+                        when {
+                            lint.isEmpty() -> out.add("-Xlint:none")
+                            lint.containsAll(sdk.supportedWarnings) -> out.add("-Xlint:all")
+                            else -> out.add("-Xlint:" + lint.intersect(sdk.supportedWarnings).joinToString(","))
+                        }
+                    }
+                    is Sdk.Scala -> {
+                        when {
+                            lint.isEmpty() -> out.add("-Xlint:")
+                            lint.containsAll(sdk.supportedWarnings) -> out.add("-Xlint:_")
+                            else -> out.add("-Xlint:" + lint.intersect(sdk.supportedWarnings).joinToString(","))
+                        }
+                    }
+                    else -> {
+                        throw AssertionError()
                     }
                 }
             }
@@ -83,10 +99,9 @@ object ConfigProperties {
     }
 
 
-
     private inline fun releaseChoice(id: String,
                                      param: String,
-                                     crossinline range: (Int) -> IntRange) : ConfigProperty.RangeChoice =
+                                     crossinline range: (Int) -> IntRange): ConfigProperty.RangeChoice =
             object : ConfigProperty.RangeChoice(id, default = null) {
                 override fun apply(out: MutableList<String>, value: Int?) {
                     if (value != null) {
@@ -113,9 +128,16 @@ object ConfigProperties {
         }
     }
     val lombok: ConfigProperty<Boolean> = ConfigProperty.SpecialFlag("lombok", "Lombok", default = true)
-    val javaLint: ConfigProperty<Set<String>?> = ConfigProperty.Special(
+    val lint: ConfigProperty<Set<String>?> = object : ConfigProperty.Special<Set<String>?>(
             "lint", default = null,
-            serializer = SetSerializer(String.serializer()).nullable)
+            serializer = SetSerializer(String.serializer()).nullable) {
+
+        override fun canApplyTo(sdk: Sdk) = sdk is Sdk.HasLint
+
+        override fun validate(sdk: Sdk, value: Set<String>?) {
+            require(value == null || Sdks.allSupportedWarnings.containsAll(value))
+        }
+    }
     private val propertiesJava = listOf<ConfigProperty<*>>(
             propertyRelease,
             releaseChoice("source", "-source") { release ->
@@ -147,9 +169,12 @@ object ConfigProperties {
                 override fun canApplyTo(sdk: Sdk) =
                         super.canApplyTo(sdk) && (sdk !is Sdk.Ecj || sdk.release >= 9)
             },
-            javaLint,
+            lint,
             ConfigProperty.SimpleFlag("preview", "--enable-preview").apply {
                 minJavaVersion = 11
+            },
+            ConfigProperty.SimpleFlag("proceedOnError", "-proceedOnError", default = true).apply {
+                requireEcj = true
             },
             ConfigProperty.SimpleFlag("preserveAllLocals", "-preserveAllLocals").apply {
                 requireEcj = true
@@ -340,9 +365,79 @@ object ConfigProperties {
             KotlinVersion(1, 3)
     ).associateBy { "${it.major}.${it.minor}" }
 
+    private val v2_11_8 = KotlinVersion(2, 11, 8)
+    private val v2_12_5 = KotlinVersion(2, 12, 5)
+
+    private val scala = listOf(
+            ConfigProperty.SimpleFlag("deprecation", "-deprecation"),
+            ConfigProperty.SimpleFlag("explainTypes", "-explaintypes"),
+            object : ConfigProperty.Choice<String>("debug", serializer = String.serializer(), default = "vars") {
+                override fun apply(out: MutableList<String>, value: String) {
+                    if (value != default) {
+                        out.add("-g:$value")
+                    }
+                }
+
+                override fun getChoices(sdk: Sdk) =
+                        listOf("none", "source", "line", "vars", "notailcalls").associateBy { it }
+            },
+            ConfigProperty.SpecialFlag("debugSource", "-g:source"),
+            ConfigProperty.SpecialFlag("debugLine", "-g:line"),
+            ConfigProperty.SpecialFlag("debugVars", "-g:vars"),
+            ConfigProperty.SpecialFlag("debugNoTailCalls", "-g:notailcalls"),
+            ConfigProperty.SimpleFlag("debugNoSpecialization", "-no-specialization"),
+            ConfigProperty.SimpleFlag("optimise", "-optimise").apply { maxScalaVersion = v2_11_8 },
+            object : ConfigProperty.RangeChoice("target", default = null) {
+                override fun apply(out: MutableList<String>, value: Int?) {
+                    if (value != null) {
+                        out.add("jvm-1.$value")
+                    }
+                }
+
+                override fun getRange(sdk: Sdk): IntRange {
+                    return 5..8
+                }
+            },
+            object : ConfigProperty.RangeChoice("release", default = null) {
+                override fun apply(out: MutableList<String>, value: Int?) {
+                    if (value != null) {
+                        out.add(value.toString())
+                    }
+                }
+
+                override fun getRange(sdk: Sdk): IntRange {
+                    return 6..9
+                }
+            },
+            ConfigProperty.SimpleFlag("unchecked", "-unchecked"),
+            ConfigProperty.SimpleFlag("uniqid", "-uniqid"),
+            ConfigProperty.SimpleFlag("verbose", "-verbose"),
+            ConfigProperty.SimpleFlag("checkInit", "-Xcheckinit"),
+            ConfigProperty.SimpleFlag("dev", "-Xdev"),
+            ConfigProperty.SimpleFlag("disableAssertions", "-Xdisable-assertions"),
+            ConfigProperty.SimpleFlag("experimental", "-Xexperimental"),
+            ConfigProperty.SimpleFlag("warningsAsErrors", "-Xfatal-warnings"),
+            ConfigProperty.SimpleFlag("fullLubs", "-Xfull-lubs"),
+            ConfigProperty.SimpleFlag("future", "-Xfuture"),
+            ConfigProperty.SimpleFlag("noForwarders", "-Xno-forwarders"),
+            ConfigProperty.SimpleFlag("noPatmatAnalysis", "-Xno-patmat-analysis"),
+            ConfigProperty.SimpleFlag("noUescape", "-Xno-uescape"),
+            ConfigProperty.SpecialFlag("dynamics", "-language:dynamics"),
+            ConfigProperty.SpecialFlag("postfixOps", "-language:postfixOps"),
+            ConfigProperty.SpecialFlag("reflectiveCalls", "-language:reflectiveCalls"),
+            ConfigProperty.SpecialFlag("implicitConversions", "-language:implicitConversions"),
+            ConfigProperty.SpecialFlag("higherKinds", "-language:higherKinds"),
+            ConfigProperty.SpecialFlag("existentials", "-language:existentials"),
+            ConfigProperty.SimpleFlag("virtPatMat", "-Yvirtpatmat").apply {
+                minScalaVersion = v2_12_5
+            },
+            lint
+    )
+
     val properties = mapOf(
             SdkLanguage.JAVA to propertiesJava,
-            SdkLanguage.KOTLIN to propertiesKotlin
+            SdkLanguage.KOTLIN to propertiesKotlin,
+            SdkLanguage.SCALA to scala
     )
 
     init {
@@ -418,14 +513,16 @@ sealed class ConfigProperty<T>(
 ) {
     private companion object {
         private val ktv1 = KotlinVersion(1, 0)
+        private val ktvInf = KotlinVersion(255, 0)
     }
 
-    lateinit var language: SdkLanguage
-        private set
+    private lateinit var language: SdkLanguage
 
     internal var minJavaVersion = 0
     internal var requireEcj = false
     internal var minKotlinVersion: KotlinVersion = ktv1
+    internal var minScalaVersion: KotlinVersion = ktv1
+    internal var maxScalaVersion: KotlinVersion = ktvInf
 
     /**
      * Only allow setting this property if a given interdependency is met
@@ -452,7 +549,10 @@ sealed class ConfigProperty<T>(
                     (!requireEcj || sdk is Sdk.Ecj)
         is Sdk.KotlinJar, is Sdk.KotlinDistribution ->
             language == SdkLanguage.KOTLIN && minKotlinVersion <= (sdk as Sdk.Kotlin).release
-        is Sdk.Scala -> TODO()
+        is Sdk.Scala ->
+            language == SdkLanguage.SCALA &&
+                    minScalaVersion <= sdk.release &&
+                    maxScalaVersion >= sdk.release
     }
 
     internal fun applyFrom(out: MutableList<String>, config: CompilerConfiguration) =
@@ -473,7 +573,9 @@ sealed class ConfigProperty<T>(
 
     protected abstract fun validate(sdk: Sdk, value: T)
 
-    class Special<T>(id: String, default: T, serializer: KSerializer<T>) : ConfigProperty<T>(id, default, serializer) {
+    open class Special<T>(id: String, default: T, serializer: KSerializer<T>) : ConfigProperty<T>(id,
+            default,
+            serializer) {
         override fun apply(out: MutableList<String>, value: T) {
             // special handling
         }
@@ -528,7 +630,7 @@ sealed class ConfigProperty<T>(
     abstract class Flag(
             id: String,
             val displayName: String,
-            default: Boolean = false
+            default: Boolean
     ) : ConfigProperty<Boolean>(id, default = default, serializer = Boolean.serializer()) {
         override fun validate(sdk: Sdk, value: Boolean) {
         }
@@ -548,8 +650,9 @@ sealed class ConfigProperty<T>(
      */
     internal class SimpleFlag(
             id: String,
-            private val value: String
-    ) : Flag(id, value) {
+            private val value: String,
+            default: Boolean = false
+    ) : Flag(id, value, default = default) {
         override fun apply(out: MutableList<String>, value: Boolean) {
             if (value) {
                 out.add(this.value)

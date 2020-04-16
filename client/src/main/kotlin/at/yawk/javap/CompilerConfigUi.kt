@@ -42,7 +42,7 @@ object CompilerConfigUi {
                 }
             }
         }
-        handlers[ConfigProperties.javaLint] = JavaLintHandler()
+        handlers[ConfigProperties.lint] = JavaLintHandler()
         this.handlers = handlers
 
         val grid = document.getElementById("compiler-options-grid")!!
@@ -222,7 +222,7 @@ object CompilerConfigUi {
     }
 
     private class JavaLintHandler : PropertyHandler<Set<String>?, ConfigProperty<Set<String>?>>(
-            ConfigProperties.javaLint) {
+            ConfigProperties.lint) {
 
         private lateinit var label: HTMLLabelElement
         private lateinit var customWarningsCheckbox: HTMLInputElement
