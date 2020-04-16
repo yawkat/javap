@@ -126,7 +126,7 @@ object ConfigProperties {
             release <= 11 -> 6..release
             else -> 7..release
         }
-    }
+    }.apply { minJavaVersion = 9 }
     val lombok: ConfigProperty<Boolean> = ConfigProperty.SpecialFlag("lombok", "Lombok", default = true)
     val lint: ConfigProperty<Set<String>?> = object : ConfigProperty.Special<Set<String>?>(
             "lint", default = null,
@@ -229,7 +229,7 @@ object ConfigProperties {
                  * Supported jvm targets. 7 should be excluded
                  */
                 private fun jvmTargets(sdk: Sdk.Kotlin): IntRange {
-                    if (sdk.release >= v1_3_50) return 6..12 // TODO: change host jdk
+                    if (sdk.release >= v1_3_50) return 6..12
                     if (sdk.release >= v1_1_1) return 6..8
                     if (sdk.release >= v1_0_3) return 6..6
                     throw AssertionError()
