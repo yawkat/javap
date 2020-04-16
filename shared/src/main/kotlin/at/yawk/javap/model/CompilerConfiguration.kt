@@ -438,6 +438,7 @@ object ConfigProperties {
             ConfigProperty.SpecialFlag("existentials", "-language:existentials"),
             ConfigProperty.SimpleFlag("virtPatMat", "-Yvirtpatmat").apply {
                 minScalaVersion = v2_12_5
+                maxScalaVersion = v2_12_5
             },
             lint
     )

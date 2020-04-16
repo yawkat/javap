@@ -111,9 +111,11 @@ object CompilerConfigUi {
                 s += " -javaagent:lombok.jar=ECJ"
             }
         }
-        s += ConfigProperties.validateAndBuildCommandLine(sdk, buildConfig()).joinToString(" ",
-                prefix = " ",
-                postfix = " ")
+        val options = ConfigProperties.validateAndBuildCommandLine(sdk, buildConfig())
+        if (options.isNotEmpty()) {
+            s += options.joinToString(" ", prefix = " ")
+        }
+        s += " "
         s += sdk.language.fileName
         compilerCommandLine.textContent = s
     }

@@ -98,6 +98,7 @@ body {
 }
 
 #compiler-options-grid {
+    clear: both;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(auto, 200px));
 }
@@ -106,6 +107,8 @@ body {
     display: inline-block;
     padding: .2em;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #compiler-options label input, #compiler-options label select {
