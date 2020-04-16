@@ -12,6 +12,12 @@ sealed class Sdk(
 ) {
     abstract val name: String
 
+    /**
+     * Previous SDK names that should now be treated as this SDK
+     */
+    open val aliases: Set<String>
+        get() = emptySet()
+
     interface HasLint {
         val supportedWarnings: Set<String>
     }
@@ -37,7 +43,9 @@ sealed class Sdk(
             val compilerJar: RemoteFile,
             val lombok: RemoteFile,
             val hostJdk: OpenJdk,
-            override val supportedWarnings: Set<String>
+            override val supportedWarnings: Set<String>,
+
+            override val aliases: Set<String> = emptySet()
     ) : Sdk(SdkLanguage.JAVA), Java
 
     interface Kotlin {
@@ -175,13 +183,14 @@ object Sdks {
             lombok = lombok1_18_10,
             supportedWarnings = openjdk13.supportedWarnings
     )
-    private val openjdk = listOf(openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
+    private val openjdk = listOf(
+            openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
     val defaultJava = openjdk14
 
-    // actually 3.11.1 TODO
-    private val ecj4_5 = Sdk.Ecj(
+    private val ecj3_11 = Sdk.Ecj(
             release = 8,
-            name = "Eclipse ECJ 4.5.1",
+            name = "Eclipse ECJ 3.11.1",
+            aliases = setOf("Eclipse ECJ 4.5.1"), // mistakenly called it this at first
             compilerJar = RemoteFile("https://repo1.maven.org/maven2/org/eclipse/jdt/core/compiler/ecj/4.5.1/ecj-4.5.1.jar"),
             lombok = lombok1_18_4,
             hostJdk = openjdk8,
@@ -202,7 +211,7 @@ object Sdks {
                     "typeHiding", "unavoidableGenericProblems", "unchecked", "unnecessaryElse", "unqualifiedField",
                     "unused", "unusedAllocation", "unusedArgument", "unusedExceptionParam", "unusedImport",
                     "unusedLabel", "unusedLocal", "unusedParam", "unusedParamOverriding", "unusedParamImplementing",
-                    "unusedParamIncludeDoc", "unusedPrivate", "unusedThrown","unusedThrownWhenOverriding",
+                    "unusedParamIncludeDoc", "unusedPrivate", "unusedThrown", "unusedThrownWhenOverriding",
                     "unusedThrownIncludeDocComment", "unusedThrownExemptExceptionThrowable", "unusedTypeArgs",
                     "uselessTypeCheck", "varargsCast", "warningToken"
             )
@@ -213,10 +222,10 @@ object Sdks {
             compilerJar = RemoteFile("https://repo1.maven.org/maven2/org/eclipse/jdt/ecj/3.21.0/ecj-3.21.0.jar"),
             lombok = lombok1_18_10,
             hostJdk = openjdk8,
-            supportedWarnings = ecj4_5.supportedWarnings +
+            supportedWarnings = ecj3_11.supportedWarnings +
                     setOf("module", "removal", "unlikelyCollectionMethodArgumentType", "unlikelyEqualsArgumentType")
     )
-    private val ecj = listOf(ecj3_21, ecj4_5)
+    private val ecj = listOf(ecj3_21, ecj3_11)
 
     private val kotlin1_3_50 = Sdk.KotlinDistribution(
             KotlinVersion(1, 3, 50),
@@ -269,9 +278,10 @@ object Sdks {
     )
 
     private val scala2_11_8 = scalaSdk(KotlinVersion(2, 11, 8), warnings = setOf(
-            "adapted-args","nullary-unit","inaccessible","nullary-override","infer-any","missing-interpolator",
-            "doc-detached","private-shadow","type-parameter-shadow","poly-implicit-overload","option-implicit",
-            "delayedinit-select","by-name-right-associative","package-object-classes","unsound-match","stars-align"))
+            "adapted-args", "nullary-unit", "inaccessible", "nullary-override", "infer-any", "missing-interpolator",
+            "doc-detached", "private-shadow", "type-parameter-shadow", "poly-implicit-overload", "option-implicit",
+            "delayedinit-select", "by-name-right-associative", "package-object-classes", "unsound-match", "stars-align"
+    ))
     private val scala2_12_0 = scalaSdk(KotlinVersion(2, 12, 0), warnings = scala2_11_8.supportedWarnings + "constant")
     private val scala2_12_5 = scalaSdk(KotlinVersion(2, 12, 5), warnings = scala2_12_0.supportedWarnings + "unused")
     private val scala2_13 = scalaSdk(KotlinVersion(2, 13, 1), warnings = scala2_12_5.supportedWarnings -
@@ -293,7 +303,19 @@ object Sdks {
             SdkLanguage.KOTLIN to defaultKotlin,
             SdkLanguage.SCALA to defaultScala
     )
-    val sdksByName = (openjdk as List<Sdk> + ecj + kotlin + scala).associateBy { it.name }
+
+    val sdksByName: Map<String, Sdk>
+
+    init {
+        val sdksByName = mutableMapOf<String, Sdk>()
+        for (sdk in openjdk as List<Sdk> + ecj + kotlin + scala) {
+            sdksByName[sdk.name] = sdk
+            for (alias in sdk.aliases) {
+                sdksByName[alias] = sdk
+            }
+        }
+        this.sdksByName = sdksByName
+    }
 
     val allSupportedWarnings: Set<String> = (openjdk as List<Sdk.HasLint> + ecj + scala)
             .flatMapTo(mutableSetOf()) { it.supportedWarnings }
