@@ -13,10 +13,13 @@ import org.w3c.dom.Element
 import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLLabelElement
+import org.w3c.dom.HTMLOptionElement
+import org.w3c.dom.HTMLSelectElement
 import kotlin.browser.document
 import kotlin.dom.addClass
 import kotlin.dom.appendElement
 import kotlin.dom.appendText
+import kotlin.dom.clear
 import kotlin.dom.removeClass
 
 object CompilerConfigUi {
@@ -35,14 +38,15 @@ object CompilerConfigUi {
             when (property) {
                 is ConfigProperty.Special -> {
                 }
-                is ConfigProperty.Choice -> {
-                }
-                is ConfigProperty.Flag -> {
+                is ConfigProperty.RangeChoice ->
+                    handlers[property] = NumberHandler(property)
+                is ConfigProperty.Choice ->
+                    handlers[property] = SelectHandler(property)
+                is ConfigProperty.Flag ->
                     handlers[property] = FlagHandler(property)
-                }
             }
         }
-        handlers[ConfigProperties.lint] = JavaLintHandler()
+        handlers[ConfigProperties.lint] = LintHandler()
         this.handlers = handlers
 
         val grid = document.getElementById("compiler-options-grid")!!
@@ -69,6 +73,7 @@ object CompilerConfigUi {
         for (handler in handlers.values) {
             handler.updateSdk()
         }
+        updateCompilerCommandLine()
     }
 
     fun updatePaste() {
@@ -186,42 +191,154 @@ object CompilerConfigUi {
         }
     }
 
-    private class FlagHandler(property: ConfigProperty.Flag)
-        : SingleElementPropertyHandler<Boolean, ConfigProperty.Flag>(property) {
-
-        lateinit var checkbox: HTMLInputElement
+    private abstract class InputHandler<T, P : ConfigProperty<T>>(property: P) :
+            SingleElementPropertyHandler<T, P>(property) {
+        lateinit var input: HTMLInputElement
 
         override fun init(wrapper: Element) {
             label = wrapper.appendElement("label") {
                 require(this is HTMLLabelElement)
-                checkbox = appendElement("input") {
+                input = appendElement("input") {
                     require(this is HTMLInputElement)
-                    type = "checkbox"
                     addEventListener("change", {
-                        this@FlagHandler.value = checkbox.checked
+                        valueFromDisplay() // this@FlagHandler.value = checkbox.checked
                         changedInDisplay()
                         afterEvent()
                     })
                 } as HTMLInputElement
-                appendText(property.displayName)
+                appendText(displayName())
             } as HTMLLabelElement
 
             val enableDependsOn = property.enableDependsOn
             if (enableDependsOn != null) {
                 addInterdependenceListener(enableDependsOn) { enable ->
                     overrideWithDefault = !enable
-                    checkbox.disabled = overrideWithDefault
+                    input.disabled = overrideWithDefault
                     changedInDisplay()
                 }
             }
         }
 
+        abstract fun valueFromDisplay()
+        abstract fun displayName(): String
+    }
+
+    private class FlagHandler(property: ConfigProperty.Flag)
+        : InputHandler<Boolean, ConfigProperty.Flag>(property) {
+        override fun init(wrapper: Element) {
+            super.init(wrapper)
+            input.type = "checkbox"
+        }
+
         override fun applyValueToDisplay() {
-            checkbox.checked = value
+            input.checked = value
+        }
+
+        override fun valueFromDisplay() {
+            this.value = input.checked
+        }
+
+        override fun displayName() = property.displayName
+    }
+
+    private class NumberHandler(property: ConfigProperty.RangeChoice)
+        : InputHandler<Int?, ConfigProperty.RangeChoice>(property) {
+        override fun init(wrapper: Element) {
+            super.init(wrapper)
+            input.type = "number"
+        }
+
+        override fun applyValueToDisplay() {
+            input.value = value?.toString() ?: ""
+        }
+
+        override fun valueFromDisplay() {
+            val trimmed = input.value.trim()
+            this.value = if (trimmed.isEmpty()) null else trimmed.toInt()
+        }
+
+        override fun displayName() = property.name
+
+        override fun updateSdk() {
+            super.updateSdk()
+            if (visibleForSdk) {
+                val range = property.getRange(sdk)
+                input.min = range.first.toString()
+                input.max = range.last.toString()
+                input.size = input.max.length
+            }
         }
     }
 
-    private class JavaLintHandler : PropertyHandler<Set<String>?, ConfigProperty<Set<String>?>>(
+    private class SelectHandler<T>(property: ConfigProperty.Choice<T>) :
+            SingleElementPropertyHandler<T, ConfigProperty.Choice<T>>(property) {
+        lateinit var select: HTMLSelectElement
+
+        private lateinit var choices: Map<String, T>
+
+        override fun init(wrapper: Element) {
+            super.init(wrapper)
+
+            label = wrapper.appendElement("label") {
+                require(this is HTMLLabelElement)
+                select = appendElement("select") {
+                    require(this is HTMLSelectElement)
+                    addEventListener("change", {
+                        this@SelectHandler.value = choices.getValue(value)
+                        changedInDisplay()
+                        afterEvent()
+                    })
+                } as HTMLSelectElement
+                appendText(property.id)
+            } as HTMLLabelElement
+
+            val choicesDependOn = property.choicesDependOn
+            if (choicesDependOn != null) {
+                addInterdependenceListener(choicesDependOn) {
+                    this.choices = it
+                    updateChoices()
+                }
+            }
+
+            val enableDependsOn = property.enableDependsOn
+            if (enableDependsOn != null) {
+                addInterdependenceListener(enableDependsOn) { enable ->
+                    overrideWithDefault = !enable
+                    select.disabled = overrideWithDefault
+                    changedInDisplay()
+                }
+            }
+        }
+
+        override fun updateSdk() {
+            super.updateSdk()
+            if (property.choicesDependOn == null && visibleForSdk) {
+                choices = property.getChoices(sdk)
+                updateChoices()
+            }
+        }
+
+        private fun updateChoices() {
+            select.clear()
+            for (name in choices.keys) {
+                select.appendElement("option") {
+                    require(this is HTMLOptionElement)
+                    textContent = name
+                    value = name
+                }
+            }
+            applyValueToDisplay()
+        }
+
+        override fun applyValueToDisplay() {
+            val selected = choices.entries.find { it.value == this.value }
+            if (selected != null) {
+                this.select.value = selected.key
+            }
+        }
+    }
+
+    private class LintHandler : PropertyHandler<Set<String>?, ConfigProperty<Set<String>?>>(
             ConfigProperties.lint) {
 
         private lateinit var label: HTMLLabelElement
@@ -238,7 +355,7 @@ object CompilerConfigUi {
         override fun updateSdk() {
             super.updateSdk()
             if (this.visibleForSdk) {
-                val supportedWarnings = (sdk as Sdk.Java).supportedWarnings
+                val supportedWarnings = (sdk as Sdk.HasLint).supportedWarnings
                 for (warningElement in warningElements) {
                     warningElement.applicableToSdk = warningElement.warning in supportedWarnings
                     if (warningElement.applicableToSdk) {

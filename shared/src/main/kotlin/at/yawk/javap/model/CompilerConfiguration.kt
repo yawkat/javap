@@ -102,7 +102,7 @@ object ConfigProperties {
     private inline fun releaseChoice(id: String,
                                      param: String,
                                      crossinline range: (Int) -> IntRange): ConfigProperty.RangeChoice =
-            object : ConfigProperty.RangeChoice(id, default = null) {
+            object : ConfigProperty.RangeChoice(id, param, default = null) {
                 override fun apply(out: MutableList<String>, value: Int?) {
                     if (value != null) {
                         out.add(param)
@@ -193,7 +193,9 @@ object ConfigProperties {
     private val v1_3_50 = KotlinVersion(1, 3, 50)
 
     private val propertyLanguageVersion = object : ConfigProperty.Choice<String?>(
-            "languageVersion", default = null, serializer = String.serializer().nullable) {
+            "languageVersion",
+            "-language-version",
+            default = null, serializer = String.serializer().nullable) {
         override fun apply(out: MutableList<String>, value: String?) {
             if (value != null) {
                 out.add("-language-version")
@@ -218,7 +220,8 @@ object ConfigProperties {
                     .apply { minKotlinVersion = v1_0_2 },
             ConfigProperty.SimpleFlag("noInline", "-Xno-inline")
                     .apply { minKotlinVersion = v1_0_2 },
-            object : ConfigProperty.Choice<Int?>("jvmTarget", default = null, serializer = Int.serializer().nullable) {
+            object : ConfigProperty.Choice<Int?>("jvmTarget", "-jvm-target",
+                    default = null, serializer = Int.serializer().nullable) {
                 /**
                  * Supported jvm targets. 7 should be excluded
                  */
@@ -248,17 +251,18 @@ object ConfigProperties {
                                 jvmTargets(sdk as Sdk.Kotlin).filter { it != 7 }.associateBy { "$it" }
             }.apply { minKotlinVersion = v1_0_3 },
             propertyLanguageVersion.apply { minKotlinVersion = v1_0_3 },
-            object : ConfigProperty.Choice<String?>("apiVersion", default = null,
+            object : ConfigProperty.Choice<String?>("apiVersion", "-api-version", default = null,
                     serializer = String.serializer().nullable) {
                 init {
                     choicesDependOn = Interdependency(propertyLanguageVersion) { sdk, langVersion ->
-                        languageVersionMap
+                        mapOf("" to null) + languageVersionMap
                                 .filter { it.value <= (sdk as Sdk.Kotlin).release }
                                 .filter {
                                     langVersion == null ||
                                             it.value <= languageVersionMap.getValue(langVersion)
                                 }
                                 .keys.associateBy { it }
+
                     }
                 }
 
@@ -278,7 +282,8 @@ object ConfigProperties {
                     .apply { minKotlinVersion = v1_1_1 },
             ConfigProperty.SimpleFlag("warningsAsErrors", "-Werror")
                     .apply { minKotlinVersion = v1_2_30 },
-            object : ConfigProperty.Choice<Boolean?>("normalizeConstructorCalls", default = null,
+            object : ConfigProperty.Choice<Boolean?>("normalizeConstructorCalls", "-Xnormalize-constructor-calls",
+                    default = null,
                     serializer = Boolean.serializer().nullable) {
                 override fun apply(out: MutableList<String>, value: Boolean?) {
                     if (value != null) {
@@ -296,6 +301,7 @@ object ConfigProperties {
             ConfigProperty.SimpleFlag("effectSystem", "-Xeffect-system")
                     .apply { minKotlinVersion = v1_2_30 },
             object : ConfigProperty.Choice<AssertionMode?>("assertions",
+                    "-Xassertions",
                     default = null,
                     serializer = AssertionMode.serializer().nullable) {
                 private val choices = mapOf(
@@ -314,7 +320,7 @@ object ConfigProperties {
                 override fun getChoices(sdk: Sdk) = mapOf("" to null) +
                         choices.entries.associate { it.value to it.key }
             }.apply { minKotlinVersion = v1_3_10 },
-            object : ConfigProperty.Choice<JvmDefaultMode?>("jvmDefault", default = null,
+            object : ConfigProperty.Choice<JvmDefaultMode?>("jvmDefault", "-Xjvm-default", default = null,
                     serializer = JvmDefaultMode.serializer().nullable) {
                 private val choices = mapOf(
                         JvmDefaultMode.ENABLE to "enable",
@@ -371,7 +377,7 @@ object ConfigProperties {
     private val scala = listOf(
             ConfigProperty.SimpleFlag("deprecation", "-deprecation"),
             ConfigProperty.SimpleFlag("explainTypes", "-explaintypes"),
-            object : ConfigProperty.Choice<String>("debug", serializer = String.serializer(), default = "vars") {
+            object : ConfigProperty.Choice<String>("debug", "-g", serializer = String.serializer(), default = "vars") {
                 override fun apply(out: MutableList<String>, value: String) {
                     if (value != default) {
                         out.add("-g:$value")
@@ -387,9 +393,10 @@ object ConfigProperties {
             ConfigProperty.SpecialFlag("debugNoTailCalls", "-g:notailcalls"),
             ConfigProperty.SimpleFlag("debugNoSpecialization", "-no-specialization"),
             ConfigProperty.SimpleFlag("optimise", "-optimise").apply { maxScalaVersion = v2_11_8 },
-            object : ConfigProperty.RangeChoice("target", default = null) {
+            object : ConfigProperty.RangeChoice("target", "-target", default = null) {
                 override fun apply(out: MutableList<String>, value: Int?) {
                     if (value != null) {
+                        out.add("-target")
                         out.add("jvm-1.$value")
                     }
                 }
@@ -398,9 +405,10 @@ object ConfigProperties {
                     return 5..8
                 }
             },
-            object : ConfigProperty.RangeChoice("release", default = null) {
+            object : ConfigProperty.RangeChoice("release", "-release", default = null) {
                 override fun apply(out: MutableList<String>, value: Int?) {
                     if (value != null) {
+                        out.add("-release")
                         out.add(value.toString())
                     }
                 }
@@ -585,7 +593,8 @@ sealed class ConfigProperty<T>(
         }
     }
 
-    abstract class Choice<T>(id: String, default: T, serializer: KSerializer<T>) :
+    abstract class Choice<T>(id: String,
+                             val name: String, default: T, serializer: KSerializer<T>) :
             ConfigProperty<T>(id, default, serializer) {
         /**
          * Change the choices based on an interdependency
@@ -612,8 +621,8 @@ sealed class ConfigProperty<T>(
         }
     }
 
-    abstract class RangeChoice(id: String, default: Int? = null) :
-            Choice<Int?>(id, default, Int.serializer().nullable) {
+    abstract class RangeChoice(id: String, name: String, default: Int? = null) :
+            Choice<Int?>(id, name, default, Int.serializer().nullable) {
         override fun getChoices(sdk: Sdk) =
                 mapOf("" to null) + getRange(sdk).associateBy { "$it" }
 

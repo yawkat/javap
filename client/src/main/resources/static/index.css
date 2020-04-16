@@ -37,16 +37,19 @@ body {
     flex-grow: 0;
 }
 
-#buttons-code-editor > button, #buttons-code-editor > select, #buttons-social > * {
+#buttons-code-editor > button, #buttons-code-editor > select, #output-type, #buttons-social > * {
     padding: .5em;
     margin: .2em;
     display: block;
     border: 1px solid;
     border-radius: 2px;
+}
+
+#buttons-code-editor > button, #buttons-code-editor > select, #buttons-social > * {
     float: right;
 }
 
-#buttons-code-editor select, #buttons-code-editor select option {
+#buttons-code-editor > select, #buttons-code-editor > select option {
     padding: .5em 1em;
 }
 
@@ -105,7 +108,7 @@ body {
     white-space: nowrap;
 }
 
-#compiler-options label input {
+#compiler-options label input, #compiler-options label select {
     margin-right: .5em;
 }
 
