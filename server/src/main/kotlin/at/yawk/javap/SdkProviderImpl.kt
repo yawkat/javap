@@ -129,6 +129,7 @@ class SdkProviderImpl : SdkProvider {
                     }
                     command.addAll(listOf(
                             "-jar", sdkRoot.resolve("ecj.jar").toAbsolutePath().toString(),
+                            "-cp", lombokLocation.toAbsolutePath().toString(),
                             "-d", outputDir.toString()
                     ))
                     command.addAll(ConfigProperties.validateAndBuildCommandLine(sdk, config))

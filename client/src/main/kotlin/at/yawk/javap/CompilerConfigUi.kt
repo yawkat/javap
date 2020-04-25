@@ -98,7 +98,7 @@ object CompilerConfigUi {
         rebuildCommandLine = false
         var s = when (sdk) {
             is Sdk.OpenJdk -> "javac"
-            is Sdk.Ecj -> "java -jar ecj.jar"
+            is Sdk.Ecj -> "java"
             is Sdk.KotlinJar, is Sdk.KotlinDistribution -> "kotlinc"
             is Sdk.Scala -> "scalac"
         }
@@ -107,9 +107,10 @@ object CompilerConfigUi {
                 s += " -cp lombok.jar"
             }
         } else if (sdk is Sdk.Ecj) {
-            if (getHandler(ConfigProperties.lombok).finalValue) {
-                s += " -javaagent:lombok.jar=ECJ"
-            }
+            val lombok = getHandler(ConfigProperties.lombok).finalValue
+            if (lombok) { s += " -javaagent:lombok.jar=ECJ" }
+            s += " -jar ecj.jar"
+            if (lombok) { s += " -cp lombok.jar" }
         }
         val options = ConfigProperties.validateAndBuildCommandLine(sdk, buildConfig())
         if (options.isNotEmpty()) {
