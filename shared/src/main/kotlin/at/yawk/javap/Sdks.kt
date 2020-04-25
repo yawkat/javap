@@ -217,11 +217,11 @@ object Sdks {
             )
     )
     private val ecj3_21 = Sdk.Ecj(
-            release = 9,
+            release = 13,
             name = "Eclipse ECJ 3.21",
             compilerJar = RemoteFile("https://repo1.maven.org/maven2/org/eclipse/jdt/ecj/3.21.0/ecj-3.21.0.jar"),
             lombok = lombok1_18_10,
-            hostJdk = openjdk8,
+            hostJdk = openjdk14,
             supportedWarnings = ecj3_11.supportedWarnings +
                     setOf("module", "removal", "unlikelyCollectionMethodArgumentType", "unlikelyEqualsArgumentType")
     )
