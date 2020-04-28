@@ -33,8 +33,8 @@ interface PasteDao {
     fun getPasteById(@Bind("id") id: String): Paste?
 
     @SqlUpdate("""insert into paste 
-        (id, ownerToken, inputCode, inputCompilerName, outputCompilerLog, outputJavap, outputProcyon) 
-        values (:id, :ownerToken, :input.code, :input.compilerName, :output.compilerLog, :output.javap, :output.procyon)""")
+        (id, ownerToken, inputCode, inputCompilerName, inputCompilerConfiguration, outputCompilerLog, outputJavap, outputProcyon) 
+        values (:id, :ownerToken, :input.code, :input.compilerName, :inputCompilerConfig, :output.compilerLog, :output.javap, :output.procyon)""")
     fun createPaste(
             @Bind("ownerToken") ownerToken: String,
             @Bind("id") id: String,
