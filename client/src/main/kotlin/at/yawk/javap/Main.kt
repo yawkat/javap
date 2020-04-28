@@ -56,6 +56,16 @@ private fun loadPasteFromHash() {
     } else {
         outputType = null
     }
+    context?.let { oldContext ->
+        if (oldContext.currentPaste.id == pasteId) {
+            // Don't try to load it again. Technically it could have changed on the server, but the user can F5 if
+            // she wants the new version.
+            // This prevents unnecessary paste fetching when the hash changed from another action, e.g. creating a new
+            // paste.
+            oldContext.displayPaste(outputType)
+            return
+        }
+    }
     loadPaste(pasteId, outputType)
 }
 
