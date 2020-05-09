@@ -33,7 +33,9 @@ sealed class Sdk(
             val distribution: RemoteFile,
             val lombok: RemoteFile,
             val libPaths: Set<String>,
-            override val supportedWarnings: Set<String>
+            override val supportedWarnings: Set<String>,
+
+            override val aliases: Set<String> = emptySet()
     ) : Sdk(SdkLanguage.JAVA), Java
 
     data class Ecj(
@@ -107,10 +109,11 @@ object Sdks {
     )
     private val openjdk8 = Sdk.OpenJdk(
             8,
-            name = "OpenJDK 8u92",
+            name = "OpenJDK 8",
+            aliases = setOf("OpenJDK 8u92"),
             distribution = RemoteFile(
-                    "http://cdn.azul.com/zulu/bin/zulu8.15.0.1-jdk8.0.92-linux_x64.tar.gz",
-                    md5 = "509fef886f7c6992d0f6f133c4928ec9"
+                    "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u252-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u252b09.tar.gz",
+                    sha256 = "2b59b5282ff32bce7abba8ad6b9fde34c15a98f949ad8ae43e789bbd78fc8862"
             ),
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
             lombok = lombok1_18_4,
@@ -118,7 +121,8 @@ object Sdks {
     )
     private val openjdk9 = Sdk.OpenJdk(
             9,
-            name = "OpenJDK 9.0.0",
+            name = "OpenJDK 9",
+            aliases = setOf("OpenJDK 9.0.0"),
             distribution = RemoteFile(
                     "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk-9.0.4%2B11/OpenJDK9U-jdk_x64_linux_hotspot_9.0.4_11.tar.gz",
                     sha256 = "aa4fc8bda11741facaf3b8537258a4497c6e0046b9f4931e31f713d183b951f1"
@@ -143,8 +147,8 @@ object Sdks {
             11,
             name = "OpenJDK 11",
             distribution = RemoteFile(
-                    "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.1%2B13/OpenJDK11U-jdk_x64_linux_hotspot_11.0.1_13.tar.gz",
-                    sha256 = "22bd2f1a2e0cb6e4075967bfeda4a960b0325879305aa739a0ba2d6e5cd4c3e2"
+                    "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.7%2B10/OpenJDK11U-jdk_x64_linux_hotspot_11.0.7_10.tar.gz",
+                    sha256 = "ee60304d782c9d5654bf1a6b3f38c683921c1711045e1db94525a51b7024a2ca"
             ),
             libPaths = setOf("lib"),
             lombok = lombok1_18_4,
@@ -165,8 +169,8 @@ object Sdks {
             13,
             name = "OpenJDK 13",
             distribution = RemoteFile(
-                    "https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33/OpenJDK13U-jdk_x64_linux_hotspot_13_33.tar.gz",
-                    sha256 = "e562caeffa89c834a69a44242d802eae3523875e427f07c05b1902c152638368"
+                    "https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.2%2B8/OpenJDK13U-jdk_x64_linux_hotspot_13.0.2_8.tar.gz",
+                    sha256 = "9ccc063569f19899fd08e41466f8c4cd4e05058abdb5178fa374cb365dcf5998"
             ),
             libPaths = setOf("lib"),
             lombok = lombok1_18_10,
@@ -176,8 +180,8 @@ object Sdks {
             14,
             name = "OpenJDK 14",
             distribution = RemoteFile(
-                    "https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14%2B36/OpenJDK14U-jdk_x64_linux_hotspot_14_36.tar.gz",
-                    sha256 = "6c06853332585ab58834d9e8a02774b388e6e062ef6c4084b4f058c67f2e81b5"
+                    "https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7/OpenJDK14U-jdk_x64_linux_hotspot_14.0.1_7.tar.gz",
+                    sha256 = "9ddf9b35996fbd784a53fff3e0d59920a7d5acf1a82d4c8d70906957ac146cd1"
             ),
             libPaths = setOf("lib"),
             lombok = lombok1_18_10,
