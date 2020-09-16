@@ -21,6 +21,7 @@ import io.undertow.util.StatusCodes
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ThreadLocalRandom
 
 /**
@@ -40,11 +41,11 @@ class PasteResource constructor(
     @Suppress("UnstableApiUsage")
     private fun <T> parse(xhg: HttpServerExchange, deserializer: DeserializationStrategy<T>, callback: (T) -> Unit) {
         if (xhg.contentType.withoutParameters() == MediaType.JSON_UTF_8.withoutParameters()) {
-            xhg.requestReceiver.receiveFullString { _, s ->
+            xhg.requestReceiver.receiveFullString({ _, s ->
                 handleExceptions(xhg) {
                     callback(json.parse(deserializer, s))
                 }
-            }
+            }, StandardCharsets.UTF_8)
         } else {
             throw HttpException(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Unsupported Content-Type")
         }
