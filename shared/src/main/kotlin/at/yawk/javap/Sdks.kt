@@ -187,9 +187,20 @@ object Sdks {
             lombok = lombok1_18_10,
             supportedWarnings = openjdk13.supportedWarnings
     )
+    private val openjdk15 = Sdk.OpenJdk(
+            15,
+            name = "OpenJDK 15",
+            distribution = RemoteFile(
+                    "https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15%2B36/OpenJDK15U-jdk_x64_linux_hotspot_15_36.tar.gz",
+                    sha256 = "c198593d1b5188ee3570e2ca33c3bc004aaefbda2c11e68e58ae7296cf5c3982"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_10,
+            supportedWarnings = openjdk14.supportedWarnings
+    )
     private val openjdk = listOf(
-            openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
-    val defaultJava = openjdk14
+            openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
+    val defaultJava = openjdk15
 
     private val ecj3_11 = Sdk.Ecj(
             release = 8,
