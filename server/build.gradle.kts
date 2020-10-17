@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     implementation(project(":javap-shared"))
-    implementation(project(":javap-client"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
     implementation("org.zeroturnaround:zt-exec:${Versions.ztExec}")
     implementation("com.google.guava:guava:${Versions.guava}")
