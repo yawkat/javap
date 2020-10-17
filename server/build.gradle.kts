@@ -24,6 +24,13 @@ dependencies {
 }
 
 tasks {
+    compileKotlin {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjvm-default=enable")
+            jvmTarget = "1.8"
+        }
+    }
+
     test {
         useTestNG()
     }

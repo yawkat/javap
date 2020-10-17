@@ -5,6 +5,10 @@ plugins {
 
 kotlin {
     jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+
         testRuns["test"].executionTask.configure {
             useTestNG()
         }
