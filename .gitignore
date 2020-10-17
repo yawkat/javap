@@ -3,3 +3,6 @@ javap.mv.db
 *.iml
 target/
 sdk/
+**/.gradle
+**/build
+**/target
