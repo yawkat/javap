@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.4.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0.0")
-    testImplementation("org.testng:testng:6.9.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
+    testImplementation("org.testng:testng:${Versions.testng}")
 }
 
 tasks {
