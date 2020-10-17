@@ -9,7 +9,7 @@ package at.yawk.javap
 import jquery.jq
 import jquery.ui.dialog
 import org.w3c.dom.Element
-import kotlin.browser.document
+import kotlinx.browser.document
 import kotlin.js.json
 
 /**

@@ -14,8 +14,8 @@ import org.w3c.dom.set
 import org.w3c.xhr.JSON
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
-import kotlin.browser.document
-import kotlin.browser.localStorage
+import kotlinx.browser.document
+import kotlinx.browser.localStorage
 import kotlin.random.Random
 
 /**

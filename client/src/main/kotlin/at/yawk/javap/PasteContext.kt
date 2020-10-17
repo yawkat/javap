@@ -13,14 +13,14 @@ import org.w3c.dom.HTMLOptionElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.asList
 import org.w3c.dom.get
-import kotlin.browser.document
-import kotlin.browser.window
-import kotlin.dom.addClass
-import kotlin.dom.appendElement
-import kotlin.dom.appendText
-import kotlin.dom.clear
-import kotlin.dom.createElement
-import kotlin.dom.removeClass
+import kotlinx.browser.document
+import kotlinx.browser.window
+import kotlinx.dom.addClass
+import kotlinx.dom.appendElement
+import kotlinx.dom.appendText
+import kotlinx.dom.clear
+import kotlinx.dom.createElement
+import kotlinx.dom.removeClass
 
 /**
  * @author yawkat

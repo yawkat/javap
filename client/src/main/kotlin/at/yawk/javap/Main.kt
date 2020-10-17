@@ -9,8 +9,8 @@ package at.yawk.javap
 import at.yawk.javap.model.PasteDto
 import org.w3c.dom.HTMLSelectElement
 import kotlin.Pair
-import kotlin.browser.document
-import kotlin.browser.window
+import kotlinx.browser.document
+import kotlinx.browser.window
 
 /**
  * @author yawkat
