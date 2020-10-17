@@ -1,13 +1,16 @@
 plugins {
     kotlin("multiplatform")
-    application
     kotlin("plugin.serialization")
 }
 
 kotlin {
-    jvm()
+    jvm {
+        testRuns["test"].executionTask.configure {
+            useTestNG()
+        }
+    }
 
-    js{
+    js {
         browser()
     }
 
@@ -27,8 +30,3 @@ kotlin {
     }
 }
 
-tasks {
-    test {
-        useTestNG()
-    }
-}
