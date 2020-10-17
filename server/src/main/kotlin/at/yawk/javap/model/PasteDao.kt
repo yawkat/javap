@@ -19,13 +19,13 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery
 import org.jdbi.v3.sqlobject.statement.SqlUpdate
 import java.sql.ResultSet
 
-private val json = Json(jsonConfiguration)
+private val json = Json { jsonConfiguration }
 
 @RegisterRowMapper(PasteDao.PasteMapper::class)
 interface PasteDao {
     private fun serializeConfig(input: ProcessingInput): ByteArray {
         val sdk = Sdks.sdksByName.getValue(input.compilerName)
-        return json.stringify(ConfigProperties.serializers.getValue(sdk.language), input.compilerConfiguration)
+        return json.encodeToString(ConfigProperties.serializers.getValue(sdk.language), input.compilerConfiguration)
                 .toByteArray()
     }
 
@@ -95,7 +95,7 @@ interface PasteDao {
                         emptyMap()
                     } else {
                         val language = Sdks.sdksByName.getValue(compilerName).language
-                        json.parse(
+                        json.decodeFromString(
                                 ConfigProperties.serializers.getValue(language),
                                 configBytes.toString(Charsets.UTF_8))
                     }

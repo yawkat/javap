@@ -32,9 +32,9 @@ class CompilerConfigurationSerializerTest {
         config[ConfigProperties.lint.id] = setOf("a", "b")
 
         val serializer = ConfigProperties.serializers.getValue(SdkLanguage.JAVA)
-        val json = Json(jsonConfiguration)
+        val json = Json{ jsonConfiguration }
         Assert.assertEquals(
-                withoutDefaults(json.parse(serializer, json.stringify(serializer, config))),
+                withoutDefaults(json.decodeFromString(serializer, json.encodeToString(serializer, config))),
                 withoutDefaults(config)
         )
     }

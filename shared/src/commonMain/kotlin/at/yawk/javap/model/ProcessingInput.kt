@@ -7,16 +7,19 @@
 package at.yawk.javap.model
 
 import at.yawk.javap.Sdks
-import kotlinx.serialization.CompositeDecoder
-import kotlinx.serialization.Decoder
-import kotlinx.serialization.Encoder
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.MissingFieldException
-import kotlinx.serialization.SerialDescriptor
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.Serializer
-import kotlinx.serialization.UnionKind
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.buildSerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 /**
  * @author yawkat
@@ -26,12 +29,15 @@ data class ProcessingInput(
         val compilerName: String,
         val compilerConfiguration: CompilerConfiguration
 ) {
+    @ExperimentalSerializationApi
+    @InternalSerializationApi
     @Serializer(forClass = ProcessingInput::class)
     companion object : KSerializer<ProcessingInput> {
-        override val descriptor: SerialDescriptor = SerialDescriptor("ProcessingInput") {
+        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ProcessingInput") {
             element("code", String.serializer().descriptor)
             element("compilerName", String.serializer().descriptor)
-            element("compilerConfiguration", SerialDescriptor("CompilerConfiguration", kind = UnionKind.CONTEXTUAL))
+            // TODO: use of buildSerialDescriptor is recommended against, explore replacements
+            element("compilerConfiguration", buildSerialDescriptor("CompilerConfiguration", kind = SerialKind.CONTEXTUAL))
         }
 
         override fun deserialize(decoder: Decoder): ProcessingInput {
@@ -41,7 +47,7 @@ data class ProcessingInput(
             val structure = decoder.beginStructure(descriptor)
             loop@ while (true) {
                 when (val i = structure.decodeElementIndex(descriptor)) {
-                    CompositeDecoder.READ_DONE -> break@loop
+                    CompositeDecoder.DECODE_DONE -> break@loop
                     0 -> code = structure.decodeStringElement(descriptor, i)
                     1 -> compilerName = structure.decodeStringElement(descriptor, i)
                     2 -> {
@@ -56,9 +62,9 @@ data class ProcessingInput(
             }
             structure.endStructure(descriptor)
             return ProcessingInput(
-                    code ?: throw MissingFieldException("code"),
-                    compilerName ?: throw MissingFieldException("compilerName"),
-                    compilerConfiguration ?: throw MissingFieldException("compilerConfiguration")
+                    code ?: throw SerializationException("code"),
+                    compilerName ?: throw SerializationException("compilerName"),
+                    compilerConfiguration ?: throw SerializationException("compilerConfiguration")
             )
         }
 

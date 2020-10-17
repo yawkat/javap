@@ -1,10 +1,12 @@
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
 }
 
 dependencies {
     implementation(project(":javap-shared"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
     implementation("org.zeroturnaround:zt-exec:${Versions.ztExec}")
     implementation("com.google.guava:guava:${Versions.guava}")
     implementation("org.flywaydb:flyway-core:${Versions.flyway}")
@@ -15,7 +17,6 @@ dependencies {
     implementation("org.jdbi:jdbi3-core:${Versions.jdbi}")
     implementation("org.jdbi:jdbi3-sqlobject:${Versions.jdbi}")
     implementation("ch.qos.logback:logback-classic:${Versions.logback}")
-    implementation("com.jakewharton:jax-rs-kotlinx-serialization:${Versions.jaxRsSerialization}")
     testImplementation("org.testng:testng:${Versions.testng}")
     testImplementation("org.mockito:mockito-all:${Versions.mockito}")
     testImplementation("com.google.jimfs:jimfs:${Versions.jimfs}")

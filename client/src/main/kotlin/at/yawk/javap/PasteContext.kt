@@ -8,8 +8,6 @@ package at.yawk.javap
 
 import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLOptionElement
 import org.w3c.dom.HTMLSelectElement

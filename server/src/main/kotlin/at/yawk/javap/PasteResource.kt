@@ -43,7 +43,7 @@ class PasteResource constructor(
         if (xhg.contentType.withoutParameters() == MediaType.JSON_UTF_8.withoutParameters()) {
             xhg.requestReceiver.receiveFullString({ _, s ->
                 handleExceptions(xhg) {
-                    callback(json.parse(deserializer, s))
+                    callback(json.decodeFromString(deserializer, s))
                 }
             }, StandardCharsets.UTF_8)
         } else {
@@ -56,7 +56,7 @@ class PasteResource constructor(
         val accept = xhg.accept?.withoutParameters()
         if (accept == null || MediaType.JSON_UTF_8.`is`(accept)) {
             xhg.responseHeaders.put(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8.toString())
-            xhg.responseSender.send(json.stringify(serializer, value))
+            xhg.responseSender.send(json.encodeToString(serializer, value))
         } else {
             throw HttpException(StatusCodes.NOT_ACCEPTABLE, "Unsupported Accept")
         }
