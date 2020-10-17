@@ -9,7 +9,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":javap-shared-js:"))
+    implementation(project(":javap-shared"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:${Versions.kotlin}")
     implementation("org.webjars:jquery:${Versions.jquery}")
     implementation("org.webjars:jquery-ui:${Versions.jqueryUi}")
