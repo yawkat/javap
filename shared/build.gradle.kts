@@ -1,11 +1,30 @@
 plugins {
-    kotlin("jvm") version Versions.kotlin
+    kotlin("multiplatform") version Versions.kotlin
+    application
+    kotlin("plugin.serialization") version Versions.kotlin
 }
 
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
-    testImplementation("org.testng:testng:${Versions.testng}")
+kotlin {
+    jvm()
+
+    js{
+        browser()
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
+            }
+        }
+
+        val commonTest by getting {
+            dependencies {
+                implementation("org.testng:testng:${Versions.testng}")
+            }
+        }
+    }
 }
 
 tasks {
