@@ -191,7 +191,7 @@ object ConfigProperties {
     private val v1_3_10 = KotlinVersion(1, 3, 10)
     private val v1_3_50 = KotlinVersion(1, 3, 50)
 
-    private val propertyLanguageVersion = object : ConfigProperty.Choice<String?>(
+    private val propertyLanguageVersion: ConfigProperty.Choice<String?> = object : ConfigProperty.Choice<String?>(
             "languageVersion",
             "-language-version",
             default = null, serializer = String.serializer().nullable) {
