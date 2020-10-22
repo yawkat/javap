@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":javap-shared"))
+    implementation(project(":shared"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
     implementation("org.zeroturnaround:zt-exec:${Versions.ztExec}")
