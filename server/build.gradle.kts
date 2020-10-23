@@ -35,4 +35,8 @@ tasks {
     test {
         useTestNG()
     }
+
+    processResources {
+        from(project(":client").tasks.named("browserDistribution"))
+    }
 }
