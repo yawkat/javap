@@ -6,27 +6,21 @@
 
 package at.yawk.javap
 
-import jquery.jq
-import jquery.ui.dialog
-import org.w3c.dom.Element
 import kotlinx.browser.document
 import kotlin.js.json
 
 /**
  * @author yawkat
  */
-@JsName("this")
-external val jsThis: Element
-
 fun showDialog(title: String, message: String) {
     val dialog = document.getElementById("dialog-message")!!
     dialog.setAttribute("title", title)
     dialog.textContent = message
-    jq(dialog).dialog(json(
+    js("$").dialog(json(
             "modal" to true,
             "buttons" to json(
                     "Ok" to {
-                        jq(jsThis).dialog("close")
+                        js("this").dialog("close")
                     }
             )
     ))
