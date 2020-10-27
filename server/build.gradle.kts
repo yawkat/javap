@@ -1,5 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm")
+    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("application")
     kotlin("plugin.serialization")
 }
 
@@ -24,6 +28,10 @@ dependencies {
     testImplementation("net.adoptopenjdk:net.adoptopenjdk.v3.vanilla:${Versions.adoptOpenJdkVanilla}")
 }
 
+application {
+    mainClassName = "at.yawk.javap.Main"
+}
+
 tasks {
     compileKotlin {
         kotlinOptions {
@@ -38,5 +46,10 @@ tasks {
 
     processResources {
         from(project(":client").tasks.named("browserDistribution"))
+    }
+
+    shadowJar {
+        mergeServiceFiles()
+        archiveClassifier.set("shaded")
     }
 }
