@@ -21,6 +21,7 @@ dependencies {
     implementation("org.jdbi:jdbi3-core:${Versions.jdbi}")
     implementation("org.jdbi:jdbi3-sqlobject:${Versions.jdbi}")
     implementation("ch.qos.logback:logback-classic:${Versions.logback}")
+    implementation("org.webjars.bower:ace-builds:${Versions.bower}")
     testImplementation("org.testng:testng:${Versions.testng}")
     testImplementation("org.mockito:mockito-all:${Versions.mockito}")
     testImplementation("com.google.jimfs:jimfs:${Versions.jimfs}")

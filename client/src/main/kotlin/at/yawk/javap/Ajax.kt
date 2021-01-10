@@ -99,7 +99,7 @@ object Ajax {
                         val error = xhr.response as kotlin.js.Json
                         error["message"]?.let { message = it as String }
                     }
-                    showDialog("Error", message)
+                    Dialog.show("Error", message)
                 }
             }
         }

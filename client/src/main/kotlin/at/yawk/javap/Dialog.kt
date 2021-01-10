@@ -7,21 +7,31 @@
 package at.yawk.javap
 
 import kotlinx.browser.document
-import kotlin.js.json
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 
-/**
- * @author yawkat
- */
-fun showDialog(title: String, message: String) {
-    val dialog = document.getElementById("dialog-message")!!
-    dialog.setAttribute("title", title)
-    dialog.textContent = message
-    js("$").dialog(json(
-            "modal" to true,
-            "buttons" to json(
-                    "Ok" to {
-                        js("this").dialog("close")
-                    }
-            )
-    ))
+object Dialog {
+    private val dialogElement = document.getElementById("dialog")!!
+    private val messageElement = document.getElementById("dialog-message")!!
+    private val titleElement = document.getElementById("dialog-title")!!
+
+    init {
+        document.getElementById("dialog-button")!!.addEventListener("click", { hide() })
+
+        dialogElement.addEventListener("click", { evt ->
+            if (evt.target == dialogElement) {
+                hide()
+            }
+        })
+    }
+
+    fun show(title: String, message: String) {
+        messageElement.textContent = message
+        titleElement.textContent = title
+        dialogElement.addClass("visible")
+    }
+
+    private fun hide() {
+        dialogElement.removeClass("visible")
+    }
 }

@@ -14,10 +14,7 @@ import io.undertow.Undertow
 import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.PathHandler
 import io.undertow.server.handlers.resource.ClassPathResourceManager
-import io.undertow.server.handlers.resource.Resource
-import io.undertow.server.handlers.resource.ResourceChangeListener
 import io.undertow.server.handlers.resource.ResourceHandler
-import io.undertow.server.handlers.resource.ResourceManager
 import io.undertow.util.StatusCodes
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -64,12 +61,8 @@ fun main(args: Array<String>) {
         val cl = object {}.javaClass.classLoader
 
         val kotlinFiles = setOf(
-                "kotlin.js",
-                "kotlin.meta.js",
-                "kotlin.js.map",
-                "kotlinx-serialization-kotlinx-serialization-runtime.js",
-                "kotlinx-serialization-kotlinx-serialization-runtime.meta.js",
-                "kotlinx-serialization-kotlinx-serialization-runtime.js.map"
+            "client.js",
+            "client.js.map"
         )
         val rootClasspath = ClassPathResourceManager(cl)
         // kotlin files are at classpath root

@@ -13,17 +13,13 @@
     <title>javap pastebin</title>
 
     <link rel="icon" href="/static/favicon.ico" />
-    <script src="/webjars/jquery-ui/1.11.4/jquery-ui.min.js"></script>
     <script src="/webjars/ace-builds/1.4.2/src-min/ace.js"></script>
     <script src="/webjars/ace-builds/1.4.2/src-min/mode-java.js"></script>
     <script src="/webjars/ace-builds/1.4.2/src-min/mode-kotlin.js"></script>
     <script src="/webjars/ace-builds/1.4.2/src-min/mode-scala.js"></script>
 
     <link rel="stylesheet" href="/static/index.css">
-    <script src="../client.js"></script>
-    <script>$(function () {
-        index.at.yawk.javap.start()
-    })</script>
+    <script src="/static/client.js"></script>
 </head>
 <body>
 <div id="main-pane">
@@ -69,8 +65,16 @@
     <div id="buttons-social">
         <a class="ui-widget" id="github" href="https://github.com/yawkat/javap">GitHub</a>
     </div>
-</div>
 
-<div id="dialog-message"></div>
+    <div id="dialog">
+        <div>
+            <h2 id="dialog-title"></h2>
+            <p id="dialog-message"></p>
+            <div>
+                <button id="dialog-button">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

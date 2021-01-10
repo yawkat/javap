@@ -14,7 +14,7 @@ class Highlighter(@Suppress("UNUSED_PARAMETER") mode: String) {
     private var state = "start"
 
     init {
-        tokenizer = js("new (require(mode).Mode)()").getTokenizer()
+        tokenizer = js("new (window.require(mode).Mode)()").getTokenizer()
     }
 
     fun printLine(element: Element, line: String) {
