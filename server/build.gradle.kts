@@ -29,7 +29,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "at.yawk.javap.Main"
+    mainClassName = "at.yawk.javap.JavapApplicationKt"
 }
 
 tasks {
