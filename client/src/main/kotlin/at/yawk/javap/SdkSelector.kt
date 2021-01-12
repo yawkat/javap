@@ -2,9 +2,9 @@ package at.yawk.javap
 
 import org.w3c.dom.HTMLOptionElement
 import org.w3c.dom.HTMLSelectElement
-import kotlin.browser.document
-import kotlin.dom.appendElement
-import kotlin.dom.clear
+import kotlinx.browser.document
+import kotlinx.dom.appendElement
+import kotlinx.dom.clear
 
 object SdkSelector {
     private val compilerNames = document.getElementById("compiler-names") as HTMLSelectElement

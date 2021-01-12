@@ -15,12 +15,12 @@ import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLLabelElement
 import org.w3c.dom.HTMLOptionElement
 import org.w3c.dom.HTMLSelectElement
-import kotlin.browser.document
-import kotlin.dom.addClass
-import kotlin.dom.appendElement
-import kotlin.dom.appendText
-import kotlin.dom.clear
-import kotlin.dom.removeClass
+import kotlinx.browser.document
+import kotlinx.dom.addClass
+import kotlinx.dom.appendElement
+import kotlinx.dom.appendText
+import kotlinx.dom.clear
+import kotlinx.dom.removeClass
 
 object CompilerConfigUi {
     private val compilerCommandLine = document.getElementById("compiler-command-line")!!

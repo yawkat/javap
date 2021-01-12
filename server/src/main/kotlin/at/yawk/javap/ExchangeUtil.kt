@@ -39,12 +39,12 @@ val HttpServerExchange.contentType: MediaType
         }
     }
 
-private val json = Json(jsonConfiguration)
+private val json = Json{ jsonConfiguration }
 
 fun handleHttpException(xhg: HttpServerExchange, exception: HttpException) {
     xhg.statusCode = exception.code
     if (xhg.accept?.withoutParameters() == MediaType.JSON_UTF_8.withoutParameters()) {
-        val serialized = json.stringify(HttpException.serializer(), exception)
+        val serialized = json.encodeToString(HttpException.serializer(), exception)
         xhg.responseHeaders.put(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8.toString())
         xhg.responseSender.send(serialized)
     } else {

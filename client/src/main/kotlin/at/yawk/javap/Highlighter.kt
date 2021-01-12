@@ -1,8 +1,8 @@
 package at.yawk.javap
 
 import org.w3c.dom.Element
-import kotlin.dom.appendElement
-import kotlin.dom.appendText
+import kotlinx.dom.appendElement
+import kotlinx.dom.appendText
 
 class Highlighter(@Suppress("UNUSED_PARAMETER") mode: String) {
     companion object {
@@ -14,7 +14,7 @@ class Highlighter(@Suppress("UNUSED_PARAMETER") mode: String) {
     private var state = "start"
 
     init {
-        tokenizer = js("new (require(mode).Mode)()").getTokenizer()
+        tokenizer = js("new (window.require(mode).Mode)()").getTokenizer()
     }
 
     fun printLine(element: Element, line: String) {

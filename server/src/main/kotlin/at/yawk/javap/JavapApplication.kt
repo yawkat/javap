@@ -14,13 +14,11 @@ import io.undertow.Undertow
 import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.PathHandler
 import io.undertow.server.handlers.resource.ClassPathResourceManager
-import io.undertow.server.handlers.resource.Resource
-import io.undertow.server.handlers.resource.ResourceChangeListener
 import io.undertow.server.handlers.resource.ResourceHandler
-import io.undertow.server.handlers.resource.ResourceManager
 import io.undertow.util.StatusCodes
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.json.JsonBuilder
 import org.flywaydb.core.Flyway
 import org.jdbi.v3.core.Jdbi
 import java.nio.file.Files
@@ -30,13 +28,11 @@ import java.util.concurrent.TimeUnit
 /**
  * @author yawkat
  */
-val jsonConfiguration = JsonConfiguration.Stable.copy(encodeDefaults = false)
+val jsonConfiguration : JsonBuilder.() -> Unit = { encodeDefaults = false }
 
 fun main(args: Array<String>) {
-    val json = Json(jsonConfiguration)
-
-    val config = json.parse(
-            JavapConfiguration.serializer(),
+    val json = Json { jsonConfiguration }
+    val config = json.decodeFromString<JavapConfiguration>(
             Files.readAllBytes(Paths.get(args[0])).toString(Charsets.UTF_8))
 
     val dataSource = HikariDataSource(HikariConfig().apply {
@@ -65,12 +61,8 @@ fun main(args: Array<String>) {
         val cl = object {}.javaClass.classLoader
 
         val kotlinFiles = setOf(
-                "kotlin.js",
-                "kotlin.meta.js",
-                "kotlin.js.map",
-                "kotlinx-serialization-kotlinx-serialization-runtime.js",
-                "kotlinx-serialization-kotlinx-serialization-runtime.meta.js",
-                "kotlinx-serialization-kotlinx-serialization-runtime.js.map"
+            "client.js",
+            "client.js.map"
         )
         val rootClasspath = ClassPathResourceManager(cl)
         // kotlin files are at classpath root

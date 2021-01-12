@@ -36,7 +36,7 @@ class PasteResourceTest {
     private val dbi = Jdbi.create(dataSource).installPlugins()
     private val defaultPaste = DefaultPaste(processor)
     private val pasteResource: PasteResource = PasteResource(
-            Json(jsonConfiguration),
+            Json { jsonConfiguration },
             dbi.onDemand(PasteDao::class.java),
             processor,
             defaultPaste)
@@ -129,7 +129,7 @@ class PasteResourceTest {
     fun `paste dto serialization`() {
         val input = ProcessingInput("in", Sdks.defaultJava.name, emptyMap())
         Assert.assertEquals(
-                Json(jsonConfiguration).stringify(PasteDto.serializer(),
+                Json{ jsonConfiguration }.encodeToString(PasteDto.serializer(),
                         PasteDto("a", false, input, processor.process(input))),
                 """{"id":"a","editable":false,"input":{"code":"in","compilerName":"${Sdks.defaultJava.name}","compilerConfiguration":{}},"output":{"compilerLog":"compiler log in","javap":"javap in","procyon":"procyon in"}}"""
         )

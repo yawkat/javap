@@ -6,28 +6,32 @@
 
 package at.yawk.javap
 
-import jquery.jq
-import jquery.ui.dialog
-import org.w3c.dom.Element
-import kotlin.browser.document
-import kotlin.js.json
+import kotlinx.browser.document
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 
-/**
- * @author yawkat
- */
-@JsName("this")
-external val jsThis: Element
+object Dialog {
+    private val dialogElement = document.getElementById("dialog")!!
+    private val messageElement = document.getElementById("dialog-message")!!
+    private val titleElement = document.getElementById("dialog-title")!!
 
-fun showDialog(title: String, message: String) {
-    val dialog = document.getElementById("dialog-message")!!
-    dialog.setAttribute("title", title)
-    dialog.textContent = message
-    jq(dialog).dialog(json(
-            "modal" to true,
-            "buttons" to json(
-                    "Ok" to {
-                        jq(jsThis).dialog("close")
-                    }
-            )
-    ))
+    init {
+        document.getElementById("dialog-button")!!.addEventListener("click", { hide() })
+
+        dialogElement.addEventListener("click", { evt ->
+            if (evt.target == dialogElement) {
+                hide()
+            }
+        })
+    }
+
+    fun show(title: String, message: String) {
+        messageElement.textContent = message
+        titleElement.textContent = title
+        dialogElement.addClass("visible")
+    }
+
+    private fun hide() {
+        dialogElement.removeClass("visible")
+    }
 }

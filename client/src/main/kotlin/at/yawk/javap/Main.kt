@@ -7,14 +7,16 @@
 package at.yawk.javap
 
 import at.yawk.javap.model.PasteDto
+import kotlinx.browser.document
+import kotlinx.browser.window
 import org.w3c.dom.HTMLSelectElement
-import kotlin.Pair
-import kotlin.browser.document
-import kotlin.browser.window
 
-/**
- * @author yawkat
- */
+fun main() {
+    window.onload = {
+        start()
+    }
+}
+
 @Suppress("unused")
 fun start() {
     Editors.start()
@@ -37,7 +39,6 @@ fun start() {
     }, false)
 
     CompilerConfigUi.init()
-    js("$(document).tooltip()")
 }
 
 fun setEditorValue(editor: dynamic, text: String) {

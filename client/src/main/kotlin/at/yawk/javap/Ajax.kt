@@ -9,14 +9,13 @@ package at.yawk.javap
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import org.w3c.dom.get
 import org.w3c.dom.set
 import org.w3c.xhr.JSON
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
-import kotlin.browser.document
-import kotlin.browser.localStorage
+import kotlinx.browser.document
+import kotlinx.browser.localStorage
 import kotlin.random.Random
 
 /**
@@ -45,7 +44,7 @@ private fun getOrCreateUserToken(): String {
 }
 
 object Ajax {
-    private val json = Json(JsonConfiguration.Stable)
+    private val json = Json {}
 
     fun <O> get(
             url: String,
@@ -55,7 +54,7 @@ object Ajax {
     ) = ajax(
             method = "GET",
             url = url,
-            onSuccess = { onSuccess(json.parse(outStrategy, it)) },
+            onSuccess = { onSuccess(json.decodeFromString(outStrategy, it)) },
             always = always
     )
 
@@ -71,8 +70,8 @@ object Ajax {
             method = method,
             url = url,
             contentType = "application/json; charset=utf-8",
-            data = json.stringify(inStrategy, data),
-            onSuccess = { onSuccess(json.parse(outStrategy, it)) },
+            data = json.encodeToString(inStrategy, data),
+            onSuccess = { onSuccess(json.decodeFromString(outStrategy, it)) },
             always = always
     )
 
@@ -100,7 +99,7 @@ object Ajax {
                         val error = xhr.response as kotlin.js.Json
                         error["message"]?.let { message = it as String }
                     }
-                    showDialog("Error", message)
+                    Dialog.show("Error", message)
                 }
             }
         }

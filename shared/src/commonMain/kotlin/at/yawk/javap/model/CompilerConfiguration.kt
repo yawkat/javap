@@ -3,18 +3,17 @@ package at.yawk.javap.model
 import at.yawk.javap.Sdk
 import at.yawk.javap.SdkLanguage
 import at.yawk.javap.Sdks
-import kotlinx.serialization.CompositeDecoder
-import kotlinx.serialization.CompositeEncoder
-import kotlinx.serialization.Decoder
-import kotlinx.serialization.Encoder
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialDescriptor
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.UpdateNotSupportedException
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.CompositeEncoder
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 typealias CompilerConfiguration = Map<String, Any?>
 
@@ -192,7 +191,7 @@ object ConfigProperties {
     private val v1_3_10 = KotlinVersion(1, 3, 10)
     private val v1_3_50 = KotlinVersion(1, 3, 50)
 
-    private val propertyLanguageVersion = object : ConfigProperty.Choice<String?>(
+    private val propertyLanguageVersion: ConfigProperty.Choice<String?> = object : ConfigProperty.Choice<String?>(
             "languageVersion",
             "-language-version",
             default = null, serializer = String.serializer().nullable) {
@@ -460,17 +459,17 @@ object ConfigProperties {
     val serializers: Map<SdkLanguage, KSerializer<CompilerConfiguration>> =
             properties.mapValues { (language, properties) ->
                 object : KSerializer<CompilerConfiguration> {
-                    override val descriptor = SerialDescriptor("CompilerConfiguration.$language") {
+                    override val descriptor = buildClassSerialDescriptor("CompilerConfiguration.$language") {
                         for (property in properties) {
                             element(property.id, property.serializer.descriptor)
                         }
                     }
 
                     private fun <T> serializeEntry(
-                            structure: CompositeEncoder,
-                            config: CompilerConfiguration,
-                            index: Int,
-                            property: ConfigProperty<T>
+                        structure: CompositeEncoder,
+                        config: CompilerConfiguration,
+                        index: Int,
+                        property: ConfigProperty<T>
                     ) {
                         if (config.containsKey(property.id)) {
                             val value = config[property.id]
@@ -499,7 +498,7 @@ object ConfigProperties {
                         val structure = decoder.beginStructure(descriptor)
                         while (true) {
                             val i = structure.decodeElementIndex(descriptor)
-                            if (i == CompositeDecoder.READ_DONE) break
+                            if (i == CompositeDecoder.DECODE_DONE) break
                             val property = properties.getOrNull(i) ?: throw SerializationException("unknown index $i")
                             result[property.id] = structure.decodeSerializableElement(
                                     property.serializer.descriptor, i, property.serializer)
@@ -508,9 +507,6 @@ object ConfigProperties {
                         return result
                     }
 
-                    override fun patch(decoder: Decoder, old: CompilerConfiguration): CompilerConfiguration {
-                        throw UpdateNotSupportedException(descriptor.serialName)
-                    }
                 }
             }
 }
