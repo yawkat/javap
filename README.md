@@ -16,13 +16,13 @@ Build
 dev:
 
 ```
-mvn -pl shared,shared-js,server,client install &&
-mvn -pl server compile exec:java -Dexec.mainClass=at.yawk.javap.JavapApplicationKt -Dexec.args="config.json"
+./gradlew clean installShadowDist &&
+./gradlew :server:run --args="config.json"
 ```
 
 prod:
 
 ```
-mvn clean install &&
-java -jar server/target/javap-server-1.0-SNAPSHOT-shaded.jar config.json
+./gradlew clean installShadowDist &&
+java -jar server/build/install/server-shadow/lib/server-1.0-SNAPSHOT-shaded.jar config.json
 ```
