@@ -17,7 +17,8 @@ class Bubblewrap {
                 "bwrap",
                 "--unshare-all",
                 "--die-with-parent",
-                "--proc", "/proc"
+                "--proc", "/proc",
+                "--dev", "/dev"
         ) +
                 // bind the normal files
                 bindLocations.filter { !Files.isSymbolicLink(it) }
