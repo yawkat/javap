@@ -126,7 +126,10 @@ object ConfigProperties {
             else -> 7..release
         }
     }.apply { minJavaVersion = 9 }
-    val lombok: ConfigProperty<Boolean> = ConfigProperty.SpecialFlag("lombok", "Lombok", default = true)
+    val lombok: ConfigProperty<Boolean> = object : ConfigProperty.SpecialFlag("lombok", "Lombok", default = true) {
+        // don't show for SDKs that don't have lombok support
+        override fun canApplyTo(sdk: Sdk) = sdk is Sdk.Java && sdk.lombok != null
+    }
     val lint: ConfigProperty<Set<String>?> = object : ConfigProperty.Special<Set<String>?>(
             "lint", default = null,
             serializer = SetSerializer(String.serializer()).nullable) {
@@ -550,7 +553,8 @@ sealed class ConfigProperty<T>(
 
     open fun canApplyTo(sdk: Sdk) = when (sdk) {
         is Sdk.OpenJdk, is Sdk.Ecj ->
-            language == SdkLanguage.JAVA && minJavaVersion <= (sdk as Sdk.Java).release &&
+            language == SdkLanguage.JAVA &&
+                    minJavaVersion <= (sdk as Sdk.Java).release &&
                     (!requireEcj || sdk is Sdk.Ecj)
         is Sdk.KotlinJar, is Sdk.KotlinDistribution ->
             language == SdkLanguage.KOTLIN && minKotlinVersion <= (sdk as Sdk.Kotlin).release

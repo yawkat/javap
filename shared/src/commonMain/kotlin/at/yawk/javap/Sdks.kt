@@ -24,6 +24,7 @@ sealed class Sdk(
 
     interface Java : HasLint {
         val release: Int
+        val lombok: RemoteFile?
     }
 
     data class OpenJdk(
@@ -31,7 +32,7 @@ sealed class Sdk(
 
             override val name: String,
             val distribution: RemoteFile,
-            val lombok: RemoteFile,
+            override val lombok: RemoteFile?,
             val libPaths: Set<String>,
             override val supportedWarnings: Set<String>,
 
@@ -43,7 +44,7 @@ sealed class Sdk(
 
             override val name: String,
             val compilerJar: RemoteFile,
-            val lombok: RemoteFile,
+            override val lombok: RemoteFile,
             val hostJdk: OpenJdk,
             override val supportedWarnings: Set<String>,
 
@@ -79,7 +80,7 @@ sealed class Sdk(
 }
 
 object Sdks {
-    private val lombok1_18_10 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.10/lombok-1.18.10.jar")
+    private val lombok1_18_18 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.18/lombok-1.18.18.jar")
     private val lombok1_18_4 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar")
 
     private val openjdk6 = Sdk.OpenJdk(
@@ -103,7 +104,7 @@ object Sdks {
                     md5 = "6fd6af8bc9a696116b7eeff8d28b0e98"
             ),
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
-            lombok = lombok1_18_4,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk6.supportedWarnings + setOf(
                     "classfile", "dep-ann", "options", "processing", "rawtypes", "static", "try", "varargs")
     )
@@ -116,7 +117,7 @@ object Sdks {
                     sha256 = "2b59b5282ff32bce7abba8ad6b9fde34c15a98f949ad8ae43e789bbd78fc8862"
             ),
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
-            lombok = lombok1_18_4,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk7.supportedWarnings + setOf("auxiliaryclass", "overloads")
     )
     private val openjdk9 = Sdk.OpenJdk(
@@ -128,7 +129,7 @@ object Sdks {
                     sha256 = "aa4fc8bda11741facaf3b8537258a4497c6e0046b9f4931e31f713d183b951f1"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_4,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk8.supportedWarnings + setOf(
                     "exports", "module", "opens", "removal", "requires-automatic", "requires-transitive-automatic")
     )
@@ -140,7 +141,7 @@ object Sdks {
                     sha256 = "3998c36c7feb4bb7a565b3d33609ec67acd40f1ae5addf103378f2ef32ab377f"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_4,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk9.supportedWarnings
     )
     private val openjdk11 = Sdk.OpenJdk(
@@ -151,7 +152,7 @@ object Sdks {
                     sha256 = "ee60304d782c9d5654bf1a6b3f38c683921c1711045e1db94525a51b7024a2ca"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_4,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk10.supportedWarnings + "preview"
     )
     private val openjdk12 = Sdk.OpenJdk(
@@ -162,7 +163,7 @@ object Sdks {
                     sha256 = "1202f536984c28d68681d51207a84b6c76e5998579132d3fe1b8085aa6a5f21e"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_10,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk11.supportedWarnings + "text-blocks"
     )
     private val openjdk13 = Sdk.OpenJdk(
@@ -173,7 +174,7 @@ object Sdks {
                     sha256 = "9ccc063569f19899fd08e41466f8c4cd4e05058abdb5178fa374cb365dcf5998"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_10,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk12.supportedWarnings
     )
     private val openjdk14 = Sdk.OpenJdk(
@@ -184,7 +185,7 @@ object Sdks {
                     sha256 = "9ddf9b35996fbd784a53fff3e0d59920a7d5acf1a82d4c8d70906957ac146cd1"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_10,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk13.supportedWarnings
     )
     private val openjdk15 = Sdk.OpenJdk(
@@ -195,12 +196,23 @@ object Sdks {
                     sha256 = "c198593d1b5188ee3570e2ca33c3bc004aaefbda2c11e68e58ae7296cf5c3982"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_10,
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk14.supportedWarnings
     )
+    private val openjdk16 = Sdk.OpenJdk(
+            16,
+            name = "OpenJDK 16",
+            distribution = RemoteFile(
+                    "https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk16-2021-02-13-09-19/OpenJDK16-jdk_x64_linux_hotspot_2021-02-13-09-19.tar.gz",
+                    sha256 = "3a80b3fb731bb4b340f8f4bbf6c0f2aeec89b97fd4916aeba10882d0430a66f2"
+            ),
+            libPaths = setOf("lib"),
+            lombok = null, // TODO: fix when lombok comes out
+            supportedWarnings = openjdk15.supportedWarnings
+    )
     private val openjdk = listOf(
-            openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
-    val defaultJava = openjdk15
+            openjdk16, openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
+    val defaultJava = openjdk16
 
     private val ecj3_11 = Sdk.Ecj(
             release = 8,
@@ -235,13 +247,20 @@ object Sdks {
             release = 13,
             name = "Eclipse ECJ 3.21",
             compilerJar = RemoteFile("https://repo1.maven.org/maven2/org/eclipse/jdt/ecj/3.21.0/ecj-3.21.0.jar"),
-            lombok = lombok1_18_10,
+            lombok = lombok1_18_4,
             hostJdk = openjdk14,
             supportedWarnings = ecj3_11.supportedWarnings +
                     setOf("module", "removal", "unlikelyCollectionMethodArgumentType", "unlikelyEqualsArgumentType")
     )
     private val ecj = listOf(ecj3_21, ecj3_11)
 
+    private val kotlin1_4_30 = Sdk.KotlinDistribution(
+            KotlinVersion(1, 4, 30),
+            name = "Kotlin 1.4.30",
+            distribution = RemoteFile("https://github.com/JetBrains/kotlin/releases/download/v1.4.30/kotlin-compiler-1.4.30.zip"),
+            hostJdk = openjdk8,
+            coroutines = RemoteFile("https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.4.2/kotlinx-coroutines-core-1.4.2.jar")
+    )
     private val kotlin1_3_50 = Sdk.KotlinDistribution(
             KotlinVersion(1, 3, 50),
             name = "Kotlin 1.3.50",
@@ -280,9 +299,9 @@ object Sdks {
     private val kotlin1_0_2 = kotlinJar(KotlinVersion(1, 0, 2))
 
     private val kotlin = listOf<Sdk>(
-            kotlin1_3_50, kotlin1_3_10, kotlin1_2, kotlin1_1_4, kotlin1_1_1, kotlin1_0_6, kotlin1_0_5, kotlin1_0_4,
-            kotlin1_0_3, kotlin1_0_2)
-    private val defaultKotlin = kotlin1_3_50
+        kotlin1_4_30, kotlin1_3_50, kotlin1_3_10, kotlin1_2, kotlin1_1_4, kotlin1_1_1, kotlin1_0_6, kotlin1_0_5,
+        kotlin1_0_4, kotlin1_0_3, kotlin1_0_2)
+    private val defaultKotlin = kotlin1_4_30
 
     private fun scalaSdk(release: KotlinVersion, warnings: Set<String>) = Sdk.Scala(
             release = release,

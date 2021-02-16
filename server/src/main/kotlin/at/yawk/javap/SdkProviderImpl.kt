@@ -32,10 +32,10 @@ import java.util.zip.ZipInputStream
 
 private val log = LoggerFactory.getLogger(SdkProviderImpl::class.java)
 
-class SdkProviderImpl : SdkProvider {
+class SdkProviderImpl(
+    private val root: Path = Paths.get("sdk")
+) : SdkProvider {
     private lateinit var sdks: Map<Sdk, RunnableSdk>
-
-    private val root = Paths.get("sdk")
 
     private abstract inner class HostedSdk(sdk: Sdk, val sdkRoot: Path, val jdk: Sdk.OpenJdk) : RunnableSdk(sdk) {
         override val jdkHome: Path
@@ -77,11 +77,18 @@ class SdkProviderImpl : SdkProvider {
             }
 
             @Suppress("UnstableApiUsage")
-            val lombokLocation = sdkRoot.resolve("lombok-" + BaseEncoding.base16().encode(
-                    Hashing.sha256().hashString(sdk.lombok.url, StandardCharsets.UTF_8).asBytes())
-                    + ".jar")
-            if (!Files.exists(lombokLocation)) {
-                sdk.lombok.downloadTo(lombokLocation)
+            val lombokLocation: Path?
+            if (sdk.lombok == null) {
+                lombokLocation = null
+            } else {
+                lombokLocation = sdkRoot.resolve(
+                    "lombok-" + BaseEncoding.base16().encode(
+                        Hashing.sha256().hashString(sdk.lombok!!.url, StandardCharsets.UTF_8).asBytes()
+                    ) + ".jar"
+                )
+                if (!Files.exists(lombokLocation)) {
+                    sdk.lombok!!.downloadTo(lombokLocation)
+                }
             }
 
             object : RunnableSdk(sdk) {
@@ -98,7 +105,9 @@ class SdkProviderImpl : SdkProvider {
                     )
 
                     command.addAll(ConfigProperties.validateAndBuildCommandLine(sdk, config))
-                    if (ConfigProperties.lombok.get(config)) {
+
+                    // hack: by default lombok is on, so .get returns true even for sdks that don't support it
+                    if (ConfigProperties.lombok.get(config) && lombokLocation != null) {
                         command.addAll(listOf(
                                 "-cp", lombokLocation.toAbsolutePath().toString(),
                                 "-processor",
