@@ -108,11 +108,30 @@ class SdkProviderImpl(
 
                     // hack: by default lombok is on, so .get returns true even for sdks that don't support it
                     if (ConfigProperties.lombok.get(config) && lombokLocation != null) {
-                        command.addAll(listOf(
+                        command.addAll(
+                            listOf(
                                 "-cp", lombokLocation.toAbsolutePath().toString(),
                                 "-processor",
                                 "lombok.launch.AnnotationProcessorHider\$AnnotationProcessor,lombok.launch.AnnotationProcessorHider\$ClaimingProcessor"
-                        ))
+                            )
+                        )
+                        if (sdk.release == 16) {
+                            // https://github.com/rzwitserloot/lombok/issues/2681
+                            command.addAll(
+                                listOf(
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
+                                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
+                                )
+                            )
+                        }
                     }
 
                     command.add(inputFile.toString())

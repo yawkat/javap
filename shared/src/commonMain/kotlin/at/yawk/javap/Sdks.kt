@@ -207,12 +207,12 @@ object Sdks {
                     sha256 = "3a80b3fb731bb4b340f8f4bbf6c0f2aeec89b97fd4916aeba10882d0430a66f2"
             ),
             libPaths = setOf("lib"),
-            lombok = null, // TODO: fix when lombok comes out - make this default jdk then too
+            lombok = lombok1_18_18,
             supportedWarnings = openjdk15.supportedWarnings
     )
     private val openjdk = listOf(
             openjdk16, openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
-    val defaultJava = openjdk15
+    val defaultJava = openjdk16
 
     private val ecj3_11 = Sdk.Ecj(
             release = 8,
