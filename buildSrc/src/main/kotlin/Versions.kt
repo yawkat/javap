@@ -1,5 +1,5 @@
 object Versions {
-    const val kotlin = "1.4.10"
+    const val kotlin = "1.5.31"
     const val kotlinxSerialization = "1.0.0"
     const val ztExec = "1.9"
     const val guava = "28.2-jre"
