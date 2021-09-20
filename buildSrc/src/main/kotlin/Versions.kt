@@ -1,7 +1,6 @@
 object Versions {
     const val kotlin = "1.4.10"
     const val kotlinxSerialization = "1.0.0"
-    const val guice = "4.2.3"
     const val ztExec = "1.9"
     const val guava = "28.2-jre"
     const val flyway = "4.0.1"
@@ -15,9 +14,6 @@ object Versions {
     const val hikariCP = "3.4.2"
     const val jdbi = "3.12.2"
     const val logback = "1.2.3"
-    const val jaxRsSerialization = "0.2.1"
-    const val adoptOpenJdkVanilla = "0.3.3"
-    const val jquery = "2.2.4"
-    const val jqueryUi = "1.11.4"
+    const val adoptOpenJdkVanilla = "0.4.0"
     const val bower = "1.4.2"
 }
