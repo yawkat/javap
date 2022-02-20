@@ -80,7 +80,7 @@ sealed class Sdk(
 }
 
 object Sdks {
-    private val lombok1_18_21 = RemoteFile("https://projectlombok.org/lombok-edge.jar")
+    private val lombok1_18_22 = RemoteFile("https://projectlombok.org/lombok-edge.jar")
     private val lombok1_18_18 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.18/lombok-1.18.18.jar")
     private val lombok1_18_4 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar")
 
@@ -220,7 +220,7 @@ object Sdks {
                     sha256 = "2997126c861af12fcd1fbd74b9463ec94d8cf05b5d912d2589f25784d0b0e091"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_21,
+            lombok = lombok1_18_22,
             supportedWarnings = openjdk16.supportedWarnings
     )
     private val openjdk = listOf(
@@ -267,6 +267,20 @@ object Sdks {
     )
     private val ecj = listOf(ecj3_21, ecj3_11)
 
+    private val kotlin1_6_10 = Sdk.KotlinDistribution(
+            KotlinVersion(1, 6, 10),
+            name = "Kotlin 1.6.10",
+            distribution = RemoteFile("https://github.com/JetBrains/kotlin/releases/download/v1.6.10/kotlin-compiler-1.6.10.zip"),
+            hostJdk = openjdk8,
+            coroutines = RemoteFile("https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.6.0/kotlinx-coroutines-core-1.6.0.jar")
+    )
+    private val kotlin1_5_32 = Sdk.KotlinDistribution(
+            KotlinVersion(1, 5, 32),
+            name = "Kotlin 1.5.32",
+            distribution = RemoteFile("https://github.com/JetBrains/kotlin/releases/download/v1.5.32/kotlin-compiler-1.5.32.zip"),
+            hostJdk = openjdk8,
+            coroutines = RemoteFile("https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.5.2/kotlinx-coroutines-core-1.5.2.jar")
+    )
     private val kotlin1_4_30 = Sdk.KotlinDistribution(
             KotlinVersion(1, 4, 30),
             name = "Kotlin 1.4.30",
@@ -312,9 +326,9 @@ object Sdks {
     private val kotlin1_0_2 = kotlinJar(KotlinVersion(1, 0, 2))
 
     private val kotlin = listOf<Sdk>(
-        kotlin1_4_30, kotlin1_3_50, kotlin1_3_10, kotlin1_2, kotlin1_1_4, kotlin1_1_1, kotlin1_0_6, kotlin1_0_5,
+        kotlin1_6_10, kotlin1_5_32, kotlin1_4_30, kotlin1_3_50, kotlin1_3_10, kotlin1_2, kotlin1_1_4, kotlin1_1_1, kotlin1_0_6, kotlin1_0_5,
         kotlin1_0_4, kotlin1_0_3, kotlin1_0_2)
-    private val defaultKotlin = kotlin1_4_30
+    private val defaultKotlin = kotlin1_6_10
 
     private fun scalaSdk(release: KotlinVersion, warnings: Set<String>) = Sdk.Scala(
             release = release,
