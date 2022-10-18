@@ -80,7 +80,7 @@ sealed class Sdk(
 }
 
 object Sdks {
-    private val lombok1_18_24 = RemoteFile("https://projectlombok.org/downloads/lombok.jar")
+    private val lombok1_18_24 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.24/lombok-1.18.24.jar")
     private val lombok1_18_18 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.18/lombok-1.18.18.jar")
     private val lombok1_18_4 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar")
 
