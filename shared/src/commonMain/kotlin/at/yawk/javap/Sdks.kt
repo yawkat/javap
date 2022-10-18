@@ -80,7 +80,7 @@ sealed class Sdk(
 }
 
 object Sdks {
-    private val lombok1_18_22 = RemoteFile("https://projectlombok.org/lombok-edge.jar")
+    private val lombok1_18_24 = RemoteFile("https://projectlombok.org/downloads/lombok.jar")
     private val lombok1_18_18 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.18/lombok-1.18.18.jar")
     private val lombok1_18_4 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar")
 
@@ -216,15 +216,37 @@ object Sdks {
             17,
             name = "OpenJDK 17",
             distribution = RemoteFile(
-                    "https://github.com/adoptium/temurin17-binaries/releases/download/jdk17-2021-09-15-08-15-beta/OpenJDK17-jdk_x64_linux_hotspot_2021-09-15-08-15.tar.gz",
-                    sha256 = "2997126c861af12fcd1fbd74b9463ec94d8cf05b5d912d2589f25784d0b0e091"
+                    "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4.1_1.tar.gz",
+                    sha256 = "5fbf8b62c44f10be2efab97c5f5dbf15b74fae31e451ec10abbc74e54a04ff44"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_22,
+            lombok = lombok1_18_24,
             supportedWarnings = openjdk16.supportedWarnings
     )
+    private val openjdk18 = Sdk.OpenJdk(
+            18,
+            name = "OpenJDK 18",
+            distribution = RemoteFile(
+                    "https://github.com/adoptium/temurin18-binaries/releases/download/jdk-18.0.2.1%2B1/OpenJDK18U-jdk_x64_linux_hotspot_18.0.2.1_1.tar.gz",
+                    sha256 = "7d6beba8cfc0a8347f278f7414351191a95a707d46b6586e9a786f2669af0f8b"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_24,
+            supportedWarnings = openjdk17.supportedWarnings
+    )
+    private val openjdk19 = Sdk.OpenJdk(
+            19,
+            name = "OpenJDK 19",
+            distribution = RemoteFile(
+                    "https://github.com/adoptium/temurin19-binaries/releases/download/jdk-19%2B36/OpenJDK19U-jdk_x64_linux_hotspot_19_36.tar.gz",
+                    sha256 = "d10becfc1ea6586180246455ee8d462875f97655416a7d7c5a1c60d0570dbc8f"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_24,
+            supportedWarnings = openjdk18.supportedWarnings
+    )
     private val openjdk = listOf(
-            openjdk17, openjdk16, openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
+            openjdk19, openjdk18, openjdk17, openjdk16, openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
     val defaultJava = openjdk17
 
     private val ecj3_11 = Sdk.Ecj(

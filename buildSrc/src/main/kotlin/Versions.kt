@@ -5,7 +5,7 @@ object Versions {
     const val guava = "28.2-jre"
     const val flyway = "4.0.1"
     const val h2 = "1.4.191"
-    const val procyon = "0.5.36"
+    const val procyon = "0.6.0"
     const val testng = "6.9.10"
     const val mockito = "2.0.2-beta"
     const val jimfs = "1.1"

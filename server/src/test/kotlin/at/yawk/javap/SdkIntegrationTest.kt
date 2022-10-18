@@ -55,6 +55,7 @@ class SdkIntegrationTest {
         val output = processor.process(ProcessingInput(testCode, sdk.name, compilerConfiguration))
         Assert.assertTrue(output.compilerLog.isEmpty(), output.compilerLog)
         Assert.assertNotNull(output.procyon)
+        Assert.assertFalse(output.procyon!!.contains("Exception: "))
         Assert.assertNotNull(output.javap)
     }
 }
