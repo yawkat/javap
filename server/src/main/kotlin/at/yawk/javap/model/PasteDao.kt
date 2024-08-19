@@ -43,7 +43,6 @@ interface PasteDao {
             @BindBean("output") output: ProcessingOutput
     )
 
-    @JvmDefault
     fun createPaste(
             ownerToken: String,
             id: String,
@@ -71,7 +70,6 @@ interface PasteDao {
             @BindBean("output") output: ProcessingOutput
     )
 
-    @JvmDefault
     fun updatePaste(
             ownerToken: String,
             id: String,

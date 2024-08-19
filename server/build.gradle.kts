@@ -1,8 +1,6 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     kotlin("jvm")
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("application")
     kotlin("plugin.serialization")
 }
@@ -11,33 +9,33 @@ dependencies {
     implementation(project(":shared"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
-    implementation("org.zeroturnaround:zt-exec:${Versions.ztExec}")
-    implementation("com.google.guava:guava:${Versions.guava}")
-    implementation("org.flywaydb:flyway-core:${Versions.flyway}")
-    implementation("org.bitbucket.mstrobel:procyon-compilertools:${Versions.procyon}")
-    implementation("org.postgresql:postgresql:${Versions.postgresql}")
-    implementation("io.undertow:undertow-core:${Versions.undertow}")
-    implementation("com.zaxxer:HikariCP:${Versions.hikariCP}")
-    implementation("org.jdbi:jdbi3-core:${Versions.jdbi}")
-    implementation("org.jdbi:jdbi3-sqlobject:${Versions.jdbi}")
-    implementation("ch.qos.logback:logback-classic:${Versions.logback}")
-    implementation("org.webjars.bower:ace-builds:${Versions.bower}")
+    implementation("org.zeroturnaround:zt-exec:1.9")
+    implementation("com.google.guava:guava:33.3.0-jre")
+    implementation("org.flywaydb:flyway-core:4.0.1")
+    implementation("org.bitbucket.mstrobel:procyon-compilertools:0.6.0")
+    implementation("org.postgresql:postgresql:42.7.3")
+    implementation("io.undertow:undertow-core:2.3.15.Final")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("org.jdbi:jdbi3-core:3.45.3")
+    implementation("org.jdbi:jdbi3-sqlobject:3.45.3")
+    implementation("ch.qos.logback:logback-classic:1.5.7")
+    implementation("org.webjars.npm:ace-builds:1.35.3")
     testImplementation("org.testng:testng:${Versions.testng}")
-    testImplementation("org.mockito:mockito-all:${Versions.mockito}")
-    testImplementation("com.google.jimfs:jimfs:${Versions.jimfs}")
-    testImplementation("com.h2database:h2:${Versions.h2}")
-    testImplementation("net.adoptopenjdk:net.adoptopenjdk.v3.vanilla:${Versions.adoptOpenJdkVanilla}")
+    testImplementation("org.mockito:mockito-all:2.0.2-beta")
+    testImplementation("com.google.jimfs:jimfs:1.3.0")
+    testImplementation("com.h2database:h2:2.3.232")
+    testImplementation("net.adoptopenjdk:net.adoptopenjdk.v3.vanilla:0.4.0")
 }
 
 application {
-    mainClassName = "at.yawk.javap.JavapApplicationKt"
+    mainClass.set("at.yawk.javap.JavapApplicationKt")
 }
 
 tasks {
     compileKotlin {
         kotlinOptions {
-            freeCompilerArgs = listOf("-Xjvm-default=enable")
-            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-Xjvm-default=all")
+            jvmTarget = "17"
         }
     }
 

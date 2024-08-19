@@ -40,6 +40,8 @@ class SdkIntegrationTest {
                 }
             """
             SdkLanguage.KOTLIN -> """
+                ${if (sdk is Sdk.KotlinDistribution) "import kotlinx.coroutines.*" else ""}
+                
                 data class A(val a: Int, val s: String)
             """.trimIndent()
             SdkLanguage.SCALA -> """

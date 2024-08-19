@@ -4,16 +4,17 @@ import org.w3c.dom.Element
 import kotlinx.dom.appendElement
 import kotlinx.dom.appendText
 
-class Highlighter(@Suppress("UNUSED_PARAMETER") mode: String) {
+class Highlighter(mode: String) {
     companion object {
         const val WRAPPER_CLASS = "ace-tm"
     }
 
-    @Suppress("JoinDeclarationAndAssignment")
     private val tokenizer: dynamic
     private var state = "start"
 
     init {
+        @Suppress("UNUSED_VARIABLE")
+        val mode = mode
         tokenizer = js("new (window.require(mode).Mode)()").getTokenizer()
     }
 

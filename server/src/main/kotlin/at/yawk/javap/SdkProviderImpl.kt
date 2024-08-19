@@ -29,8 +29,11 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 import java.util.Arrays
 import java.util.zip.ZipInputStream
+import kotlin.io.path.exists
+import kotlin.io.path.writeText
 
 private val log = LoggerFactory.getLogger(SdkProviderImpl::class.java)
+private const val SHA_FILE_NAME = "sha256sum"
 
 class SdkProviderImpl(
     private val root: Path = Paths.get("sdk")
@@ -59,6 +62,16 @@ class SdkProviderImpl(
 
     private fun prepareSdk(sdk: Sdk, sdkRoot: Path) = when (sdk) {
         is Sdk.OpenJdk -> {
+            // JDK gets special treatment because the name does not represent the full version string
+            if (sdkRoot.exists()) {
+                // all jdk dists are sha256 verified, so this shortcut works
+                val shaFile = sdkRoot.resolve(SHA_FILE_NAME)
+                if (!shaFile.exists() || Files.readString(shaFile).trim() != sdk.distribution.sha256) {
+                    log.info("Deleting old ${sdk.name} distribution because of hash mismatch")
+                    deleteRecursively(sdkRoot)
+                }
+            }
+
             buildSdkRootIfMissing(sdkRoot) { tmp ->
                 val dist = tmp.resolve("dist.tgz")
                 try {
@@ -71,12 +84,13 @@ class SdkProviderImpl(
                             .exitValueNormal()
                             .destroyOnExit()
                             .execute()
+
+                    tmp.resolve(SHA_FILE_NAME).writeText(sdk.distribution.sha256!!)
                 } finally {
                     if (Files.exists(dist)) Files.delete(dist)
                 }
             }
 
-            @Suppress("UnstableApiUsage")
             val lombokLocation: Path?
             if (sdk.lombok == null) {
                 lombokLocation = null

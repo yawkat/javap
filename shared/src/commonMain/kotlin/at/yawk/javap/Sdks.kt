@@ -80,16 +80,18 @@ sealed class Sdk(
 }
 
 object Sdks {
+    private val lombok1_18_34 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar")
     private val lombok1_18_24 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.24/lombok-1.18.24.jar")
     private val lombok1_18_18 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.18/lombok-1.18.18.jar")
     private val lombok1_18_4 = RemoteFile("https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar")
 
     private val openjdk6 = Sdk.OpenJdk(
             6,
-            name = "OpenJDK 6u79",
+            name = "OpenJDK 6",
+            aliases = setOf("OpenJDK 6u79"),
             distribution = RemoteFile(
-                    "http://cdn.azul.com/zulu/bin/zulu6.12.0.2-jdk6.0.79-linux_x64.tar.gz",
-                    md5 = "a54fb082c89de3909df5b69cd50a2155"
+                    "https://cdn.azul.com/zulu/bin/zulu6.22.0.3-jdk6.0.119-linux_x64.tar.gz",
+                    sha256 = "dd4765b45d9f1fc319a6e5be0bbc79371582daa8fd77872d51072f16deca2625"
             ),
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
             lombok = lombok1_18_4,
@@ -99,10 +101,11 @@ object Sdks {
     )
     private val openjdk7 = Sdk.OpenJdk(
             7,
-            name = "OpenJDK 7u101",
+            name = "OpenJDK 7",
+            aliases = setOf("OpenJDK 7u101"),
             distribution = RemoteFile(
-                    "http://cdn.azul.com/zulu/bin/zulu7.14.0.5-jdk7.0.101-linux_x64.tar.gz",
-                    md5 = "6fd6af8bc9a696116b7eeff8d28b0e98"
+                    "https://cdn.azul.com/zulu/bin/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz",
+                    sha256 = "8a7387c1ed151474301b6553c6046f865dc6c1e1890bcf106acc2780c55727c8"
             ),
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
             lombok = lombok1_18_18,
@@ -114,8 +117,8 @@ object Sdks {
             name = "OpenJDK 8",
             aliases = setOf("OpenJDK 8u92"),
             distribution = RemoteFile(
-                    "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u302-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u302b08.tar.gz",
-                    sha256 = "cc13f274becf9dd5517b6be583632819dfd4dd81e524b5c1b4f406bdaf0e063a"
+                    "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jdk_x64_linux_hotspot_8u422b05.tar.gz",
+                    sha256 = "4c6056f6167fae73ace7c3080b78940be5c87d54f5b08894b3517eed1cbb2c06"
             ),
             libPaths = setOf("lib/amd64", "lib/amd64/jli"),
             lombok = lombok1_18_18,
@@ -126,8 +129,8 @@ object Sdks {
             name = "OpenJDK 9",
             aliases = setOf("OpenJDK 9.0.0"),
             distribution = RemoteFile(
-                    "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk-9.0.4%2B11/OpenJDK9U-jdk_x64_linux_hotspot_9.0.4_11.tar.gz",
-                    sha256 = "aa4fc8bda11741facaf3b8537258a4497c6e0046b9f4931e31f713d183b951f1"
+                    "https://github.com/AdoptOpenJDK/openjdk9-binaries/releases/download/jdk-9%2B181/OpenJDK9U-jdk_x64_linux_hotspot_9_181.tar.gz",
+                    sha256 = "ebe1eaad73584f70ab4e587ab9367fb15af820745979e68350fe80fadf615df8"
             ),
             libPaths = setOf("lib"),
             lombok = lombok1_18_18,
@@ -149,8 +152,8 @@ object Sdks {
             11,
             name = "OpenJDK 11",
             distribution = RemoteFile(
-                    "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz",
-                    sha256 = "8770f600fc3b89bf331213c7aa21f8eedd9ca5d96036d1cd48cb2748a3dbefd2"
+                    "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.24%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.24_8.tar.gz",
+                    sha256 = "0e71a01563a5c7b9988a168b0c4ce720a6dff966b3c27bb29d1ded461ff71d0e"
             ),
             libPaths = setOf("lib"),
             lombok = lombok1_18_18,
@@ -210,18 +213,18 @@ object Sdks {
             ),
             libPaths = setOf("lib"),
             lombok = lombok1_18_18,
-            supportedWarnings = openjdk15.supportedWarnings
+            supportedWarnings = openjdk15.supportedWarnings + setOf("missing-explicit-ctor", "synchronization")
     )
     private val openjdk17 = Sdk.OpenJdk(
             17,
             name = "OpenJDK 17",
             distribution = RemoteFile(
-                    "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4.1_1.tar.gz",
-                    sha256 = "5fbf8b62c44f10be2efab97c5f5dbf15b74fae31e451ec10abbc74e54a04ff44"
+                    "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.9%2B9/OpenJDK17U-jdk_x64_linux_hotspot_17.0.9_9.tar.gz",
+                    sha256 = "7b175dbe0d6e3c9c23b6ed96449b018308d8fc94a5ecd9c0df8b8bc376c3c18a"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_24,
-            supportedWarnings = openjdk16.supportedWarnings
+            lombok = lombok1_18_34,
+            supportedWarnings = openjdk16.supportedWarnings + "strictfp"
     )
     private val openjdk18 = Sdk.OpenJdk(
             18,
@@ -231,23 +234,57 @@ object Sdks {
                     sha256 = "7d6beba8cfc0a8347f278f7414351191a95a707d46b6586e9a786f2669af0f8b"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_24,
+            lombok = lombok1_18_34,
             supportedWarnings = openjdk17.supportedWarnings
     )
     private val openjdk19 = Sdk.OpenJdk(
             19,
             name = "OpenJDK 19",
             distribution = RemoteFile(
-                    "https://github.com/adoptium/temurin19-binaries/releases/download/jdk-19%2B36/OpenJDK19U-jdk_x64_linux_hotspot_19_36.tar.gz",
-                    sha256 = "d10becfc1ea6586180246455ee8d462875f97655416a7d7c5a1c60d0570dbc8f"
+                    "https://github.com/adoptium/temurin19-binaries/releases/download/jdk-19.0.2%2B7/OpenJDK19U-jdk_x64_linux_hotspot_19.0.2_7.tar.gz",
+                    sha256 = "3a3ba7a3f8c3a5999e2c91ea1dca843435a0d1c43737bd2f6822b2f02fc52165"
             ),
             libPaths = setOf("lib"),
-            lombok = lombok1_18_24,
+            lombok = lombok1_18_34,
             supportedWarnings = openjdk18.supportedWarnings
     )
+    private val openjdk20 = Sdk.OpenJdk(
+            20,
+            name = "OpenJDK 20",
+            distribution = RemoteFile(
+                    "https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20.0.2%2B9/OpenJDK20U-jdk_x64_linux_hotspot_20.0.2_9.tar.gz",
+                    sha256 = "3d91842e9c172967ac397076523249d05a82ead51b0006838f5f0315ad52222c"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_34,
+            supportedWarnings = openjdk19.supportedWarnings + "lossy-conversions"
+    )
+    private val openjdk21 = Sdk.OpenJdk(
+            21,
+            name = "OpenJDK 21",
+            distribution = RemoteFile(
+                    "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz",
+                    sha256 = "51fb4d03a4429c39d397d3a03a779077159317616550e4e71624c9843083e7b9"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_34,
+            // also output-file-clash but that's not relevant to this website
+            supportedWarnings = openjdk20.supportedWarnings + "this-escape"
+    )
+    private val openjdk22 = Sdk.OpenJdk(
+            22,
+            name = "OpenJDK 22",
+            distribution = RemoteFile(
+                    "https://github.com/adoptium/temurin22-binaries/releases/download/jdk-22.0.2%2B9/OpenJDK22U-jdk_x64_linux_hotspot_22.0.2_9.tar.gz",
+                    sha256 = "05cd9359dacb1a1730f7c54f57e0fed47942a5292eb56a3a0ee6b13b87457a43"
+            ),
+            libPaths = setOf("lib"),
+            lombok = lombok1_18_34,
+            supportedWarnings = openjdk21.supportedWarnings + setOf("incubating", "restricted")
+    )
     private val openjdk = listOf(
-            openjdk19, openjdk18, openjdk17, openjdk16, openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
-    val defaultJava = openjdk17
+            openjdk22, openjdk21, openjdk20, openjdk19, openjdk18, openjdk17, openjdk16, openjdk15, openjdk14, openjdk13, openjdk12, openjdk11, openjdk10, openjdk9, openjdk8, openjdk7, openjdk6)
+    val defaultJava = openjdk21
 
     private val ecj3_11 = Sdk.Ecj(
             release = 8,
@@ -287,8 +324,23 @@ object Sdks {
             supportedWarnings = ecj3_11.supportedWarnings +
                     setOf("module", "removal", "unlikelyCollectionMethodArgumentType", "unlikelyEqualsArgumentType")
     )
-    private val ecj = listOf(ecj3_21, ecj3_11)
+    private val ecj3_38 = Sdk.Ecj(
+            release = 22,
+            name = "Eclipse ECJ 3.38",
+            compilerJar = RemoteFile("https://repo1.maven.org/maven2/org/eclipse/jdt/ecj/3.38.0/ecj-3.38.0.jar"),
+            lombok = lombok1_18_34,
+            hostJdk = openjdk21,
+            supportedWarnings = ecj3_21.supportedWarnings
+    )
+    private val ecj = listOf(ecj3_38, ecj3_21, ecj3_11)
 
+    private val kotlin2_0_10 = Sdk.KotlinDistribution(
+            KotlinVersion(2, 0, 10),
+            name = "Kotlin 2.0.10",
+            distribution = RemoteFile("https://github.com/JetBrains/kotlin/releases/download/v2.0.10/kotlin-compiler-2.0.10.zip"),
+            hostJdk = openjdk21,
+            coroutines = RemoteFile("https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.1/kotlinx-coroutines-core-jvm-1.8.1.jar")
+    )
     private val kotlin1_6_10 = Sdk.KotlinDistribution(
             KotlinVersion(1, 6, 10),
             name = "Kotlin 1.6.10",
@@ -348,14 +400,22 @@ object Sdks {
     private val kotlin1_0_2 = kotlinJar(KotlinVersion(1, 0, 2))
 
     private val kotlin = listOf<Sdk>(
+        kotlin2_0_10,
         kotlin1_6_10, kotlin1_5_32, kotlin1_4_30, kotlin1_3_50, kotlin1_3_10, kotlin1_2, kotlin1_1_4, kotlin1_1_1, kotlin1_0_6, kotlin1_0_5,
         kotlin1_0_4, kotlin1_0_3, kotlin1_0_2)
-    private val defaultKotlin = kotlin1_6_10
+    private val defaultKotlin = kotlin2_0_10
 
     private fun scalaSdk(release: KotlinVersion, warnings: Set<String>) = Sdk.Scala(
             release = release,
             name = "Scala $release",
             sdk = RemoteFile("https://downloads.lightbend.com/scala/$release/scala-$release.zip"),
+            hostJdk = openjdk8,
+            supportedWarnings = warnings
+    )
+    private fun scala3Sdk(release: KotlinVersion, warnings: Set<String>) = Sdk.Scala(
+            release = release,
+            name = "Scala $release",
+            sdk = RemoteFile("https://github.com/scala/scala3/releases/download/$release/scala3-$release.zip"),
             hostJdk = openjdk8,
             supportedWarnings = warnings
     )
@@ -371,9 +431,11 @@ object Sdks {
             setOf("by-name-right-associative", "unsound-match") +
             setOf("nonlocal-return", "implicit-not-found", "serial", "valpattern", "eta-zero", "eta-sam",
                     "deprecation"))
+    // not sure about scala 3 warnings
+    private val scala3_4_2 = scala3Sdk(KotlinVersion(3, 4, 2), warnings = scala2_13.supportedWarnings)
 
-    private val scala = listOf(scala2_13, scala2_12_5, scala2_12_0, scala2_11_8)
-    private val defaultScala = scala2_13
+    private val scala = listOf(scala3_4_2, scala2_13, scala2_12_5, scala2_12_0, scala2_11_8)
+    private val defaultScala = scala3_4_2
 
     val sdkByLabel = mapOf(
             "OpenJDK" to openjdk,

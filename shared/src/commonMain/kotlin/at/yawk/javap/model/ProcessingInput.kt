@@ -10,6 +10,7 @@ import at.yawk.javap.Sdks
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.serializer
@@ -24,15 +25,14 @@ import kotlinx.serialization.encoding.Encoder
 /**
  * @author yawkat
  */
+@Serializable(with = ProcessingInput.Companion::class)
 data class ProcessingInput(
         val code: String,
         val compilerName: String,
         val compilerConfiguration: CompilerConfiguration
 ) {
-    @ExperimentalSerializationApi
-    @InternalSerializationApi
-    @Serializer(forClass = ProcessingInput::class)
     companion object : KSerializer<ProcessingInput> {
+        @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ProcessingInput") {
             element("code", String.serializer().descriptor)
             element("compilerName", String.serializer().descriptor)
