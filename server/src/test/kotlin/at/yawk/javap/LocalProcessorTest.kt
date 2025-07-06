@@ -18,7 +18,7 @@ import org.testng.annotations.Test
 class LocalProcessorTest {
     private val localProcessor = LocalProcessor(SystemSdkProvider, Bubblewrap())
 
-    @Test(enabled = false)
+    @Test
     fun `empty file`() {
         assertEquals(
                 localProcessor.process(ProcessingInput("", Sdks.defaultJava.name, emptyMap())),
@@ -26,7 +26,7 @@ class LocalProcessorTest {
         )
     }
 
-    @Test(enabled = false)
+    @Test
     fun `compile error`() {
         assertEquals(
                 localProcessor.process(ProcessingInput(
