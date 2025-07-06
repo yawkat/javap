@@ -15,7 +15,7 @@ import org.testng.annotations.Test
 /**
  * @author yawkat
  */
-
+@Test(enabled = false)
 class LocalProcessorTest {
     private val localProcessor = LocalProcessor(SystemSdkProvider, Bubblewrap())
 

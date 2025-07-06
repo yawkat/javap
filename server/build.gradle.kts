@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("jvm")
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -33,9 +35,9 @@ application {
 
 tasks {
     compileKotlin {
-        kotlinOptions {
-            freeCompilerArgs = listOf("-Xjvm-default=all")
-            jvmTarget = "17"
+        compilerOptions {
+            freeCompilerArgs.add("-Xjvm-default=all")
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 
