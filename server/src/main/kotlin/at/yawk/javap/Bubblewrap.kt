@@ -56,6 +56,7 @@ class Bubblewrap {
         } else {
             combinedCommand = command
         }
+        println(combinedCommand)
         return ProcessExecutor()
                 .command(combinedCommand)
                 .directory(workingDir.toFile())
