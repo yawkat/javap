@@ -15,11 +15,10 @@ import org.testng.annotations.Test
 /**
  * @author yawkat
  */
-@Test(enabled = false)
 class LocalProcessorTest {
     private val localProcessor = LocalProcessor(SystemSdkProvider, Bubblewrap())
 
-    @Test
+    @Test(enabled = false)
     fun `empty file`() {
         assertEquals(
                 localProcessor.process(ProcessingInput("", Sdks.defaultJava.name, emptyMap())),
@@ -27,7 +26,7 @@ class LocalProcessorTest {
         )
     }
 
-    @Test
+    @Test(enabled = false)
     fun `compile error`() {
         assertEquals(
                 localProcessor.process(ProcessingInput(

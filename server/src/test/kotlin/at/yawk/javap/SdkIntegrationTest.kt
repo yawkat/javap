@@ -27,7 +27,7 @@ class SdkIntegrationTest {
         return Sdks.sdksByName.values.map { arrayOf<Any>(it) }.toTypedArray()
     }
 
-    @Test(dataProvider = "sdks", enabled = false)
+    @Test(dataProvider = "sdks")
     fun testSdk(sdk: Sdk) {
         val processor = LocalProcessor(sdkProvider, Bubblewrap())
         val testCode = when (sdk.language) {
