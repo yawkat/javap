@@ -13,7 +13,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 
-@Test(enabled = false)
 class SdkIntegrationTest {
     private lateinit var sdkProvider: SdkProviderImpl
 
@@ -28,7 +27,7 @@ class SdkIntegrationTest {
         return Sdks.sdksByName.values.map { arrayOf<Any>(it) }.toTypedArray()
     }
 
-    @Test(dataProvider = "sdks")
+    @Test(dataProvider = "sdks", enabled = false)
     fun testSdk(sdk: Sdk) {
         val processor = LocalProcessor(sdkProvider, Bubblewrap())
         val testCode = when (sdk.language) {
