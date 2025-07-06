@@ -18,3 +18,11 @@ jobs:
         run: ./gradlew check
         env:
           DISABLE_BUBBLEWRAP: true
+      - name: Store reports
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
