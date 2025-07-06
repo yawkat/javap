@@ -8,14 +8,24 @@ package at.yawk.javap
 
 import org.testng.Assert
 import org.testng.Assert.assertEquals
+import org.testng.SkipException
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * @author yawkat
  */
 class BubblewrapTest {
     private val bubblewrap = Bubblewrap()
+
+    @BeforeClass
+    fun check() {
+        if (!Files.exists(Path.of("/usr/bin/bwrap"))) {
+            throw SkipException("Bubblewrap unavailable")
+        }
+    }
 
     @Test
     fun `whitelist reading`() {
