@@ -40,7 +40,7 @@ class Bubblewrap {
             throw UnsupportedOperationException("Currently only /tmp is supported, verify security before allowing other paths")
 
         val combinedCommand: List<String>
-        if (runInJail) {
+        if (runInJail && AVAILABLE) {
             val bubblewrapCommand = basicCommand + writable.flatMap {
                 val abs = it.toAbsolutePath().toString()
                 listOf("--bind", abs, abs)
@@ -62,5 +62,9 @@ class Bubblewrap {
                 .readOutput(true)
                 .destroyOnExit()
                 .execute()
+    }
+
+    companion object {
+        val AVAILABLE = !(System.getenv("DISABLE_BUBBLEWRAP")?.toBoolean() ?: false)
     }
 }

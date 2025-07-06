@@ -20,13 +20,6 @@ import java.nio.file.Path
 class BubblewrapTest {
     private val bubblewrap = Bubblewrap()
 
-    @BeforeClass
-    fun check() {
-        if (!Files.exists(Path.of("/usr/bin/bwrap"))) {
-            throw SkipException("Bubblewrap unavailable")
-        }
-    }
-
     @Test
     fun `whitelist reading`() {
         val tempDirectory = Files.createTempDirectory(null)
@@ -54,6 +47,9 @@ class BubblewrapTest {
 
     @Test
     fun `cannot access files outside whitelist`() {
+        if (!Bubblewrap.AVAILABLE) {
+            throw SkipException("Bubblewrap is not available")
+        }
         val tempDirectory = Files.createTempDirectory(null)
         try {
             val command = bubblewrap.executeCommand(listOf("/bin/ls", "/opt"), tempDirectory)
