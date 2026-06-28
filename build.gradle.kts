@@ -8,7 +8,8 @@ allprojects {
 }
 
 plugins {
-    kotlin("multiplatform") version Versions.kotlin apply false
-    kotlin("plugin.serialization") version Versions.kotlin apply false
-    kotlin("jvm") version Versions.kotlin apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.shadow) apply false
 }

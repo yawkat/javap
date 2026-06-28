@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -27,14 +27,14 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
+                implementation(libs.kotlin.stdlib)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
 
         jvmTest {
             dependencies {
-                implementation("org.testng:testng:${Versions.testng}")
+                implementation(libs.testng)
             }
         }
     }

@@ -1,33 +1,33 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm")
-    id("com.gradleup.shadow") version "9.4.3"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
     id("application")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
     implementation(project(":shared"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
-    implementation("org.zeroturnaround:zt-exec:1.12")
-    implementation("com.google.guava:guava:33.6.0-jre")
-    implementation("org.flywaydb:flyway-core:12.9.0")
-    implementation("org.flywaydb:flyway-database-postgresql:12.9.0")
-    implementation("org.bitbucket.mstrobel:procyon-compilertools:0.6.0")
-    implementation("org.postgresql:postgresql:42.7.11")
-    implementation("io.undertow:undertow-core:2.4.2.Final")
-    implementation("com.zaxxer:HikariCP:7.1.0")
-    implementation("org.jdbi:jdbi3-core:3.53.0")
-    implementation("org.jdbi:jdbi3-sqlobject:3.53.0")
-    implementation("ch.qos.logback:logback-classic:1.5.37")
-    implementation("org.webjars.npm:ace-builds:1.44.0")
-    testImplementation("org.testng:testng:${Versions.testng}")
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("com.google.jimfs:jimfs:1.3.1")
-    testImplementation("com.h2database:h2:2.4.240")
-    testImplementation("net.adoptopenjdk:net.adoptopenjdk.v3.vanilla:0.4.0")
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.zt.exec)
+    implementation(libs.guava)
+    implementation(libs.flyway.core)
+    implementation(libs.flyway.database.postgresql)
+    implementation(libs.procyon.compilertools)
+    implementation(libs.postgresql)
+    implementation(libs.undertow.core)
+    implementation(libs.hikari.cp)
+    implementation(libs.jdbi.core)
+    implementation(libs.jdbi.sqlobject)
+    implementation(libs.logback.classic)
+    implementation(libs.ace.builds)
+    testImplementation(libs.testng)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.jimfs)
+    testImplementation(libs.h2)
+    testImplementation(libs.adoptopenjdk.v3.vanilla)
 }
 
 application {

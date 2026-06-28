@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -14,7 +14,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation(project(":shared"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerialization}")
+                implementation(libs.kotlinx.serialization.json)
             }
         }
     }
