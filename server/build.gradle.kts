@@ -53,5 +53,8 @@ tasks {
     shadowJar {
         mergeServiceFiles()
         archiveClassifier.set("shaded")
+        filesMatching("META-INF/services/**") {
+            duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+        }
     }
 }
