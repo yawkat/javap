@@ -12,6 +12,9 @@ kotlin {
 
     sourceSets {
         jsMain {
+            kotlin.srcDir("src/main/kotlin")
+            resources.srcDir("src/main/resources")
+
             dependencies {
                 implementation(project(":shared"))
                 implementation(libs.kotlinx.serialization.json)
