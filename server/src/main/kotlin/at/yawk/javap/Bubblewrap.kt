@@ -6,7 +6,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class Bubblewrap {
+class Bubblewrap(private val config: JavapConfiguration.Bubblewrap = JavapConfiguration.Bubblewrap()) {
     private val basicCommand: List<String>
 
     init {
@@ -25,7 +25,8 @@ class Bubblewrap {
                         .flatMap { listOf("--ro-bind", it.toString(), it.toString()) } +
                 // copy the links
                 bindLocations.filter { Files.isSymbolicLink(it) }
-                        .flatMap { listOf("--symlink", Files.readSymbolicLink(it).toString(), it.toString()) }
+                        .flatMap { listOf("--symlink", Files.readSymbolicLink(it).toString(), it.toString()) } +
+                config.extraArgs
     }
 
     fun executeCommand(

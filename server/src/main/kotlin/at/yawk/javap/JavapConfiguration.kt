@@ -15,12 +15,18 @@ import kotlinx.serialization.Serializable
 data class JavapConfiguration(
         val database: Database,
         val bindAddress: String = "127.0.0.1",
-        val bindPort: Int = 8080
+        val bindPort: Int = 8080,
+        val bubblewrap: Bubblewrap = Bubblewrap()
 ) {
     @Serializable
     data class Database(
             val user: String? = null,
             val password: String? = null,
             val url: String
+    )
+
+    @Serializable
+    data class Bubblewrap(
+            val extraArgs: List<String> = emptyList()
     )
 }
