@@ -51,7 +51,7 @@ tasks {
         from(project(":client").file("src/main/resources/static")) {
             into("static")
         }
-        from(project(":client").layout.buildDirectory.dir("distributions")) {
+        from(project(":client").layout.buildDirectory.dir("dist/js/productionExecutable")) {
             include("client.js", "client.js.map")
         }
     }
