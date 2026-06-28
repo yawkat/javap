@@ -60,6 +60,7 @@ class Bubblewrap {
         return ProcessExecutor()
                 .command(combinedCommand)
                 .directory(workingDir.toFile())
+                .environment(env)
                 .readOutput(true)
                 .destroyOnExit()
                 .execute()
