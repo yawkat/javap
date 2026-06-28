@@ -43,8 +43,9 @@ class PasteResourceTest {
 
     @BeforeClass
     fun setupDb() {
-        val flyway = Flyway()
-        flyway.dataSource = dataSource
+        val flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .load()
         flyway.migrate()
     }
 

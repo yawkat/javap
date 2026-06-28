@@ -41,8 +41,9 @@ fun main(args: Array<String>) {
         jdbcUrl = config.database.url
     })
 
-    val flyway = Flyway()
-    flyway.dataSource = dataSource
+    val flyway = Flyway.configure()
+            .dataSource(dataSource)
+            .load()
     flyway.migrate()
 
     val jdbi = Jdbi.create(dataSource).installPlugins()
