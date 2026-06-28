@@ -47,7 +47,8 @@ tasks {
     }
 
     processResources {
-        from(project(":client").tasks.named("jsBrowserDistribution"))
+        dependsOn(project(":client").tasks.named("jsBrowserDistribution"))
+        from(project(":client").layout.buildDirectory.dir("distributions"))
     }
 
     shadowJar {
