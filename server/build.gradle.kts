@@ -48,7 +48,12 @@ tasks {
 
     processResources {
         dependsOn(project(":client").tasks.named("jsBrowserDistribution"))
-        from(project(":client").layout.buildDirectory.dir("distributions"))
+        from(project(":client").file("src/main/resources/static")) {
+            into("static")
+        }
+        from(project(":client").layout.buildDirectory.dir("distributions")) {
+            include("client.js", "client.js.map")
+        }
     }
 
     shadowJar {
