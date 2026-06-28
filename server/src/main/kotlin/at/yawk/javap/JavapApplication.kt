@@ -49,7 +49,7 @@ fun main(args: Array<String>) {
     val jdbi = Jdbi.create(dataSource).installPlugins()
     val sdkProvider = SdkProviderImpl()
     sdkProvider.start()
-    val processor = LocalProcessor(sdkProvider, Bubblewrap())
+    val processor = LocalProcessor(sdkProvider, Bubblewrap(config.bubblewrap))
     val pasteResource = PasteResource(
             json,
             jdbi.onDemand(PasteDao::class.java),
