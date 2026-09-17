@@ -169,7 +169,7 @@ class PasteContext(var currentPaste: PasteDto) {
 
         // show tool output iff there are any outputs to select
         val toolOutputWrapper = document.getElementById("tool-output-wrapper")!!
-        if (OutputType.values().any { hasOutputOfType(it) }) {
+        if (OutputType.entries.any { hasOutputOfType(it) }) {
             toolOutputWrapper.removeClass("hide")
         } else {
             toolOutputWrapper.addClass("hide")

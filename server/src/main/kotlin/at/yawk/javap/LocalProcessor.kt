@@ -18,22 +18,12 @@ import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.stream.Collectors
-import java.util.stream.Stream
 
 /**
  * @author yawkat
  */
 @VisibleForTesting
 internal const val NO_CLASSES_GENERATED = "No classes generated"
-
-@Suppress("ConvertTryFinallyToUseCall")
-private inline fun <T, R> Stream<T>.use(f: (Stream<T>) -> R): R {
-    try {
-        return f(this)
-    } finally {
-        close()
-    }
-}
 
 fun deleteRecursively(path: Path) {
     Files.walkFileTree(path, object : SimpleFileVisitor<Path>() {

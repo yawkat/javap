@@ -17,7 +17,7 @@ import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream
 import java.io.BufferedInputStream
 import java.io.InputStream
-import java.net.URL
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileVisitResult
@@ -27,7 +27,6 @@ import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
-import java.util.Arrays
 import java.util.zip.ZipInputStream
 import kotlin.io.path.exists
 import kotlin.io.path.writeText
@@ -244,7 +243,7 @@ class SdkProviderImpl(
 @Suppress("UnstableApiUsage", "SuspiciousCollectionReassignment")
 private fun <R> RemoteFile.download(consumer: (InputStream) -> R): R {
     log.info("Fetching {}", url)
-    return URL(url).openStream().use {
+    return URI(url).toURL().openStream().use {
         var stream: InputStream = BufferedInputStream(it)
         var callbacks = emptyList<() -> Unit>()
 
@@ -253,7 +252,7 @@ private fun <R> RemoteFile.download(consumer: (InputStream) -> R): R {
             stream = hashing
             callbacks += {
                 val actualHash = hashing.hash().asBytes()
-                if (!Arrays.equals(BaseEncoding.base16().lowerCase().decode(hash), actualHash)) {
+                if (!BaseEncoding.base16().lowerCase().decode(hash).contentEquals(actualHash)) {
                     throw RuntimeException("Hash for $url is invalid (expected $hash but was ${BaseEncoding.base16().lowerCase().encode(
                             actualHash)}, corrupted download?)")
                 }

@@ -39,7 +39,7 @@ val HttpServerExchange.contentType: MediaType
         }
     }
 
-private val json = Json{ jsonConfiguration }
+private val json = Json(builderAction = jsonConfiguration)
 
 fun handleHttpException(xhg: HttpServerExchange, exception: HttpException) {
     xhg.statusCode = exception.code
