@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
 val jsonConfiguration : JsonBuilder.() -> Unit = { encodeDefaults = false }
 
 fun main(args: Array<String>) {
-    val json = Json { jsonConfiguration }
+    val json = Json(builderAction = jsonConfiguration)
     val config = json.decodeFromString<JavapConfiguration>(
             Files.readAllBytes(Paths.get(args[0])).toString(Charsets.UTF_8))
 

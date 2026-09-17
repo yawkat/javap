@@ -19,7 +19,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery
 import org.jdbi.v3.sqlobject.statement.SqlUpdate
 import java.sql.ResultSet
 
-private val json = Json { jsonConfiguration }
+private val json = Json(builderAction = jsonConfiguration)
 
 @RegisterRowMapper(PasteDao.PasteMapper::class)
 interface PasteDao {

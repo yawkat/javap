@@ -31,14 +31,14 @@ dependencies {
 }
 
 application {
-    mainClass.set("at.yawk.javap.JavapApplicationKt")
+    mainClass = "at.yawk.javap.JavapApplicationKt"
 }
 
 tasks {
     compileKotlin {
         compilerOptions {
             freeCompilerArgs.add("-Xjvm-default=all")
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget = JvmTarget.JVM_21
         }
     }
 
@@ -58,7 +58,7 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
-        archiveClassifier.set("shaded")
+        archiveClassifier = "shaded"
         filesMatching("META-INF/services/**") {
             duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
         }
