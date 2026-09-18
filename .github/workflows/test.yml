@@ -7,6 +7,10 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
+      - name: Build SDKs
+        run: nix build .#sdks -o sdk
       - name: Setup Java
         uses: actions/setup-java@v6
         with:

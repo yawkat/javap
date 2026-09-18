@@ -9,9 +9,18 @@ Prerequisites
 ----
 
 - PostgreSQL server with a `javap` role, owner of a `javap` database 
+- [Nix](https://nixos.org/) with flakes. The SDKs (JDKs, ECJ, Kotlin, Scala) and their metadata are defined in
+  `nix/sdks.nix`, and the build evaluates that metadata.
 
 Build
 -----
+
+Build the SDKs. This creates the SDK manifest `sdk/sdks.json` (the location can be changed with `sdkManifest` in the
+config file):
+
+```
+nix build .#sdks -o sdk
+```
 
 dev:
 

@@ -6,9 +6,6 @@
 
 package at.yawk.javap
 
-import at.yawk.javap.model.CompilerConfiguration
-import at.yawk.javap.model.ConfigProperties
-import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
@@ -17,28 +14,23 @@ import java.nio.file.Paths
 object SystemSdkProvider : SdkProvider {
     override fun lookupSdk(sdk: Sdk): RunnableSdk {
         require(sdk is Sdk.Java)
-        return object : RunnableSdk(sdk) {
-            override val jdkHome: Path
-                get() {
-                    var path = Paths.get(
-                            System.getenv("JAVA_HOME") ?: System.getProperty("java.home") ?: "/usr/lib/jvm/default")
-                    if (path.endsWith("jre")) path = path.parent
-                    return path
-                }
-            override val readable: Set<Path>
-                get() = setOf(Paths.get("/etc"), jdkHome)
-            override val libraryPath: List<Path>
-                get() = listOf(
-                        Paths.get("/usr/lib/jvm/default/lib/amd64"),
-                        Paths.get("/usr/lib/jvm/default/lib/amd64/jli"),
-                        Paths.get("/usr/lib/jvm/default/lib")
-                )
-
-            override fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration) = listOf(
-                    jdkHome.resolve("bin/javac").toAbsolutePath().toString(),
-                    "-encoding", "utf-8",
-                    "-d", outputDir.toString()
-            ) + ConfigProperties.validateAndBuildCommandLine(sdk, config) + inputFile.toString()
-        }
+        var jdkHome = Paths.get(
+                System.getenv("JAVA_HOME") ?: System.getProperty("java.home") ?: "/usr/lib/jvm/default")
+        if (jdkHome.endsWith("jre")) jdkHome = jdkHome.parent
+        return RunnableSdk(
+                sdk,
+                compiler = listOf(jdkHome.resolve("bin/javac").toAbsolutePath().toString(), "-encoding", "utf-8"),
+                compilerWithLombok = null,
+                javap = listOf(jdkHome.resolve("bin/javap").toAbsolutePath().toString()),
+                env = mapOf(
+                        "JAVA_HOME" to jdkHome.toAbsolutePath().toString(),
+                        "LD_LIBRARY_PATH" to listOf(
+                                "/usr/lib/jvm/default/lib/amd64",
+                                "/usr/lib/jvm/default/lib/amd64/jli",
+                                "/usr/lib/jvm/default/lib"
+                        ).joinToString(":")
+                ),
+                readable = setOf(Paths.get("/etc"), jdkHome)
+        )
     }
 }
