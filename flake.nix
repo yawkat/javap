@@ -93,7 +93,19 @@
         # SDK manifest used by the server at runtime: `nix build .#sdks -o sdk`
         sdks = sdks.manifest;
         server = javap;
-        default = javap;
+
+        # javap + sdks.manifest at `sdk/sdks.json`, matching the default (relative) `sdkManifest` config value, so
+        # `nix build; result/bin/javap-server config.json` works out of the box. Deployments that manage the SDK
+        # closure's lifecycle separately from the server (e.g. rebuilding the server far more often) should use the
+        # `server` and `sdks` outputs directly and wire `sdkManifest` themselves instead.
+        default = pkgs.symlinkJoin {
+          name = "javap";
+          paths = [ javap ];
+          postBuild = ''
+            mkdir -p $out/sdk
+            ln -s ${sdks.manifest}/sdks.json $out/sdk/sdks.json
+          '';
+        };
       };
 
       apps.${system}.update-deps = {

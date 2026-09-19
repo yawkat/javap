@@ -15,22 +15,23 @@ Prerequisites
 Build
 -----
 
-The server (client + server, packaged as `bin/javap-server`) can be built with nix:
+The whole server (client + server + SDKs) can be built with nix:
 
 ```
 nix build .#default
 ```
 
-This does *not* build the SDKs -- `javap-server` needs those separately, via the SDK manifest `sdk/sdks.json`
-(the location can be changed with `sdkManifest` in the config file):
+This produces `result/bin/javap-server` plus the SDK manifest at `result/sdk/sdks.json`, matching the default
+(relative) `sdkManifest` config value, so `result/bin/javap-server config.json` works out of the box from `result`.
+
+`server` and `sdks` are also available as separate outputs, for deployments that manage the SDK closure's lifecycle
+independently from the server -- e.g. rebuilding/redeploying the server on every commit while keeping the (large,
+rarely-changing) SDKs pinned separately. Point such a deployment's `sdkManifest` config value at the `sdks` output's
+`sdks.json` directly:
 
 ```
 nix build .#sdks -o sdk
 ```
-
-They're separate outputs because they change independently: the SDKs are large, expensive to rebuild, and rarely
-change, while the server rebuilds on every commit. A deployment needs both, typically wiring `sdkManifest` in its
-config to the `sdks` output's store path rather than relying on the relative-path default.
 
 After bumping a gradle or yarn dependency, refresh the pinned offline dependency cache (`nix/deps.json` and the
 yarn hash in `flake.nix`) with:
