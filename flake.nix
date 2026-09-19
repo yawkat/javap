@@ -50,55 +50,12 @@
         gradleFlags = [ "-Dorg.gradle.welcome=never" "--no-daemon" ];
         gradleUpdateTask = ":server:javapNixDownloadDeps";
 
+        # Picked up by build.gradle.kts to point the kotlin-js plugins at prebuilt node/yarn instead of letting
+        # them download their own, which the sandboxed build has no network access to do.
+        NIX_NODEJS_BIN = "${pkgs.nodejs_22}/bin/node";
+        NIX_YARN_BIN = "${pkgs.yarn}/bin/yarn";
+
         postPatch = ''
-          substituteInPlace build.gradle.kts \
-            --replace-fail 'allprojects {' 'import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
-
-plugins.withType<NodeJsPlugin> {
-    extensions.findByType<NodeJsEnvSpec>()?.let {
-        it.download.set(false)
-        it.command.set("${pkgs.nodejs_22}/bin/node")
-    }
-}
-
-rootProject.plugins.withType<NodeJsRootPlugin> {
-    rootProject.extensions.findByType<NodeJsRootExtension>()?.let {
-        it.withGroovyBuilder {
-            "setDownload"(false)
-            "setNodeCommand"("${pkgs.nodejs_22}/bin/node")
-        }
-    }
-}
-
-plugins.withType<YarnPlugin> {
-    extensions.findByType<YarnRootEnvSpec>()?.let {
-        it.download.set(false)
-        it.command.set("${pkgs.yarn}/bin/yarn")
-    }
-}
-
-project(":server") {
-    tasks.register("javapNixDownloadDeps") {
-        dependsOn(
-            ":server:compileKotlin",
-            ":shared:compileKotlinJvm",
-            ":shared:compileKotlinJs",
-            ":client:compileKotlinJs",
-        )
-        doLast {
-            configurations.getByName("runtimeClasspath").resolve()
-        }
-    }
-}
-
-allprojects {'
-
           fixup-yarn-lock kotlin-js-store/yarn.lock
         '';
 
