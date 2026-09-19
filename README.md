@@ -15,18 +15,33 @@ Prerequisites
 Build
 -----
 
-Build the SDKs. This creates the SDK manifest `sdk/sdks.json` (the location can be changed with `sdkManifest` in the
-config file):
+The whole server (client + server + SDKs) can be built with nix:
+
+```
+nix build .#default
+```
+
+After bumping a gradle or yarn dependency, refresh the pinned offline dependency cache (`nix/deps.json` and the
+yarn hash in `flake.nix`) with:
+
+```
+nix run .#update-deps
+```
+
+For local development, build just the SDK manifest `sdk/sdks.json` (the location can be changed with `sdkManifest`
+in the config file):
 
 ```
 nix build .#sdks -o sdk
 ```
 
-dev:
+dev, using a JDK from `nix develop` (or any JDK 21):
 
 ```
-./gradlew clean installShadowDist &&
-./gradlew :server:run --args="config.json"
+nix develop --command bash -c '
+  ./gradlew clean installShadowDist &&
+  ./gradlew :server:run --args="config.json"
+'
 ```
 
 prod:

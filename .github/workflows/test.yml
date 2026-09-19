@@ -9,17 +9,23 @@ jobs:
         uses: actions/checkout@v7
       - name: Install nix
         uses: cachix/install-nix-action@v31
+      - name: Cache nix store
+        uses: actions/cache@v4
+        with:
+          path: /nix
+          key: nix-store-${{ runner.os }}-${{ hashFiles('flake.lock', 'nix/sdks.nix', 'nix/deps.json', 'kotlin-js-store/yarn.lock') }}
+          restore-keys: |
+            nix-store-${{ runner.os }}-
       - name: Build SDKs
         run: nix build .#sdks -o sdk
-      - name: Setup Java
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: 21
+      - name: Build package
+        # Builds the app fully offline from nix/deps.json and the yarn hash in flake.nix, so this fails if either
+        # falls out of sync with the actual gradle/yarn dependency graph. Refresh them with `nix run .#update-deps`.
+        run: nix build .#default -L
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Check
-        run: ./gradlew check
+        run: nix develop --command ./gradlew check
         env:
           DISABLE_BUBBLEWRAP: true
       - name: Store reports
