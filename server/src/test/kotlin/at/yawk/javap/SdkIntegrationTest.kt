@@ -12,13 +12,15 @@ import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
+import java.nio.file.Paths
 
 class SdkIntegrationTest {
     private lateinit var sdkProvider: SdkProviderImpl
 
     @BeforeClass
     fun setup() {
-        sdkProvider = SdkProviderImpl()
+        // built with `nix build .#sdks -o sdk` in the repository root
+        sdkProvider = SdkProviderImpl(Paths.get(System.getenv("JAVAP_SDK_MANIFEST") ?: "../sdk/sdks.json"))
         sdkProvider.start()
     }
 
@@ -36,14 +38,14 @@ class SdkIntegrationTest {
         val processor = LocalProcessor(sdkProvider, Bubblewrap())
         val testCode = when (sdk.language) {
             SdkLanguage.JAVA -> """
-                ${if (sdk !is Sdk.OpenJdk || sdk.lombok != null) "@lombok.Data" else ""}
+                ${if ((sdk as Sdk.Java).hasLombok) "@lombok.Data" else ""}
                 class Test {
                     int a;
                     String b;
                 }
             """
             SdkLanguage.KOTLIN -> """
-                ${if (sdk is Sdk.KotlinDistribution) "import kotlinx.coroutines.*" else ""}
+                ${if ((sdk as Sdk.Kotlin).release >= KotlinVersion(1, 2)) "import kotlinx.coroutines.*" else ""}
                 
                 data class A(val a: Int, val s: String)
             """.trimIndent()

@@ -25,7 +25,9 @@ fun main() {
                         it.binary().operatingSystem() == AOV3OperatingSystem.LINUX
             }
             val pkg = asset.binary().package_()
-            println("$i: ${pkg.checksum().get()} ${pkg.link()}")
+            // print as nix/sdks.nix openjdk arguments
+            val hash = java.util.Base64.getEncoder().encodeToString(java.util.HexFormat.of().parseHex(pkg.checksum().get()))
+            println("$i: url = \"${pkg.link()}\"; hash = \"sha256-$hash\";")
         }
     }
 }

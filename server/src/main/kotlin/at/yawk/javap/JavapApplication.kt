@@ -47,7 +47,7 @@ fun main(args: Array<String>) {
     flyway.migrate()
 
     val jdbi = Jdbi.create(dataSource).installPlugins()
-    val sdkProvider = SdkProviderImpl()
+    val sdkProvider = SdkProviderImpl(Paths.get(config.sdkManifest))
     sdkProvider.start()
     val processor = LocalProcessor(sdkProvider, Bubblewrap(config.bubblewrap))
     val pasteResource = PasteResource(
