@@ -16,7 +16,11 @@ data class JavapConfiguration(
         val database: Database,
         val bindAddress: String = "127.0.0.1",
         val bindPort: Int = 8080,
-        val bubblewrap: Bubblewrap = Bubblewrap()
+        val bubblewrap: Bubblewrap = Bubblewrap(),
+        /**
+         * SDK manifest built by `nix build .#sdks -o sdk`
+         */
+        val sdkManifest: String = "sdk/sdks.json"
 ) {
     @Serializable
     data class Database(

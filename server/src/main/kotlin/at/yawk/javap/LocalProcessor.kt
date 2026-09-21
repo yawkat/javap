@@ -63,7 +63,7 @@ class LocalProcessor constructor(private val sdkProvider: SdkProvider,
                     workingDir = sourceDir,
                     writable = setOf(tempDirectory),
                     readable = runnableSdk.readable,
-                    env = env(runnableSdk)
+                    env = runnableSdk.env
             )
 
             var javapOutput: String? = javap(runnableSdk, classDir)
@@ -83,25 +83,20 @@ class LocalProcessor constructor(private val sdkProvider: SdkProvider,
         }
     }
 
-    private fun env(sdk: RunnableSdk) = mapOf(
-            "LD_LIBRARY_PATH" to sdk.libraryPath.map { it.toAbsolutePath() }.joinToString(":"),
-            "JAVA_HOME" to sdk.jdkHome.toAbsolutePath().toString()
-    )
-
     private fun javap(sdk: RunnableSdk, classDir: Path): String? {
         val classFiles = Files.list(classDir).use { // close stream
             it.sorted().map { classFile -> classFile.fileName.toString() }.collect(Collectors.toList())
         }
         return if (classFiles.isNotEmpty()) {
             bubblewrap.executeCommand(
-                    listOf(sdk.jdkHome.resolve("bin/javap").toAbsolutePath().toString(),
+                    sdk.javap + listOf(
                             "-v",
                             "-private",
                             "-constants",
                             "-XDdetails:stackMaps,localVariables") + classFiles,
                     classDir,
                     readable = sdk.readable + listOf(classDir),
-                    env = env(sdk)
+                    env = sdk.env
             ).outputUTF8()
         } else null
     }

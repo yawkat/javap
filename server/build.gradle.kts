@@ -63,4 +63,18 @@ tasks {
             duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
         }
     }
+
+    // Forces resolution of the runtime classpath, so that `nix run .#update-deps` (see flake.nix) captures
+    // everything installShadowDist needs into the offline dependency cache.
+    register("javapNixDownloadDeps") {
+        dependsOn(
+            "compileKotlin",
+            ":shared:compileKotlinJvm",
+            ":shared:compileKotlinJs",
+            ":client:compileKotlinJs",
+        )
+        doLast {
+            configurations.getByName("runtimeClasspath").resolve()
+        }
+    }
 }

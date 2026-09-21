@@ -99,7 +99,7 @@ object CompilerConfigUi {
         var s = when (sdk) {
             is Sdk.OpenJdk -> "javac"
             is Sdk.Ecj -> "java"
-            is Sdk.KotlinJar, is Sdk.KotlinDistribution -> "kotlinc"
+            is Sdk.Kotlin -> "kotlinc"
             is Sdk.Scala -> "scalac"
         }
         if (sdk is Sdk.OpenJdk) {

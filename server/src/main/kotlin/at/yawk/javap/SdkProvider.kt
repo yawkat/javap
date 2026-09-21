@@ -7,6 +7,7 @@
 package at.yawk.javap
 
 import at.yawk.javap.model.CompilerConfiguration
+import at.yawk.javap.model.ConfigProperties
 import java.nio.file.Path
 
 /**
@@ -16,10 +17,30 @@ interface SdkProvider {
     fun lookupSdk(sdk: Sdk): RunnableSdk
 }
 
-abstract class RunnableSdk(val sdk: Sdk) {
-    abstract val jdkHome: Path
-    abstract val readable: Set<Path>
-    abstract val libraryPath: List<Path>
-
-    abstract fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration): List<String>
+/**
+ * How to invoke an SDK. See `nix/sdks.nix` for details.
+ */
+class RunnableSdk(
+        val sdk: Sdk,
+        /**
+         * Base compiler command. Output directory, options and input file are appended.
+         */
+        val compiler: List<String>,
+        /**
+         * Alternative to [compiler] when lombok is enabled, or `null` if lombok is not supported.
+         */
+        private val compilerWithLombok: List<String>?,
+        val javap: List<String>,
+        val env: Map<String, String>,
+        /**
+         * Paths that need to be readable by the sandboxed compiler and javap.
+         */
+        val readable: Set<Path>
+) {
+    fun compilerCommand(inputFile: Path, outputDir: Path, config: CompilerConfiguration): List<String> {
+        val base = if (compilerWithLombok != null && ConfigProperties.lombok.get(config)) compilerWithLombok else compiler
+        return base + listOf("-d", outputDir.toString()) +
+                ConfigProperties.validateAndBuildCommandLine(sdk, config) +
+                inputFile.toString()
+    }
 }

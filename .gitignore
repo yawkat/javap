@@ -2,7 +2,8 @@ javap.mv.db
 .idea/
 *.iml
 target/
-sdk/
+/sdk
+/sdk.json
 **/.gradle
 **/build
 **/target
