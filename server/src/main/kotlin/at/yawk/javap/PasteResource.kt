@@ -137,11 +137,12 @@ class PasteResource constructor(
             compilerConfiguration = input.compilerConfiguration
     )
 
+    // also bound the size of what we store and return
     private fun sanitizeOutput(output: ProcessingOutput): ProcessingOutput {
         return ProcessingOutput(
-                compilerLog = output.compilerLog.sanitizeText(),
-                javap = output.javap?.sanitizeText(),
-                procyon = output.procyon?.sanitizeText()
+                compilerLog = output.compilerLog.sanitizeText().truncateOutput(),
+                javap = output.javap?.sanitizeText()?.truncateOutput(),
+                procyon = output.procyon?.sanitizeText()?.truncateOutput()
         )
     }
 
