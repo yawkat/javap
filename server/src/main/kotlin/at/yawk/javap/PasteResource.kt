@@ -107,7 +107,7 @@ class PasteResource constructor(
     }
 
     fun createPaste(userToken: String?, body: PasteDto.Create): PasteDto {
-        if (userToken == null || !userToken.matches("[a-zA-Z0-9]+".toRegex())) {
+        if (userToken == null || !userToken.matches("[a-zA-Z0-9]{1,64}".toRegex())) {
             throw HttpException(StatusCodes.BAD_REQUEST, "Illegal user token")
         }
 
@@ -148,7 +148,7 @@ class PasteResource constructor(
     fun updatePaste(userToken: String?,
                     id: String,
                     body: PasteDto.Update): PasteDto {
-        if (userToken == null || !userToken.matches("[a-zA-Z0-9]+".toRegex())) {
+        if (userToken == null || !userToken.matches("[a-zA-Z0-9]{1,64}".toRegex())) {
             throw HttpException(StatusCodes.BAD_REQUEST, "Illegal user token")
         }
 
