@@ -12,6 +12,7 @@ import at.yawk.javap.model.PasteDao
 import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
+import io.undertow.util.StatusCodes
 import kotlinx.serialization.json.Json
 import org.flywaydb.core.Flyway
 import org.h2.jdbcx.JdbcConnectionPool
@@ -39,6 +40,19 @@ class PasteResourceTest {
             Json(builderAction = jsonConfiguration),
             dbi.onDemand(PasteDao::class.java),
             processor,
+            defaultPaste)
+
+    /**
+     * Resource whose processor fails, to check that requests are rejected before any processing happens.
+     */
+    private val failingPasteResource = PasteResource(
+            Json(builderAction = jsonConfiguration),
+            dbi.onDemand(PasteDao::class.java),
+            object : Processor {
+                override fun process(input: ProcessingInput): ProcessingOutput {
+                    throw AssertionError("Should not process input")
+                }
+            },
             defaultPaste)
 
     @BeforeClass
@@ -115,6 +129,35 @@ class PasteResourceTest {
     fun `paste update empty user token`() {
         pasteResource.updatePaste("", "xyz", PasteDto.Update(
                 ProcessingInput("abc", Sdks.defaultJava.name, emptyMap())))
+    }
+
+    @Test
+    fun `paste create max length user token`() {
+        val token = "a".repeat(64)
+        val created = pasteResource.createPaste(token, PasteDto.Create(
+                ProcessingInput("abc", Sdks.defaultJava.name, emptyMap())))
+        Assert.assertTrue(pasteResource.getPaste(token, created.id).editable)
+    }
+
+    @Test
+    fun `paste create too long user token`() {
+        val e = Assert.expectThrows(HttpException::class.java) {
+            failingPasteResource.createPaste("a".repeat(65), PasteDto.Create(
+                    ProcessingInput("abc", Sdks.defaultJava.name, emptyMap())))
+        }
+        Assert.assertEquals(e.code, StatusCodes.BAD_REQUEST)
+    }
+
+    @Test
+    fun `paste update too long user token`() {
+        val token = "a".repeat(65)
+        val created = pasteResource.createPaste("abc",
+                PasteDto.Create(ProcessingInput("abc", Sdks.defaultJava.name, emptyMap())))
+        val e = Assert.expectThrows(HttpException::class.java) {
+            failingPasteResource.updatePaste(token, created.id, PasteDto.Update(
+                    ProcessingInput("def", Sdks.defaultJava.name, emptyMap())))
+        }
+        Assert.assertEquals(e.code, StatusCodes.BAD_REQUEST)
     }
 
     @Test(expectedExceptions = [HttpException::class])
