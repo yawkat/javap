@@ -12,8 +12,11 @@ import at.yawk.javap.model.PasteDto
 import at.yawk.javap.model.ProcessingInput
 import at.yawk.javap.model.ProcessingOutput
 import com.google.common.net.MediaType
+import io.undertow.UndertowLogger
+import io.undertow.io.Receiver
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
+import io.undertow.server.RequestTooBigException
 import io.undertow.server.handlers.PathTemplateHandler
 import io.undertow.util.Headers
 import io.undertow.util.Methods
@@ -23,6 +26,18 @@ import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ThreadLocalRandom
+
+/**
+ * Maximum size of a paste request body in bytes. Larger requests are rejected with 413.
+ */
+const val MAX_REQUEST_BODY_SIZE = 32 * 1024
+
+/**
+ * Server-wide [io.undertow.UndertowOptions.MAX_ENTITY_SIZE] backstop. It is set above [MAX_REQUEST_BODY_SIZE] (by
+ * more than one read buffer), so that oversized paste requests hit that limit first and get a clean 413. When
+ * Undertow's own entity size limit is hit on a chunked body, it closes the connection instead.
+ */
+const val SERVER_MAX_ENTITY_SIZE = MAX_REQUEST_BODY_SIZE + 64 * 1024L
 
 /**
  * @author yawkat
@@ -41,9 +56,21 @@ class PasteResource constructor(
     @Suppress("UnstableApiUsage")
     private fun <T> parse(xhg: HttpServerExchange, deserializer: DeserializationStrategy<T>, callback: (T) -> Unit) {
         if (xhg.contentType.withoutParameters() == MediaType.JSON_UTF_8.withoutParameters()) {
-            xhg.requestReceiver.receiveFullString({ _, s ->
+            val receiver = xhg.requestReceiver
+            receiver.setMaxBufferSize(MAX_REQUEST_BODY_SIZE)
+            receiver.receiveFullString({ _, s ->
                 handleExceptions(xhg) {
                     callback(json.decodeFromString(deserializer, s))
+                }
+            }, { _, e ->
+                // RequestToLargeException: body exceeds maxBufferSize (by Content-Length or while reading).
+                // RequestTooBigException: body exceeds UndertowOptions.MAX_ENTITY_SIZE.
+                if (e is Receiver.RequestToLargeException || e is RequestTooBigException) {
+                    handleHttpException(xhg, HttpException(StatusCodes.REQUEST_ENTITY_TOO_LARGE, "Request too large"))
+                } else {
+                    UndertowLogger.REQUEST_IO_LOGGER.ioException(e)
+                    xhg.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
+                    xhg.endExchange()
                 }
             }, StandardCharsets.UTF_8)
         } else {
