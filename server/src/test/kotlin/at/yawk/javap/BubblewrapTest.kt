@@ -46,6 +46,22 @@ class BubblewrapTest {
     }
 
     @Test
+    fun `output is bounded`() {
+        val tempDirectory = Files.createTempDirectory(null)
+        try {
+            val command = bubblewrap.executeCommand(
+                    listOf("/bin/sh", "-c", "i=0; while [ \$i -lt 200 ]; do echo 0123456789; i=\$((i+1)); done"),
+                    tempDirectory,
+                    maxOutputBytes = 100
+            )
+            assertEquals(command.exitValue, 0)
+            assertEquals(command.outputUTF8(), "0123456789\n".repeat(10).substring(0, 100) + OUTPUT_TRUNCATED_MARKER)
+        } finally {
+            deleteRecursively(tempDirectory)
+        }
+    }
+
+    @Test
     fun `cannot access files outside whitelist`() {
         if (!Bubblewrap.AVAILABLE) {
             throw SkipException("Bubblewrap is not available")

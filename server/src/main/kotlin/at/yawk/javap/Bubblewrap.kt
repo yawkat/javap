@@ -1,6 +1,7 @@
 package at.yawk.javap
 
 import org.zeroturnaround.exec.ProcessExecutor
+import org.zeroturnaround.exec.ProcessOutput
 import org.zeroturnaround.exec.ProcessResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -35,7 +36,8 @@ class Bubblewrap(private val config: JavapConfiguration.Bubblewrap = JavapConfig
             writable: Set<Path> = emptySet(),
             readable: Set<Path> = setOf(workingDir),
             env: Map<String, String> = emptyMap(),
-            runInJail: Boolean = true
+            runInJail: Boolean = true,
+            maxOutputBytes: Int = MAX_PROCESS_OUTPUT_BYTES
     ): ProcessResult {
         if (!workingDir.startsWith("/tmp"))
             throw UnsupportedOperationException("Currently only /tmp is supported, verify security before allowing other paths")
@@ -58,13 +60,17 @@ class Bubblewrap(private val config: JavapConfiguration.Bubblewrap = JavapConfig
             combinedCommand = command
         }
         println(combinedCommand)
-        return ProcessExecutor()
+        // keep only the start of the (combined stdout / stderr) output, but keep draining the process
+        val output = BoundedOutputStream(maxOutputBytes)
+        val result = ProcessExecutor()
                 .command(combinedCommand)
                 .directory(workingDir.toFile())
                 .environment(env)
-                .readOutput(true)
+                .redirectErrorStream(true)
+                .redirectOutput(output)
                 .destroyOnExit()
                 .execute()
+        return ProcessResult(result.exitValue, ProcessOutput(output.toByteArray()))
     }
 
     companion object {

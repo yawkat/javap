@@ -29,6 +29,10 @@ import javax.sql.DataSource
 class PasteResourceTest {
     private val processor = object : Processor {
         override fun process(input: ProcessingInput): ProcessingOutput {
+            if (input.code == "large output") {
+                val large = "x".repeat(MAX_STORED_OUTPUT_LENGTH + 1)
+                return ProcessingOutput(large, large, large)
+            }
             return ProcessingOutput("compiler log " + input.code, "javap " + input.code, "procyon " + input.code)
         }
     }
@@ -69,6 +73,15 @@ class PasteResourceTest {
         Assert.assertEquals(updated, created.copy(input = input2, output = processor.process(input2)))
 
         Assert.assertEquals(pasteResource.getPaste(token, created.id), updated)
+    }
+
+    @Test
+    fun `large output is truncated`() {
+        val input = ProcessingInput("large output", Sdks.defaultJava.name, emptyMap())
+        val created = pasteResource.createPaste("abcdef", PasteDto.Create(input))
+        val expected = "x".repeat(MAX_STORED_OUTPUT_LENGTH) + OUTPUT_TRUNCATED_MARKER
+        Assert.assertEquals(created.output, ProcessingOutput(expected, expected, expected))
+        Assert.assertEquals(pasteResource.getPaste("abcdef", created.id).output, created.output)
     }
 
     @Test(expectedExceptions = [HttpException::class])
