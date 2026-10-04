@@ -1,6 +1,7 @@
 package at.yawk.javap
 
 import org.zeroturnaround.exec.ProcessExecutor
+import org.zeroturnaround.exec.ProcessOutput
 import org.zeroturnaround.exec.ProcessResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -58,13 +59,17 @@ class Bubblewrap(private val config: JavapConfiguration.Bubblewrap = JavapConfig
             combinedCommand = command
         }
         println(combinedCommand)
-        return ProcessExecutor()
+        // keep only the start of the (combined stdout / stderr) output, but keep draining the process
+        val output = BoundedOutputStream(MAX_PROCESS_OUTPUT_BYTES)
+        val result = ProcessExecutor()
                 .command(combinedCommand)
                 .directory(workingDir.toFile())
                 .environment(env)
-                .readOutput(true)
+                .redirectErrorStream(true)
+                .redirectOutput(output)
                 .destroyOnExit()
                 .execute()
+        return ProcessResult(result.exitValue, ProcessOutput(output.toByteArray()))
     }
 
     companion object {
