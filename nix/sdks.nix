@@ -447,7 +447,8 @@ let
       };
     };
   scala2 = { release, hash, supportedWarnings }: scala {
-    url = "https://downloads.lightbend.com/scala/${release}/scala-${release}.zip";
+    # downloads.lightbend.com no longer serves these (403)
+    url = "https://github.com/scala/scala/releases/download/v${release}/scala-${release}.zip";
     inherit release hash supportedWarnings;
   };
 
@@ -477,10 +478,8 @@ let
       lib.subtractLists [ "by-name-right-associative" "unsound-match" ] scala2_12_5.meta.supportedWarnings
       ++ [ "nonlocal-return" "implicit-not-found" "serial" "valpattern" "eta-zero" "eta-sam" "deprecation" ];
   };
-  scala2_13_18 = scala {
+  scala2_13_18 = scala2 {
     release = "2.13.18";
-    # newer releases are no longer published on downloads.lightbend.com
-    url = "https://github.com/scala/scala/releases/download/v2.13.18/scala-2.13.18.zip";
     hash = "sha256-nJBWLymwoxbiaUdNZ1K8jsRbHKv2HVQB18pQQHs6nSs=";
     supportedWarnings =
       lib.subtractLists [ "nullary-override" ] scala2_13.meta.supportedWarnings
