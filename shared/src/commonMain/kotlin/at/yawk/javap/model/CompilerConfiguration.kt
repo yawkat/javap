@@ -100,7 +100,7 @@ object ConfigProperties {
 
     private inline fun releaseChoice(id: String,
                                      param: String,
-                                     crossinline range: (Int) -> IntRange): ConfigProperty.RangeChoice =
+                                     crossinline range: (Sdk.Java) -> IntRange): ConfigProperty.RangeChoice =
             object : ConfigProperty.RangeChoice(id, param, default = null) {
                 override fun apply(out: MutableList<String>, value: Int?) {
                     if (value != null) {
@@ -113,17 +113,27 @@ object ConfigProperties {
                     }
                 }
 
-                override fun getRange(sdk: Sdk): IntRange {
-                    val release = (sdk as Sdk.Java).release
-                    return range(release)
-                }
+                override fun getRange(sdk: Sdk): IntRange = range(sdk as Sdk.Java)
             }
 
-    private val propertyRelease = releaseChoice("release", "--release") { release ->
+    /**
+     * Lowest source/target level supported by compilers that no longer support 6.
+     */
+    private fun minModernLevel(sdk: Sdk.Java) = when (sdk) {
+        // JDK 20 dropped source/target 7
+        is Sdk.OpenJdk -> if (sdk.release >= 20) 8 else 7
+        // ECJ 3.38 (release 22) still supports 7, later versions don't
+        is Sdk.Ecj -> if (sdk.release >= 23) 8 else 7
+        else -> throw AssertionError()
+    }
+
+    private val propertyRelease = releaseChoice("release", "--release") { sdk ->
         when {
-            release <= 8 -> throw AssertionError()
-            release <= 11 -> 6..release
-            else -> 7..release
+            sdk.release <= 8 -> throw AssertionError()
+            sdk.release <= 11 -> 6..sdk.release
+            // ECJ resolves --release against its host JDK, which for ECJ 3.38 is JDK 21, so same cutoff as javac
+            sdk.release <= 19 -> 7..sdk.release
+            else -> 8..sdk.release
         }
     }.apply { minJavaVersion = 9 }
     val lombok: ConfigProperty<Boolean> = object : ConfigProperty.SpecialFlag("lombok", "Lombok", default = true) {
@@ -142,20 +152,20 @@ object ConfigProperties {
     }
     private val propertiesJava = listOf<ConfigProperty<*>>(
             propertyRelease,
-            releaseChoice("source", "-source") { release ->
+            releaseChoice("source", "-source") { sdk ->
                 when {
-                    release <= 8 -> 3..release
-                    release <= 11 -> 6..release
-                    else -> 7..release
+                    sdk.release <= 8 -> 3..sdk.release
+                    sdk.release <= 11 -> 6..sdk.release
+                    else -> minModernLevel(sdk)..sdk.release
                 }
             }.apply {
                 enableDependsOn = ConfigProperty.Interdependency(propertyRelease) { _, it -> it == null }
             },
-            releaseChoice("target", "-target") { release ->
+            releaseChoice("target", "-target") { sdk ->
                 when {
-                    release <= 8 -> 1..release
-                    release <= 11 -> 6..release
-                    else -> 7..release
+                    sdk.release <= 8 -> 1..sdk.release
+                    sdk.release <= 11 -> 6..sdk.release
+                    else -> minModernLevel(sdk)..sdk.release
                 }
             }.apply {
                 enableDependsOn = ConfigProperty.Interdependency(propertyRelease) { _, it -> it == null }
