@@ -36,8 +36,7 @@ class Bubblewrap(private val config: JavapConfiguration.Bubblewrap = JavapConfig
             writable: Set<Path> = emptySet(),
             readable: Set<Path> = setOf(workingDir),
             env: Map<String, String> = emptyMap(),
-            runInJail: Boolean = true,
-            maxOutputBytes: Int = MAX_PROCESS_OUTPUT_BYTES
+            runInJail: Boolean = true
     ): ProcessResult {
         if (!workingDir.startsWith("/tmp"))
             throw UnsupportedOperationException("Currently only /tmp is supported, verify security before allowing other paths")
@@ -61,7 +60,7 @@ class Bubblewrap(private val config: JavapConfiguration.Bubblewrap = JavapConfig
         }
         println(combinedCommand)
         // keep only the start of the (combined stdout / stderr) output, but keep draining the process
-        val output = BoundedOutputStream(maxOutputBytes)
+        val output = BoundedOutputStream(MAX_PROCESS_OUTPUT_BYTES)
         val result = ProcessExecutor()
                 .command(combinedCommand)
                 .directory(workingDir.toFile())

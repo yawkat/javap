@@ -76,11 +76,12 @@ class BoundedOutputStream(private val limit: Int) : OutputStream() {
 }
 
 /**
- * Truncate this string to at most [maxLength] chars (plus [OUTPUT_TRUNCATED_MARKER] if it was truncated).
+ * Truncate this string to at most [MAX_STORED_OUTPUT_LENGTH] chars (plus [OUTPUT_TRUNCATED_MARKER] if it was
+ * truncated).
  */
-fun String.truncateOutput(maxLength: Int = MAX_STORED_OUTPUT_LENGTH): String {
-    if (length <= maxLength) return this
-    var end = maxLength
+fun String.truncateOutput(): String {
+    if (length <= MAX_STORED_OUTPUT_LENGTH) return this
+    var end = MAX_STORED_OUTPUT_LENGTH
     // don't split a surrogate pair
     if (end > 0 && Character.isHighSurrogate(this[end - 1])) end--
     return substring(0, end) + OUTPUT_TRUNCATED_MARKER

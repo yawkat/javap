@@ -50,12 +50,12 @@ class BubblewrapTest {
         val tempDirectory = Files.createTempDirectory(null)
         try {
             val command = bubblewrap.executeCommand(
-                    listOf("/bin/sh", "-c", "i=0; while [ \$i -lt 200 ]; do echo 0123456789; i=\$((i+1)); done"),
-                    tempDirectory,
-                    maxOutputBytes = 100
+                    listOf("/bin/sh", "-c", "yes 0123456789 | head -c ${MAX_PROCESS_OUTPUT_BYTES * 2}"),
+                    tempDirectory
             )
             assertEquals(command.exitValue, 0)
-            assertEquals(command.outputUTF8(), "0123456789\n".repeat(10).substring(0, 100) + OUTPUT_TRUNCATED_MARKER)
+            val expected = "0123456789\n".repeat(MAX_PROCESS_OUTPUT_BYTES / 11 + 1).substring(0, MAX_PROCESS_OUTPUT_BYTES)
+            assertEquals(command.outputUTF8(), expected + OUTPUT_TRUNCATED_MARKER)
         } finally {
             deleteRecursively(tempDirectory)
         }

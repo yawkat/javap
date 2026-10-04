@@ -42,9 +42,11 @@ class OutputLimitsTest {
 
     @Test
     fun `truncate output`() {
-        assertEquals("abc".truncateOutput(3), "abc")
-        assertEquals("abcd".truncateOutput(3), "abc$OUTPUT_TRUNCATED_MARKER")
+        val max = "x".repeat(MAX_STORED_OUTPUT_LENGTH)
+        assertEquals(max.truncateOutput(), max)
+        assertEquals((max + "y").truncateOutput(), max + OUTPUT_TRUNCATED_MARKER)
         // surrogate pair is not split
-        assertEquals("ab😀".truncateOutput(3), "ab$OUTPUT_TRUNCATED_MARKER")
+        val prefix = "x".repeat(MAX_STORED_OUTPUT_LENGTH - 1)
+        assertEquals((prefix + "😀").truncateOutput(), prefix + OUTPUT_TRUNCATED_MARKER)
     }
 }
