@@ -11,6 +11,7 @@ import at.yawk.javap.model.PasteDao
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.undertow.Undertow
+import io.undertow.UndertowOptions
 import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.PathHandler
 import io.undertow.server.handlers.resource.ClassPathResourceManager
@@ -83,6 +84,7 @@ fun main(args: Array<String>) {
 
     val undertow = Undertow.builder()
             .addHttpListener(config.bindPort, config.bindAddress)
+            .setServerOption(UndertowOptions.MAX_ENTITY_SIZE, SERVER_MAX_ENTITY_SIZE)
             .setHandler(handler)
             .build()
     undertow.start()

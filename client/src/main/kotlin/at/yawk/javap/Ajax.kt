@@ -16,12 +16,36 @@ import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
-import kotlin.random.Random
+import kotlinx.browser.window
+import org.khronos.webgl.Uint8Array
+import org.khronos.webgl.get
 
 /**
  * @author yawkat
  */
 private const val ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+private const val USER_TOKEN_LENGTH = 64
+
+/**
+ * Generate a random token from [ALPHABET] using the Web Crypto CSPRNG. Bytes are mapped onto the alphabet with
+ * rejection sampling so that every character is equally likely.
+ */
+private fun generateUserToken(): String {
+    // largest multiple of ALPHABET.length that fits in a byte; bytes at or above it are discarded
+    val limit = 256 - 256 % ALPHABET.length
+    val builder = StringBuilder(USER_TOKEN_LENGTH)
+    val bytes = Uint8Array(USER_TOKEN_LENGTH * 2)
+    while (builder.length < USER_TOKEN_LENGTH) {
+        window.asDynamic().crypto.getRandomValues(bytes)
+        for (i in 0 until bytes.length) {
+            val b = bytes[i].toInt() and 0xff
+            if (b < limit && builder.length < USER_TOKEN_LENGTH) {
+                builder.append(ALPHABET[b % ALPHABET.length])
+            }
+        }
+    }
+    return builder.toString()
+}
 
 private fun getOrCreateUserToken(): String {
     // check local storage first
@@ -36,9 +60,7 @@ private fun getOrCreateUserToken(): String {
         return userToken
     }
 
-    val generated = (0..63).map {
-        ALPHABET[Random.nextInt(ALPHABET.length)]
-    }.joinToString("")
+    val generated = generateUserToken()
     localStorage["userToken"] = generated
     return generated
 }
