@@ -38,9 +38,13 @@ let
     inherit hash;
   };
 
+  lombok1_18_48 = maven "org.projectlombok" "lombok" "1.18.48" "sha256-hUd6RlXrssB0qQmc+3Sb5FREn+5WTUKCYQ3xuF98UIs=";
   lombok1_18_34 = maven "org.projectlombok" "lombok" "1.18.34" "sha256-wn1rKv9WJB0bB/y8xrGDcJ5rQyyA9zdO6x2CPobUuBo=";
   lombok1_18_18 = maven "org.projectlombok" "lombok" "1.18.18" "sha256-YB7EYgbg+crCwFg7M1DnnwlUGcOV6ZHHYWQPkpA46cw=";
   lombok1_18_4 = maven "org.projectlombok" "lombok" "1.18.4" "sha256-OfOSLetnmxhSr1GesicVfvLdCiHuw1QsjOG0Xy3zl0I=";
+
+  # lombok still uses sun.misc.Unsafe, which warns since JDK 24 (JEP 498). These are javac args.
+  lombokUnsafeArgs = [ "-J--sun-misc-unsafe-memory-access=allow" ];
 
   # javac from a prebuilt JDK distribution
   openjdk =
@@ -228,9 +232,48 @@ let
     lombok = lombok1_18_34;
     supportedWarnings = openjdk21.meta.supportedWarnings ++ [ "incubating" "restricted" ];
   };
+  openjdk23 = openjdk {
+    release = 23;
+    url = "https://github.com/adoptium/temurin23-binaries/releases/download/jdk-23.0.2%2B7/OpenJDK23U-jdk_x64_linux_hotspot_23.0.2_7.tar.gz";
+    hash = "sha256-hwrIwFxv5WPno4eKR9AjS4PAUOg2UdLEfouCLsdFEt0=";
+    lombok = lombok1_18_48;
+    supportedWarnings = openjdk22.meta.supportedWarnings ++ [ "dangling-doc-comments" ];
+  };
+  openjdk24 = openjdk {
+    release = 24;
+    url = "https://github.com/adoptium/temurin24-binaries/releases/download/jdk-24.0.2%2B12/OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz";
+    hash = "sha256-rqHMVeUc9lHIXy8ArQIWA/4mnEu2ST+pejIa13DJsJY=";
+    lombok = lombok1_18_48;
+    lombokArgs = lombokUnsafeArgs;
+    supportedWarnings = openjdk23.meta.supportedWarnings;
+  };
+  openjdk25 = openjdk {
+    release = 25;
+    url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz";
+    hash = "sha256-27aYOW1Hjn+iseUPQQMySyqZuQVp7ifDPyJh+SFc9B4=";
+    lombok = lombok1_18_48;
+    lombokArgs = lombokUnsafeArgs;
+    supportedWarnings = openjdk24.meta.supportedWarnings ++ [ "identity" ];
+  };
+  openjdk26 = openjdk {
+    release = 26;
+    url = "https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2.1%2B1/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2.1_1.tar.gz";
+    hash = "sha256-RRwS5odHvPovtaLBawBIP+25+m13vJYtMJV/dqwXBE0=";
+    lombok = lombok1_18_48;
+    lombokArgs = lombokUnsafeArgs;
+    supportedWarnings = openjdk25.meta.supportedWarnings;
+  };
+  openjdk27 = openjdk {
+    release = 27;
+    url = "https://github.com/adoptium/temurin27-binaries/releases/download/jdk-27%2B35/OpenJDK27U-jdk_x64_linux_hotspot_27_35.tar.gz";
+    hash = "sha256-HPaaSEj/tyizsmDf1FIGpRVmq1caAqMAkicdTFgLzLw=";
+    lombok = lombok1_18_48;
+    lombokArgs = lombokUnsafeArgs;
+    supportedWarnings = openjdk26.meta.supportedWarnings;
+  };
 
   # ecj runs as a jar on a host JDK. Lombok is loaded as an agent.
-  ecj = { release, name, aliases ? [ ], jar, lombok, hostJdk, supportedWarnings }: {
+  ecj = { release, name, aliases ? [ ], jar, lombok, lombokJvmArgs ? [ ], hostJdk, supportedWarnings }: {
     meta = {
       compiler = "ecj";
       release = toString release;
@@ -239,7 +282,7 @@ let
     };
     runtime = hostedOn hostJdk {
       compiler = [ (java hostJdk) "-jar" "${jar}" "-cp" "${lombok}" ];
-      compilerWithLombok = [ (java hostJdk) "-javaagent:${lombok}=ECJ" "-jar" "${jar}" "-cp" "${lombok}" ];
+      compilerWithLombok = [ (java hostJdk) ] ++ lombokJvmArgs ++ [ "-javaagent:${lombok}=ECJ" "-jar" "${jar}" "-cp" "${lombok}" ];
     };
   };
 
@@ -281,6 +324,15 @@ let
     supportedWarnings = ecj3_11.meta.supportedWarnings ++ [
       "module" "removal" "unlikelyCollectionMethodArgumentType" "unlikelyEqualsArgumentType"
     ];
+  };
+  ecj3_46 = ecj {
+    release = 26;
+    name = "Eclipse ECJ 3.46.100";
+    jar = maven "org.eclipse.jdt" "ecj" "3.46.100" "sha256-dMkxckdf7gzU5u77RCM1Ft1AUlZC2jXQCRRtl+pZgik=";
+    lombok = lombok1_18_48;
+    lombokJvmArgs = [ "--sun-misc-unsafe-memory-access=allow" ];
+    hostJdk = openjdk26;
+    supportedWarnings = ecj3_38.meta.supportedWarnings;
   };
   ecj3_38 = ecj {
     release = 22;
@@ -325,6 +377,12 @@ let
       };
     };
 
+  kotlin2_4_20 = kotlinDistribution {
+    version = "2.4.20";
+    hash = "sha256-WenKdMeQTvLBIrEhFJN2c8zOaN6CCmY/DtZsz4eZ4Lc=";
+    hostJdk = openjdk25;
+    coroutines = maven "org.jetbrains.kotlinx" "kotlinx-coroutines-core-jvm" "1.11.0" "sha256-0ddaoB3/u00cUg5n5MTn9fYXRxjny0YyQSUD8vDmBPo=";
+  };
   kotlin2_0_10 = kotlinDistribution {
     version = "2.0.10";
     hash = "sha256-iNfYutNirk4RSouWaMaIe4yF9I40CIPbDjF+R8jcL08=";
@@ -389,7 +447,8 @@ let
       };
     };
   scala2 = { release, hash, supportedWarnings }: scala {
-    url = "https://downloads.lightbend.com/scala/${release}/scala-${release}.zip";
+    # downloads.lightbend.com no longer serves these (403)
+    url = "https://github.com/scala/scala/releases/download/v${release}/scala-${release}.zip";
     inherit release hash supportedWarnings;
   };
 
@@ -419,6 +478,17 @@ let
       lib.subtractLists [ "by-name-right-associative" "unsound-match" ] scala2_12_5.meta.supportedWarnings
       ++ [ "nonlocal-return" "implicit-not-found" "serial" "valpattern" "eta-zero" "eta-sam" "deprecation" ];
   };
+  scala2_13_18 = scala2 {
+    release = "2.13.18";
+    hash = "sha256-nJBWLymwoxbiaUdNZ1K8jsRbHKv2HVQB18pQQHs6nSs=";
+    supportedWarnings =
+      lib.subtractLists [ "nullary-override" ] scala2_13.meta.supportedWarnings
+      ++ [
+        "arg-discard" "byname-implicit" "cloneable" "implicit-recursion" "infer-structural" "int-div-to-float"
+        "numeric-methods" "overload" "pattern-shadow" "recurse-with-default" "strict-unsealed-patmat" "unit-special"
+        "universal-methods"
+      ];
+  };
   scala3_4_2 = scala {
     release = "3.4.2";
     url = "https://github.com/scala/scala3/releases/download/3.4.2/scala3-3.4.2.zip";
@@ -427,35 +497,44 @@ let
     supportedWarnings = scala2_13.meta.supportedWarnings;
   };
 
+  scala3_9_0 = scala {
+    release = "3.9.0";
+    url = "https://github.com/scala/scala3/releases/download/3.9.0/scala3-3.9.0.zip";
+    hash = "sha256-LsCM5R5AAJAFitB1//C+dkx+FvuCfSmcG+DQU9Qldww=";
+    # scala 3.8+ requires JDK 17
+    hostJdk = openjdk25;
+    supportedWarnings = scala3_4_2.meta.supportedWarnings;
+  };
+
   groups = [
     {
       label = "OpenJDK";
       sdks = [
-        openjdk22 openjdk21 openjdk20 openjdk19 openjdk18 openjdk17 openjdk16 openjdk15 openjdk14 openjdk13
+        openjdk27 openjdk26 openjdk25 openjdk24 openjdk23 openjdk22 openjdk21 openjdk20 openjdk19 openjdk18 openjdk17 openjdk16 openjdk15 openjdk14 openjdk13
         openjdk12 openjdk11 openjdk10 openjdk9 openjdk8 openjdk7 openjdk6
       ];
     }
     {
       label = "Eclipse ECJ";
-      sdks = [ ecj3_38 ecj3_21 ecj3_11 ];
+      sdks = [ ecj3_46 ecj3_38 ecj3_21 ecj3_11 ];
     }
     {
       label = "Kotlin";
       sdks = [
-        kotlin2_0_10 kotlin1_6_10 kotlin1_5_32 kotlin1_4_30 kotlin1_3_50 kotlin1_3_10 kotlin1_2
+        kotlin2_4_20 kotlin2_0_10 kotlin1_6_10 kotlin1_5_32 kotlin1_4_30 kotlin1_3_50 kotlin1_3_10 kotlin1_2
         kotlin1_1_4 kotlin1_1_1 kotlin1_0_6 kotlin1_0_5 kotlin1_0_4 kotlin1_0_3 kotlin1_0_2
       ];
     }
     {
       label = "Scala";
-      sdks = [ scala3_4_2 scala2_13 scala2_12_5 scala2_12_0 scala2_11_8 ];
+      sdks = [ scala3_9_0 scala3_4_2 scala2_13_18 scala2_13 scala2_12_5 scala2_12_0 scala2_11_8 ];
     }
   ];
 
   defaults = {
-    JAVA = openjdk21;
-    KOTLIN = kotlin2_0_10;
-    SCALA = scala3_4_2;
+    JAVA = openjdk25;
+    KOTLIN = kotlin2_4_20;
+    SCALA = scala3_9_0;
   };
 
   allSdks = lib.concatMap (group: group.sdks) groups;
