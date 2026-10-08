@@ -1,6 +1,10 @@
 name: Check
 on:
   push:
+  # Pushes made with GITHUB_TOKEN (e.g. by update-flake.yml) don't trigger
+  # workflows; closing and reopening the PR kicks off CI instead.
+  pull_request:
+    types: [reopened]
 jobs:
   check:
     runs-on: ubuntu-latest

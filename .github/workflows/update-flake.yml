@@ -1,0 +1,41 @@
+name: Update flake
+
+on:
+  workflow_dispatch:
+    inputs:
+      cooldown_days:
+        description: >-
+          Only take third-party commits at least this many days old
+          (0 for an urgent update). Inputs under yawkat/ are exempt.
+        type: number
+        default: 5
+  schedule:
+    # Thursday, so the PR can be merged before the flakes using this one
+    # update (nixcfg-shared on Monday). Off the full hour (GitHub delays or
+    # drops scheduled runs under load, and the top of the hour is the
+    # busiest) and apart from the other repositories' updates.
+    - cron: '13 4 * * 4'
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      # Pinned to a commit: it runs with this job's write permissions.
+      - uses: yawkat/flake-cooldown@5286c6acca43da847b27c2c3a19623911389553f
+        id: update
+        with:
+          cooldown-days: ${{ inputs.cooldown_days }}
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          branch: update_flake_lock_action
+          delete-branch: true
+          title: flake update
+          body: ${{ steps.update.outputs.body }}
