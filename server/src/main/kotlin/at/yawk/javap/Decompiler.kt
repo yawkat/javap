@@ -17,7 +17,9 @@ import com.strobel.decompiler.languages.java.BraceStyle
 import com.strobel.decompiler.languages.java.JavaFormattingOptions
 import com.strobel.decompiler.languages.java.ast.AstBuilder
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 
 /**
  * @author yawkat
@@ -39,20 +41,43 @@ enum class Decompiler {
         }
 
         override fun decompile(classDir: Path): String {
+            val classFiles = Files.newDirectoryStream(classDir).use { it.sorted() }
+                    .filter { it.toString().endsWith(".class") }
+                    // the class dir is writable by the sandbox, so don't follow links or read special files
+                    .filter {
+                        Files.readAttributes(it, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
+                                .isRegularFile
+                    }
+            if (classFiles.size > MAX_DECOMPILE_CLASS_FILES) {
+                return "Too many class files to decompile (${classFiles.size}, limit $MAX_DECOMPILE_CLASS_FILES)"
+            }
+            val totalSize = classFiles.sumOf {
+                Files.readAttributes(it, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS).size()
+            }
+            if (totalSize > MAX_DECOMPILE_CLASS_BYTES) {
+                return "Class files too large to decompile ($totalSize bytes, limit $MAX_DECOMPILE_CLASS_BYTES)"
+            }
+
             val ctx = DecompilerContext(settings)
             val astBuilder = AstBuilder(ctx)
-            Files.newDirectoryStream(classDir).use {
-                for (classFile in it.sorted()) {
-                    if (!classFile.toString().endsWith(".class")) continue
-                    val def = ClassFileReader.readClass(
-                            ClassFileReader.OPTION_PROCESS_ANNOTATIONS or ClassFileReader.OPTION_PROCESS_CODE,
-                            IMetadataResolver.EMPTY,
-                            Buffer(Files.readAllBytes(classFile))
-                    )
-                    astBuilder.addType(def)
-                    // only need this to avoid errors. would be better to decompile separately, but... TODO
-                    ctx.currentType = def
+            var remaining = MAX_DECOMPILE_CLASS_BYTES
+            for (classFile in classFiles) {
+                // bounded read, in case a file changed after the size check
+                val bytes = Files.newInputStream(classFile, LinkOption.NOFOLLOW_LINKS).use {
+                    it.readNBytes((remaining + 1).toInt())
                 }
+                remaining -= bytes.size
+                if (remaining < 0) {
+                    return "Class files too large to decompile (limit $MAX_DECOMPILE_CLASS_BYTES bytes)"
+                }
+                val def = ClassFileReader.readClass(
+                        ClassFileReader.OPTION_PROCESS_ANNOTATIONS or ClassFileReader.OPTION_PROCESS_CODE,
+                        IMetadataResolver.EMPTY,
+                        Buffer(bytes)
+                )
+                astBuilder.addType(def)
+                // only need this to avoid errors. would be better to decompile separately, but... TODO
+                ctx.currentType = def
             }
             val output = PlainTextOutput()
             astBuilder.generateCode(output)
