@@ -11,7 +11,17 @@
       sdks = import ./nix/sdks.nix { inherit pkgs; };
 
       jdk = pkgs.jdk21;
-      gradle = pkgs.gradle_9.override { java = jdk; };
+      # Gradle's version is taken from the wrapper rather than nixpkgs: nix/deps.json depends on it (e.g. through the
+      # embedded kotlin-stdlib it pins on the buildscript classpath), so a nixpkgs gradle bump would break the build.
+      wrapperProps = builtins.listToAttrs (map
+        (line: let m = builtins.match "([^=]+)=(.*)" line; in { name = builtins.elemAt m 0; value = builtins.elemAt m 1; })
+        (builtins.filter (line: builtins.match "[^#].*=.*" line != null)
+          (pkgs.lib.splitString "\n" (builtins.readFile ./gradle/wrapper/gradle-wrapper.properties))));
+      gradle = (pkgs.gradle-packages.mkGradle {
+        version = builtins.head (builtins.match ".*/gradle-(.*)-bin\\.zip" wrapperProps.distributionUrl);
+        hash = builtins.convertHash { hash = wrapperProps.distributionSha256Sum; hashAlgo = "sha256"; toHashFormat = "sri"; };
+        defaultJava = jdk;
+      }).wrapped;
 
       # shared/build.gradle.kts generates SdkMetadata.kt by shelling out to `nix eval .#sdkMetadata`. That's not
       # available (no network, no nix) inside the sandboxed nix build, so it's replaced with a stub that prints the
