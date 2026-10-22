@@ -6,7 +6,7 @@ on:
       cooldown_days:
         description: >-
           Only take third-party commits at least this many days old
-          (0 for an urgent update). Inputs under yawkat/ are exempt.
+          (0 for an urgent update). Inputs under yawkat/ and nixpkgs are exempt.
         type: number
         default: 5
   schedule:
@@ -29,10 +29,13 @@ jobs:
       - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@v31
       # Pinned to a commit: it runs with this job's write permissions.
-      - uses: yawkat/flake-cooldown@5286c6acca43da847b27c2c3a19623911389553f
+      - uses: yawkat/flake-cooldown@a05db221b1449ef970e3b4112b467ef8361f25b6
         id: update
         with:
           cooldown-days: ${{ inputs.cooldown_days }}
+          # Security fixes should not wait out the cooldown. The channel only
+          # advances once Hydra has built it.
+          exempt-inputs: nixpkgs
       - uses: peter-evans/create-pull-request@v8
         with:
           branch: update_flake_lock_action
