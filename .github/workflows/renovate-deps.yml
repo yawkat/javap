@@ -1,0 +1,74 @@
+name: Renovate deps
+
+# Renovate bumps the versions in the Gradle build, but can't regenerate what the nix build pins: the Kotlin/JS
+# yarn.lock, the hash of its yarn dependencies in flake.nix, and nix/deps.json. Without them, the nix build of its
+# branches fails. This adds a commit with the regenerated files. That push is made with GITHUB_TOKEN, which doesn't
+# trigger workflows, so the check is then started explicitly for the new commit.
+on:
+  push:
+    branches: [ 'renovate/**' ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renovate-deps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deps:
+    # Only Renovate's pushes, not the commit added below or manual pushes to its branches
+    if: github.actor == 'renovate[bot]'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+
+      # The update script runs Gradle in bwrap, which needs unprivileged user namespaces. Ubuntu restricts those
+      # through AppArmor.
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # A Kotlin bump can change the npm packages of the Kotlin/JS build, and the build fails while yarn.lock
+      # doesn't match them.
+      - name: Upgrade yarn.lock
+        run: nix develop --command ./gradlew --no-daemon kotlinUpgradeYarnLock
+
+      - name: Update the yarn hash
+        run: |
+          if git diff --quiet -- kotlin-js-store/yarn.lock; then
+            echo "kotlin-js-store/yarn.lock is up to date"
+            exit 0
+          fi
+          hash=$(nix run --inputs-from . nixpkgs#prefetch-yarn-deps -- kotlin-js-store/yarn.lock)
+          hash=$(nix hash convert --hash-algo sha256 --to sri "$hash")
+          # The only literal hash in flake.nix: the one of yarnOfflineCache
+          sed -i -E "s|hash = \"sha256-[^\"]+\";|hash = \"$hash\";|" flake.nix
+          grep -qF "hash = \"$hash\";" flake.nix || { echo "flake.nix has no yarn hash to replace"; exit 1; }
+
+      - name: Regenerate nix/deps.json
+        run: nix run .#update-deps
+
+      - name: Commit
+        id: commit
+        run: |
+          files=(kotlin-js-store/yarn.lock flake.nix nix/deps.json)
+          if git diff --quiet -- "${files[@]}"; then
+            echo "Everything is up to date"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Regenerate the nix dependency pins' -- "${files[@]}"
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # The checks of the dispatched run are reported on the new commit, so they show up on the PR.
+      - name: Check the new commit
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run test.yml --ref "$GITHUB_REF_NAME"
