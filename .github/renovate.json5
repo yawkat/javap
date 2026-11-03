@@ -1,0 +1,24 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['config:recommended', 'helpers:pinGitHubActionDigests'],
+  // Same cooldown as the flake update.
+  minimumReleaseAge: '5 days',
+  // flake.lock is updated by update-flake.yml.
+  nix: { enabled: false },
+  // Renovate's own commits change the versions, renovate-deps.yml then regenerates nix/deps.json on top. Without
+  // this, Renovate would consider that branch edited and stop rebasing it.
+  gitIgnoredAuthors: ['41898282+github-actions[bot]@users.noreply.github.com'],
+  packageRules: [
+    {
+      // One PR, so nix/deps.json is regenerated once per batch instead of once per dependency.
+      matchUpdateTypes: ['minor', 'patch'],
+      groupName: 'non-major dependencies',
+    },
+    {
+      // The Kotlin plugins and libraries are released together. Minor and patch updates are already in the group above.
+      matchUpdateTypes: ['major'],
+      matchPackageNames: ['org.jetbrains.kotlin**'],
+      groupName: 'kotlin',
+    },
+  ],
+}

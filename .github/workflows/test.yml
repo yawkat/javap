@@ -5,6 +5,8 @@ on:
   # The runs of PRs opened by update-flake.yml (with GITHUB_TOKEN) wait for
   # approval: "Approve and run" on the PR starts them.
   pull_request:
+  # Started by renovate-deps.yml after it pushes the regenerated dependency pins.
+  workflow_dispatch:
 jobs:
   check:
     runs-on: ubuntu-latest
