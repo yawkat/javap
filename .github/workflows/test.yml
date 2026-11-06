@@ -16,7 +16,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31
       - name: Cache nix store
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: /nix
           key: nix-store-${{ runner.os }}-${{ hashFiles('flake.lock', 'nix/sdks.nix', 'nix/deps.json', 'kotlin-js-store/yarn.lock') }}
