@@ -26,8 +26,8 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: cachix/install-nix-action@v31
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31
       # Pinned to a commit: it runs with this job's write permissions.
       - uses: yawkat/flake-cooldown@a05db221b1449ef970e3b4112b467ef8361f25b6
         id: update
@@ -36,7 +36,7 @@ jobs:
           # Security fixes should not wait out the cooldown. The channel only
           # advances once Hydra has built it.
           exempt-inputs: nixpkgs
-      - uses: peter-evans/create-pull-request@v8
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           branch: update_flake_lock_action
           delete-branch: true
