@@ -20,5 +20,12 @@
       matchPackageNames: ['org.jetbrains.kotlin**'],
       groupName: 'kotlin',
     },
+    {
+      // Maven Central answers Renovate's lookup of this one with 429 Too Many Requests on every run, and Renovate
+      // then aborts the whole run. It won't get updates anyway: AdoptOpenJDK became Adoptium, and 0.4.0 is the
+      // last release.
+      matchPackageNames: ['net.adoptopenjdk:net.adoptopenjdk.v3.vanilla'],
+      enabled: false,
+    },
   ],
 }
