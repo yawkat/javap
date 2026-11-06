@@ -6,28 +6,39 @@
 
 package at.yawk.javap
 
-import net.adoptopenjdk.v3.api.AOV3Architecture
-import net.adoptopenjdk.v3.api.AOV3HeapSize
-import net.adoptopenjdk.v3.api.AOV3ImageKind
-import net.adoptopenjdk.v3.api.AOV3JVMImplementation
-import net.adoptopenjdk.v3.api.AOV3OperatingSystem
-import net.adoptopenjdk.v3.vanilla.AOV3Clients
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+
+private const val API = "https://api.adoptium.net/v3"
+
+private fun HttpClient.getJson(path: String): JsonElement {
+    val response = send(HttpRequest.newBuilder(URI.create(API + path)).build(), HttpResponse.BodyHandlers.ofString())
+    check(response.statusCode() == 200) { "$path: HTTP ${response.statusCode()}" }
+    return Json.parseToJsonElement(response.body())
+}
+
+private val JsonElement.string get() = jsonPrimitive.content
 
 fun main() {
-    AOV3Clients().createClient().use { adopt ->
-        val releases = adopt.availableReleases { }.execute().availableReleases()
-        for (i in releases) {
-            val assets = adopt.assetsForLatest({}, i, AOV3JVMImplementation.HOTSPOT).execute()
-            val asset = assets.single {
-                it.binary().architecture() == AOV3Architecture.X64 &&
-                        it.binary().heapSize() == AOV3HeapSize.NORMAL &&
-                        it.binary().imageType() == AOV3ImageKind.JDK &&
-                        it.binary().operatingSystem() == AOV3OperatingSystem.LINUX
-            }
-            val pkg = asset.binary().package_()
+    HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build().use { http ->
+        val releases = http.getJson("/info/available_releases").jsonObject["available_releases"]!!.jsonArray
+        for (release in releases.map { it.jsonPrimitive.int }) {
+            val assets = http.getJson("/assets/latest/$release/hotspot?architecture=x64&image_type=jdk&os=linux")
+            val pkg = assets.jsonArray
+                .map { it.jsonObject["binary"]!!.jsonObject }
+                .single { it["heap_size"]!!.string == "normal" }["package"]!!.jsonObject
             // print as nix/sdks.nix openjdk arguments
-            val hash = java.util.Base64.getEncoder().encodeToString(java.util.HexFormat.of().parseHex(pkg.checksum().get()))
-            println("$i: url = \"${pkg.link()}\"; hash = \"sha256-$hash\";")
+            val hash = java.util.Base64.getEncoder()
+                .encodeToString(java.util.HexFormat.of().parseHex(pkg["checksum"]!!.string))
+            println("$release: url = \"${pkg["link"]!!.string}\"; hash = \"sha256-$hash\";")
         }
     }
 }

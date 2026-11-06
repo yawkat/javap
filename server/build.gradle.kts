@@ -27,7 +27,6 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.jimfs)
     testImplementation(libs.h2)
-    testImplementation(libs.adoptopenjdk.v3.vanilla)
 }
 
 application {
