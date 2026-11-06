@@ -59,7 +59,17 @@ class SdkIntegrationTest {
         if (sdk is Sdk.Ecj) {
             compilerConfiguration = compilerConfiguration + ("source" to 8)
         }
-        val output = processor.process(ProcessingInput(testCode, sdk.name, compilerConfiguration))
+        val input = ProcessingInput(testCode, sdk.name, compilerConfiguration)
+        var output = processor.process(input)
+        // javac 10 sometimes crashes inside its own runtime image (a ConcurrentModificationException from
+        // jdk.internal.jrtfs in JRTIndex.getEntry), on CI runners only. That's a JDK bug, not ours, so retry it.
+        for (attempt in 1..2) {
+            if (!(output.compilerLog.contains("An exception has occurred in the compiler") &&
+                        output.compilerLog.contains("java.util.ConcurrentModificationException"))) {
+                break
+            }
+            output = processor.process(input)
+        }
         Assert.assertTrue(output.compilerLog.isEmpty(), "${sdk.name}: ${output.compilerLog}")
         Assert.assertNotNull(output.procyon, sdk.name)
         Assert.assertFalse(output.procyon!!.contains("Exception: "), sdk.name)
