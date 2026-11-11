@@ -220,10 +220,10 @@
   "org/jetbrains/kotlin#kotlin-serialization/2.4.21/gradle96": {
    "jar": "sha256-9bb1/fZOx65XFoFunne6qe2mrnYpHKF7OP5CQemarTw="
   },
-  "org/jetbrains/kotlin#kotlin-stdlib/2.4.10": {
-   "jar": "sha256-TsApO8N1FCOyA/HYSTJRxXxC5z62N3prhWDQl0/wpt8=",
-   "module": "sha256-HASpjxIAyHBdAV3wiXchFYnuy8h88cTG0oqSaC/oRG4=",
-   "pom": "sha256-n4HyXpa5GRUzkt7VO9MyFudmJJCc/QgKPtsnjUT8NPA="
+  "org/jetbrains/kotlin#kotlin-stdlib/2.4.21": {
+   "jar": "sha256-vYJQIQWEy2WYR9zpzaZg+OmQbl3vf7686pPcbctqiKM=",
+   "module": "sha256-A7DfZ8DNdKlIpFxbA8S7z7MaubmHn7OArffBh7ZZS38=",
+   "pom": "sha256-uSsj7JxESyV4uYUkR1Ze/HLCSz6ne0w79OZE9oXu7wc="
   },
   "org/jetbrains/kotlin#kotlin-tooling-core/2.4.21": {
    "jar": "sha256-X8XbCDgDIyhXQI7VwlvMMHxwOwS972yyw06/TbYRpiI=",
@@ -450,20 +450,20 @@
    "module": "sha256-OQabiu7c3Ed/S0W9Ho41IAe3uZCk4XgU7Vn7MRLYFQM=",
    "pom": "sha256-Yn2SqpL9TWu4wrVry7OFQ0F/SdOLWmL720rv9VHnt2A="
   },
-  "org/flywaydb#flyway-core/13.12.0": {
-   "jar": "sha256-iOiqyKGf7B52j7ZLaTYR654HcCIgeVZ7DVz4sR3l02I=",
-   "pom": "sha256-QNHZjZL59vhT2DM+oD9AzID1XHgAbzs52edp11/H13o="
+  "org/flywaydb#flyway-core/13.12.1": {
+   "jar": "sha256-d7Jjx4pxtsojwBQEjpddtGANbEoNVHkNoYAHpmWvNW0=",
+   "pom": "sha256-y/TyJeFF3x4z99JVs1m7cbc6K9iBmCdikoqze9//1Cs="
   },
-  "org/flywaydb#flyway-database-cockroachdb/13.12.0": {
-   "jar": "sha256-1qVoCE8dWOKneA0p8IYp57cX4KG2Q9MTefJSQuocChg=",
-   "pom": "sha256-AFwPo4KIrZ0aB//Z6inKo9es02j24frvBRFYlIzyhAM="
+  "org/flywaydb#flyway-database-cockroachdb/13.12.1": {
+   "jar": "sha256-D64+MiXfeyJPsJ0GEmebRR93zdERk3sjVUzwaoluncU=",
+   "pom": "sha256-vnhREXGBIanc5GkYWsL0XDLDfYWqTVVh0/6vmLQV49I="
   },
-  "org/flywaydb#flyway-database-postgresql/13.12.0": {
-   "jar": "sha256-zKzF8qS33HwJzcTWS2827UNPBjhEkMKjOiCtFV3vgVo=",
-   "pom": "sha256-EWSa3mLETTZfyHFk7lL8GqSvhJgchJmeJMNxNuzs1D8="
+  "org/flywaydb#flyway-database-postgresql/13.12.1": {
+   "jar": "sha256-eRKBkNCNIwCMnULHFyC0vp60ACb1GON5oR/95/WmBTg=",
+   "pom": "sha256-1PF8zNi4kfq02kcqFOe45tIC5vNvC8SAMuzjKDShG6Y="
   },
-  "org/flywaydb#flyway-parent/13.12.0": {
-   "pom": "sha256-wl9WFJ0YHrkFyOVtuQbOM4ZMpdsicUYWMMBc1k4HWLo="
+  "org/flywaydb#flyway-parent/13.12.1": {
+   "pom": "sha256-bGHUYVagupXjkSIUdHtV1Vg0JukjTpcZ5s3hHGoZA8w="
   },
   "org/jboss#jboss-parent/23": {
    "pom": "sha256-bPr6FVv0aJ5KySbQDxDwWBbpqyVXOUNt/kLZk1KpVhM="
