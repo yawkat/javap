@@ -290,16 +290,16 @@
   }
  },
  "https://repo.maven.apache.org/maven2": {
-  "ch/qos/logback#logback-classic/1.6.6": {
-   "jar": "sha256-UjAhfMunqdMd2h3YeOVgYDenlyKCx9P46sHvqA6UY9k=",
-   "pom": "sha256-48FKClq3bLD/69CO0ZpXZpZMUhle3hW91UCHBxQtnME="
+  "ch/qos/logback#logback-classic/1.6.7": {
+   "jar": "sha256-I8Ijh8DOx+86j+dfyaRDuHqciKV7MNRB+S8gqENiatg=",
+   "pom": "sha256-3Ea+q0lxZrG+JmKsKV9wVj62Uqu6caKRyaEh4O2jyoo="
   },
-  "ch/qos/logback#logback-core/1.6.6": {
-   "jar": "sha256-VFhBXV1YqXq2cGMvmyvawtb34OEUVbRd1OZOkNEmcKs=",
-   "pom": "sha256-dBVFvxxTetT5Mo/5bN28U+mg8dqEdmVVkLoHGi8f4oQ="
+  "ch/qos/logback#logback-core/1.6.7": {
+   "jar": "sha256-F2Ljtss69pMa5qn87AX7EXbARJk+fLQjo2XYQv1J5Pg=",
+   "pom": "sha256-PiDSPNehf9VzjLdSroGQ9fdLK/vdSPKzct2shJB35Ic="
   },
-  "ch/qos/logback#logback-parent/1.6.6": {
-   "pom": "sha256-buKa2JJH3fKsKsx/IBWl//bPwk386tpHT+wCnS+UFvw="
+  "ch/qos/logback#logback-parent/1.6.7": {
+   "pom": "sha256-zgv77XNJ1W4GRTXIQxniy/2BeQL+IeTyEejeGDJcx0Q="
   },
   "com/fasterxml#oss-parent/75": {
    "pom": "sha256-/LvxwYyQR+aRfThPIGTiG0Klj8hfsFI6ni4BXv98YZ0="
